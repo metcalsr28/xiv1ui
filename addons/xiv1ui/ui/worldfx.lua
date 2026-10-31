@@ -1,0 +1,118 @@
+--[[
+* xiv1ui - things drawn in the world, after FFXIV 1.0:
+*   - the target cursor (reference §11): a gold broken ring over the current target that turns slowly, replaced by
+*     three gold shards pointing inward while locked on;
+*   - pop-up numbers (reference §15): damage in white italic numerals, criticals larger in gold, heals in green and
+*     "Miss" in grey, rising from whoever was hit and fading out. Only actions involving you, your party or your
+*     target are shown.
+--]]
+
+local xi_now = require('core.now');
+local draw    = require('core.draw');
+local text    = require('core.text');
+local world   = require('core.world');
+local project = require('core.project');
+local ap      = require('core.actionpacket');
+
+local worldfx = {};
+
+local pops = {};          -- { obj, idx, t0, dx }
+local pool = {};
+local LIFE = 1.4;
+
+local function get_obj()
+    local o = table.remove(pool);
+    if o then return o; end
+    return text.new('numeral', { font_height = 34, font_alignment = text.align.Center, gradient_style = 0 });
+end
+
+local function index_of(server_id)
+    if bit.band(server_id, 0x1000000) ~= 0 then
+        local idx = bit.band(server_id, 0xFFF);
+        if idx >= 0x900 then idx = idx - 0x100; end
+        if AshitaCore:GetMemoryManager():GetEntity():GetServerId(idx) == server_id then return idx; end
+    end
+    local e = AshitaCore:GetMemoryManager():GetEntity();
+    for i = 0, 2303 do if e:GetServerId(i) == server_id then return i; end end
+    return nil;
+end
+
+function worldfx.debug_pops() return #pops; end
+
+local function pop(idx, str, color, height)
+    local o = get_obj();
+    o:set_font_color(color);
+    o:set_font_height(height);
+    o:set_text(str);
+    pops[#pops + 1] = { obj = o, idx = idx, t0 = xi_now(), dx = math.random(-18, 18) };
+end
+
+worldfx.pop = function (...) return pop(...); end
+
+function worldfx.packet(e)
+    if e.id ~= 0x028 then return; end
+    local a = ap.parse(e);
+    if a == nil then return; end
+    local party = world.party_ids();
+    local tgt = world.target_index();
+    local tgt_id = tgt ~= 0 and AshitaCore:GetMemoryManager():GetEntity():GetServerId(tgt) or -1;
+    local involved = party[a.actor] ~= nil or a.actor == tgt_id;
+    for _, t in ipairs(a.targets) do
+        local mine = involved or party[t.id] ~= nil or t.id == tgt_id;
+        if mine then
+            local idx = index_of(t.id);
+            if idx then
+                for _, act in ipairs(t.actions) do
+                    if ap.MISS[act.message] then
+                        pop(idx, 'Miss', 0xFFB8BCC8, 30);
+                    elseif ap.HEAL[act.message] and act.param > 0 then
+                        pop(idx, tostring(act.param), 0xFF9BF08C, 38);
+                    elseif act.param > 0 and (a.category == 1 or a.category == 2 or a.category == 3 or a.category == 4
+                            or a.category == 6 or a.category == 11 or a.category == 13) then
+                        if ap.CRIT[act.message] then pop(idx, tostring(act.param), 0xFFFFD86A, 52);
+                        else pop(idx, tostring(act.param), 0xFFFFFFFF, 40); end
+                    end
+                end
+            end
+        end
+    end
+end
+
+function worldfx.render()
+    local now = xi_now();
+
+    -- target cursor
+    local idx = world.target_index();
+    if idx ~= 0 then
+        -- middle of the model, where it's drawn; objects without a model (doors) at FFXI's own arrow height
+        local door = bit.band(AshitaCore:GetMemoryManager():GetEntity():GetSpawnFlags(idx) or 0, 0x20) ~= 0;
+        local sx, sy, vis = project.on_model(idx, 0.55, 0, door and 0.4 or 1.2);
+        if sx and vis then
+            if world.locked() then
+                draw.image('lock_mark', sx - 26, sy - 26, { scale = 2, rot = now * 0.8 });
+            else
+                draw.image('target_ring', sx - 36, sy - 36, { rot = now * 0.6, color = 0xE0FFFFFF });
+            end
+        end
+    end
+
+    -- pop-up numbers
+    for i = #pops, 1, -1 do
+        local p = pops[i];
+        local age = now - p.t0;
+        if age > LIFE then
+            pool[#pool + 1] = p.obj;
+            table.remove(pops, i);
+        else
+            local sx, sy, vis = project.on_model(p.idx, 0.9, 0, 1.8);
+            if sx and vis then
+                local rise = 40 * math.min(1, age / 0.5) + 10 * age;
+                local alpha = age < LIFE - 0.4 and 1 or (LIFE - age) / 0.4;
+                p.obj:set_opacity(alpha);
+                text.draw(p.obj, p.obj.settings.text, sx + p.dx, sy - rise, 'baseline');
+            end
+        end
+    end
+end
+
+return worldfx;

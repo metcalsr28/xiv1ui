@@ -1,0 +1,5 @@
+##########################################################################
+# xiv1ui (FINAL FANTASY XIV 1.0 style interface). Included from default.txt.
+##########################################################################
+/load nameplate
+/addon load xiv1ui
