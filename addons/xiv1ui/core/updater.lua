@@ -4,6 +4,7 @@
 *
 *   /xiv1ui update        check for a newer release and say what's available
 *   /xiv1ui update now    download it, check every file, install it and reload xiv1ui
+* With updates on, xiv1ui also checks once at each start (15 s into the world) and says when a newer release exists.
 *
 * Each release has manifest.txt at its root: "version <v>", then one "<sha256> <size> <path>" line per file of
 * the addon (paths relative to addons/xiv1ui, with forward slashes). Files are fetched over HTTPS from
@@ -40,8 +41,21 @@ int __stdcall MoveFileExA(const char* from, const char* to, uint32_t flags);
 
 local function say(s) print('\30\8[xiv1ui] ' .. s .. '\30\1'); end
 
+-- WinINet and BCrypt stay loaded for the rest of the game: WinINet runs threads of its own, and freeing the DLL
+-- when the addon unloads (LuaJIT frees ffi.load'ed libraries with the Lua state) deadlocks the game. An extra
+-- LoadLibrary reference, never released, keeps them in memory.
+pcall(ffi.cdef, 'void* __stdcall LoadLibraryA(const char* name);');
+local pinned = false;
+local function pin()
+    if pinned then return; end
+    pinned = true;
+    ffi.C.LoadLibraryA('wininet.dll');
+    ffi.C.LoadLibraryA('bcrypt.dll');
+end
+
 -- HTTPS GET; returns the body or nil, error
 local function fetch(url)
+    pin();
     local ok, wininet = pcall(ffi.load, 'wininet');
     if not ok then return nil, 'WinINet is not available'; end
     local net = wininet.InternetOpenA('xiv1ui-updater', 0, nil, nil, 0);
@@ -66,6 +80,7 @@ local function wide(s)
 end
 
 local function sha256(data)
+    pin();
     local bc = ffi.load('bcrypt');
     local alg, h = ffi.new('void*[1]'), ffi.new('void*[1]');
     if bc.BCryptOpenAlgorithmProvider(alg, wide('SHA256'), nil, 0) ~= 0 then return nil; end
@@ -212,5 +227,21 @@ function updater.command(args, target, enabled, current)
 end
 
 updater.newer = newer;
+
+--- Called every frame in the world: once per load, 15 s after the player is in, check for a newer release and say
+-- which command installs it (only with in-game updates on). The check pauses the game for a moment, so it waits
+-- until loading is long over.
+local since, checked = nil, false;
+function updater.tick(enabled, current)
+    if checked or not enabled then return; end
+    since = since or os.clock();
+    if os.clock() - since < 15 then return; end
+    checked = true;
+    local tag, version = updater.latest();
+    if tag and newer(version, current) then
+        say(string.format('xiv1ui %s is available (you have %s). Type /xiv1ui update now to install it '
+            .. '(at your own risk).', version, current));
+    end
+end
 
 return updater;

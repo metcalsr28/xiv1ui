@@ -7,7 +7,7 @@
 
 addon.name    = 'xiv1ui';
 addon.author  = 'xiv1ui project';
-addon.version = '0.2.0';
+addon.version = '0.2.1';
 addon.desc    = 'FINAL FANTASY XIV 1.0 style interface.';
 addon.link    = '';
 
@@ -156,6 +156,7 @@ ashita.events.register('d3d_present', 'xiv1ui_present', function ()
     local me = AshitaCore:GetMemoryManager():GetParty():GetMemberTargetIndex(0);
     if me == nil or me == 0 or (AshitaCore:GetMemoryManager():GetEntity():GetServerId(me) or 0) == 0 then return; end
     local t0 = xi_now();
+    pcall(require('core.updater').tick, store.data.experimental == true and store.data.updater == true, addon.version);
     native.tick(store.data.hide_native);
     require('core.project').begin();
     draw.set_scale(store.data.ui_scale);
