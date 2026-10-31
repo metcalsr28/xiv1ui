@@ -132,10 +132,15 @@ function hotbar.init()
         line = text.new('small', { font_color = 0xFFF0DCA0 }),
     };
     if store.data.hotbar.keys then apply_keys(true); end
+    -- Shift+1..3: show that bar page (whether or not the number keys fire slots)
+    local cm = AshitaCore:GetChatManager();
+    for p = 1, PAGES do cm:QueueCommand(-1, string.format('/bind +%d /xiv1ui page %d', p, p)); end
 end
 
 function hotbar.release()
     if store.data.hotbar.keys then apply_keys(false); end
+    local cm = AshitaCore:GetChatManager();
+    for p = 1, PAGES do cm:QueueCommand(-1, string.format('/unbind +%d', p)); end
 end
 
 -- Pop-up help for the hovered slot (reference: name in white italic, class line, timings with gold labels).
@@ -345,6 +350,24 @@ end
 
 -- Assign mode (from the Actions & Traits window): the next slot chosen receives this binding instead of firing.
 function hotbar.begin_assign(b) pending = b; end
+
+--- Put a binding on a given layer (1 green, 2 red), bar (page 1..3) and slot (1..10) of the current job.
+function hotbar.assign_to(lay, page, slot, b)
+    local hb = store.data.hotbar;
+    local j, p = tostring(job()), tostring(page);
+    hb.bars[j] = hb.bars[j] or T{};
+    hb.bars[j][p] = hb.bars[j][p] or T{};
+    hb.bars[j][p][PREFIX[lay] .. tostring(slot)] = b;
+    store.save();
+end
+
+--- The binding on a layer / bar / slot of the current job, or nil.
+function hotbar.binding_at(lay, page, slot)
+    local t = store.data.hotbar.bars[tostring(job())];
+    t = t and t[tostring(page)];
+    return t and t[PREFIX[lay] .. tostring(slot)] or nil;
+end
+hotbar.PAGES = PAGES;
 function hotbar.assigning() return pending ~= nil; end
 function hotbar.cancel_assign() pending = nil; end
 

@@ -33,8 +33,12 @@ end
 function ti.begin(initial, on_done)
     local chars = {};
     for ch in (initial or ''):gmatch('[%z\1-\127\194-\244][\128-\191]*') do chars[#chars + 1] = ch; end
-    cur = { chars = chars, caret = #chars, done = on_done };
+    -- the on-screen keyboard only when the field was opened from the controller; with a keyboard you just type
+    cur = { chars = chars, caret = #chars, done = on_done, osk = require('core.ui').via_pad == true };
 end
+
+--- True while the field being edited uses the on-screen keyboard (it was opened from the controller).
+function ti.osk() return cur ~= nil and cur.osk; end
 
 function ti.active() return cur ~= nil; end
 function ti.text() return cur and table.concat(cur.chars) or ''; end
@@ -120,7 +124,7 @@ end
 
 --- Draw the on-screen keyboard with its top-left at x, y (HUD units).
 function ti.draw_osk(x, y)
-    if cur == nil then return; end
+    if cur == nil or not cur.osk then return; end
     local draw, text, layout, ui = require('core.draw'), require('core.text'), require('core.layout'), require('core.ui');
     local rows = osk_rows();
     local KW, KH = 38, 36;

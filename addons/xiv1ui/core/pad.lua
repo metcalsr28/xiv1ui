@@ -24,11 +24,13 @@ pad.bar_cursor = nil;        -- slot index while the action-bar cursor is active
 
 local function key(vk)
     local win = ui.top();
+    ui.via_pad = true;            -- (a text field opened by this press shows the on-screen keyboard)
     if vk == ui.VK.ESCAPE then
         if not (win and win.key and win.key(win, vk)) and win then ui.close(win.id); end
     elseif win and win.key then
         win.key(win, vk);
     end
+    ui.via_pad = false;
 end
 
 --- xinput_button handler; returns true when the button should be kept from the game.

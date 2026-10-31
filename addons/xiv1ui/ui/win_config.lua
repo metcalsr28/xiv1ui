@@ -134,12 +134,17 @@ local TABS = {
         { label = 'Reset HUD sizes', action = true, value = function () return ''; end,
           step = function () store.data.part_scale = nil; store.data.part_offset = nil; store.save(); end },
     } },
-    { title = 'Experimental', note = 'Features still in development. They change how the game works, not only how it looks.',
+    { title = 'Experimental', note = 'Features still in development. They change how the game works, not only how it looks. '
+                                     .. 'In-game updates download and install files from the internet: likely safe, but '
+                                     .. 'use them at your own risk.',
       rows = {
         flag('Enable experimental options', 'experimental', false),
         { label = 'Actions & Traits window in the Main Menu', needs = 'experimental',
           get = function () return store.data.extras == true; end,
           set = function (v) store.data.extras = v; store.save(); end },
+        { label = 'In-game updates (/xiv1ui update) - at your own risk', needs = 'experimental',
+          get = function () return store.data.updater == true; end,
+          set = function (v) store.data.updater = v; store.save(); end },
     } },
     { title = 'Controls', rows = {
         { label = 'Number keys fire the action bar (1–0, Shift+↑/↓ pages)',

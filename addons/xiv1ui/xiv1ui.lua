@@ -7,7 +7,7 @@
 
 addon.name    = 'xiv1ui';
 addon.author  = 'xiv1ui project';
-addon.version = '0.1';
+addon.version = '0.2.0';
 addon.desc    = 'FINAL FANTASY XIV 1.0 style interface.';
 addon.link    = '';
 
@@ -23,6 +23,8 @@ local world  = require('core.world');
 local ui     = require('core.ui');
 
 local ROOT = addon.path:gsub('[\\/]?$', '\\');
+-- files an earlier in-game update couldn't replace (locked then) are swapped in before anything loads them
+pcall(function () require('core.updater').finish_pending(ROOT); end);
 
 local MODULES = {
     'gamein',           -- first: keeps navigation input from the game while an xiv1ui window is open
@@ -171,7 +173,7 @@ ashita.events.register('d3d_present', 'xiv1ui_present', function ()
             if k ~= 1 then draw.pop_part(); end
             if not ok then
                 print('[xiv1ui] ' .. m.name .. ': ' .. tostring(err):match('^[^\n]*'));
-                _G.xiv1ui_last_error = err;          -- (with the traceback, for /xiv1ui eval)
+                _G.xiv1ui_last_error = err;          -- (with the traceback, for debugging)
                 m.render = nil;
             end
         end
@@ -348,6 +350,12 @@ ashita.events.register('command', 'xiv1ui_command', function (e)
         return;
     end
     if args[2] == 'layout' and args[3] == 'reset' then layout.reset(); return; end
+    -- /xiv1ui update [now]: in-game updates from the GitHub releases (Configuration » Experimental, at your own risk)
+    if (args[2] or ''):lower() == 'update' then
+        require('core.updater').command(args, ROOT,
+            store.data.experimental == true and store.data.updater == true, addon.version);
+        return;
+    end
     -- /xiv1ui config: the Configuration window; /xiv1ui configbutton on|off: its button in the bottom-right menu
     if (args[2] or ''):lower() == 'config' then require('ui.win_config').toggle(); return; end
     if (args[2] or ''):lower() == 'configbutton' then

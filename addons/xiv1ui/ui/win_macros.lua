@@ -6,9 +6,12 @@
 * Left: the macro list ("New Macro" at the top). Right: the selected macro's fields.
 *   ↑/↓ choose, → / ← move between the list and the fields, Enter edits the field:
 *     Name / Line n  a text field (type, Enter to keep, Esc to cancel)
-*     Icon           a grid of icons: arrows choose, Enter picks
+*     Icon           a grid of icons (the macro icons, then every action icon): arrows choose, Enter picks
 *     Show name      toggles
-*     Place on bar   then press 1–0 or click a slot (on the layer and page shown)
+*     Place on bar   a map of every bar (Green / Red, bars 1–3, slots 1–10) with what's on them: choose a slot,
+*                    Enter places the macro there (e.g. "Green 3, slot 2")
+* The last row, Edit Action Bars, shows the same map of every bar: choose a slot, Enter picks one of your macros to
+* put there, Delete / Backspace (or RB on the controller) clears it, Esc goes back.
 *     Delete         press Enter twice
 * Commands: /xiv1ui macro new | name <id> <text> | line <id> <n> <text> | icon <id> <name> | delete <id>
 --]]
@@ -19,7 +22,22 @@ local text   = require('core.text');
 local layout = require('core.layout');
 local store  = require('core.store');
 local ti     = require('core.textinput');
-local ICONS  = require('core.macro_icons');
+local MACRO_ICONS = require('core.macro_icons');
+
+-- The icons a macro can have: the macro icons (stored by name), then every action icon (stored as its texture,
+-- ai_...), without repeats.
+local ICONS = {};
+for _, n in ipairs(MACRO_ICONS) do ICONS[#ICONS + 1] = n; end
+do
+    local seen, extra = {}, {};
+    for _, tex in pairs(require('core.action_icons')) do
+        if not seen[tex] then seen[tex] = true; extra[#extra + 1] = tex; end
+    end
+    table.sort(extra);
+    for _, t in ipairs(extra) do ICONS[#ICONS + 1] = t; end
+end
+local function icon_tex(n) return n and (n:match('^ai_') and n or ('mi_' .. n)) or nil; end
+local GRID_ROWS = 6;          -- rows of icons shown at once (the grid scrolls)
 
 local M = {};
 
@@ -61,7 +79,7 @@ local function selected_id(w)
     return w.sel > 1 and list[w.sel - 1] or nil;
 end
 
--- the last list row opens FFXI's own macro books
+-- the last list row opens the action bar editor
 local function books_row(w) return w.sel == #ids() + 2; end
 
 local function edit_text(initial, apply)
@@ -91,8 +109,8 @@ local function activate_field(w)
             m.lines = out;
         end);
     elseif f == 'Place on bar' then
-        require('ui.hotbar').begin_assign({ kind = 'macro', ref = id, name = m.name });
-        ui.close(w.id); ui.close('mainmenu');
+        local lay = require('ui.layers').current();
+        w.place = { r = (store.data.hotbar.page - 1) * 2 + (lay or 1), c = 1 };
     elseif f == 'Delete' then
         if w.armed_delete then
             data()[tostring(id)] = nil; store.save();
@@ -110,36 +128,38 @@ win.draw = function (w, x, y)
         local m = get(id);
         items[#items + 1] = { label = m.name, indent = 34 };
     end
-    items[#items + 1] = { label = 'FFXI Macro Books', color = 0xFFB8C0D8 };
+    items[#items + 1] = { label = 'Edit Action Bars', color = 0xFF9BE08C };
     if w.sel > #items then w.sel = #items; end
     if w.sel - 1 < w.first then w.first = w.sel - 1; end
     if w.sel > w.first + LIST_ROWS then w.first = w.sel - LIST_ROWS; end
     ui.header('mcr_list', 'Macros', x + 24, y + 62, 250);
-    w.rows = ui.list(w, 'mcrlist', items, w.sel, x + 40, y + 76, 240, 32, LIST_ROWS, w.first, w.focus == 'list');
+    w.rows = ui.list(w, 'mcrlist', items, w.sel, x + 40, y + 76, 240, 32, LIST_ROWS, w.first,
+                     w.focus == 'list' and not (w.bars or w.place));
     -- small icons in the list
     for _, r in ipairs(w.rows) do
         local i = r[5];
         if i > 1 then
             local m = get(list[i - 1]);
-            if m and m.icon then draw.image('mi_' .. m.icon, r[1] + 6, r[2] + 2, { scale = 26 / 44 }); end
+            if m and m.icon then draw.image(icon_tex(m.icon), r[1] + 6, r[2] + 2, { scale = 26 / 44 }); end
         end
     end
 
     local id = selected_id(w);
     local m = get(id);
     local dx = x + 320;
-    ui.header('mcr_detail', m and m.name or 'New Macro', dx, y + 62, w.w - 350);
+    ui.header('mcr_detail', m and m.name or (books_row(w) and 'Action Bars' or 'New Macro'), dx, y + 62, w.w - 350);
     if m == nil then
         local hint = ui.label('mcr_hint0', 'small', { font_height = 17, font_color = 0xFFB8C0D8 });
-        text.draw(hint, books_row(w) and 'Enter: open FFXI\'s own macro books (Ctrl / Alt palettes)'
+        text.draw(hint, books_row(w) and 'Enter: see every bar, put your macros on them or clear slots'
                                       or 'Enter: create a new macro', dx + 4, y + 110, 'baseline');
         w.frows = {};
-        return;
+        if not w.bars then return; end
     end
+    if m then
     -- preview: the macro as it looks on the bar
     draw.image('slot_shadow', dx + 4, y + 84);
     draw.image('slot_well', dx + 12, y + 92);
-    if m.icon then draw.image('mi_' .. m.icon, dx + 12, y + 92); end
+    if m.icon then draw.image(icon_tex(m.icon), dx + 12, y + 92); end
     draw.image('slot_ring', dx + 4, y + 84);
     local hint = ui.label('mcr_pvh', 'small', { font_height = 14, font_color = 0xFFB8C0D8, font_alignment = text.align.Center });
     text.draw(hint, 'as on the bar', dx + 34, y + 164, 'baseline');
@@ -162,30 +182,162 @@ win.draw = function (w, x, y)
     end
     w.frows = ui.list(w, 'mcrfields', fitems, w.field, dx + 100, y + 84, w.w - 450, 32, #FIELDS, 0, w.focus == 'fields');
 
+    end
     -- on-screen keyboard while a field is being typed into
     if ti.active() then ti.draw_osk(x + 8, y + 140); end      -- over the macro list (the field being typed stays in view)
 
     -- icon picker
     if w.grid then
         local gx, gy = dx - 10, y + 150;
-        local gw, gh = GRID_COLS * 52 + 24, math.ceil(#ICONS / GRID_COLS) * 52 + 56;
+        local total_rows = math.ceil(#ICONS / GRID_COLS);
+        local gw, gh = GRID_COLS * 52 + 24, GRID_ROWS * 52 + 56;
+        -- keep the chosen icon's row in view
+        local row = math.floor((w.grid - 1) / GRID_COLS);
+        w.grid_first = w.grid_first or 0;
+        if row < w.grid_first then w.grid_first = row; end
+        if row >= w.grid_first + GRID_ROWS then w.grid_first = row - GRID_ROWS + 1; end
         local bw, bh = layout.size('win_body');
         draw.nine('win_body', gx, gy, gw, gh, 12, bw, bh);
         draw.nine('win_body', gx, gy, gw, gh, 12, bw, bh);       -- twice: opaque enough to hide the fields under it
         local t = ui.label('mcr_gridt', 'label', { font_height = 18 });
         text.draw(t, 'Choose an icon', gx + 16, gy + 28, 'baseline');
+        local more = ui.label('mcr_gridn', 'small', { font_height = 14, font_color = 0xFFB8C0D8,
+                                                      font_alignment = text.align.Right });
+        text.draw(more, string.format('%d of %d   (scroll for more)', w.grid, #ICONS), gx + gw - 16, gy + 26, 'baseline');
+        w.gcells = {};
         for i, n in ipairs(ICONS) do
-            local cx = gx + 12 + ((i - 1) % GRID_COLS) * 52;
-            local cy = gy + 40 + math.floor((i - 1) / GRID_COLS) * 52;
-            draw.image('mi_' .. n, cx + 4, cy + 4);
-            if i == w.grid then draw.image('slot_ring_white', cx - 4, cy - 4, { scale = 52 / 60 }); end
+            local r = math.floor((i - 1) / GRID_COLS) - w.grid_first;
+            if r >= 0 and r < GRID_ROWS then
+                local cx = gx + 12 + ((i - 1) % GRID_COLS) * 52;
+                local cy = gy + 40 + r * 52;
+                draw.image(icon_tex(n), cx + 4, cy + 4);
+                if i == w.grid then draw.image('slot_ring_white', cx - 4, cy - 4, { scale = 52 / 60 }); end
+                w.gcells[#w.gcells + 1] = { cx, cy, 52, 52, i };
+            end
+        end
+        -- a scroll bar along the right edge
+        if total_rows > GRID_ROWS then
+            local th = (gh - 56) * GRID_ROWS / total_rows;
+            local ty = gy + 40 + (gh - 56 - th) * w.grid_first / (total_rows - GRID_ROWS);
+            draw.rect(gx + gw - 8, gy + 40, 3, gh - 56, 0x40FFFFFF);
+            draw.rect(gx + gw - 8, ty, 3, th, 0xC0C8A860);
+        end
+    end
+
+    -- the bar map: placing a macro (w.place) or editing the bars (w.bars)
+    local map = w.place or w.bars;
+    if map then
+        local hb = require('ui.hotbar');
+        local nrows = hb.PAGES * 2;
+        local CW = 48;
+        local gx, gy = x + 40, y + 120;
+        local gw, gh = 130 + 10 * CW + 24, nrows * CW + 96;
+        local bw, bh = layout.size('win_body');
+        draw.nine('win_body', gx, gy, gw, gh, 12, bw, bh);
+        draw.nine('win_body', gx, gy, gw, gh, 12, bw, bh);
+        local t = ui.label('mcr_placet', 'label', { font_height = 18 });
+        text.draw(t, w.place and ('Place "' .. (m and m.name or '') .. '" on a bar') or 'Action bars', gx + 16, gy + 28,
+                  'baseline');
+        w.pcells = {};
+        for r = 1, nrows do
+            local page, lay = math.floor((r - 1) / 2) + 1, (r - 1) % 2 + 1;
+            local ry = gy + 44 + (r - 1) * CW;
+            local lab = ui.label('mcr_pl' .. r, 'small', { font_height = 16 });
+            lab:set_font_color(lay == 1 and 0xFF9BE08C or 0xFFFF9080);
+            text.draw(lab, (lay == 1 and 'Green ' or 'Red ') .. page, gx + 18, ry + CW - 16, 'baseline');
+            for c = 1, 10 do
+                local cx = gx + 120 + (c - 1) * CW;
+                draw.image('slot_well', cx + 2, ry + 2, { scale = (CW - 6) / 44 });
+                local bd = hb.binding_at(lay, page, c);
+                local info = bd and require('core.actions').resolve(bd);
+                if info and info.icon then draw.image(info.icon, cx + 2, ry + 2, { scale = (CW - 6) / 44 }); end
+                if r == map.r and c == map.c then
+                    draw.image('slot_ring_white', cx - 3, ry - 3, { scale = (CW + 2) / 60 });
+                end
+                w.pcells[#w.pcells + 1] = { cx, ry, CW, CW, r, c };
+            end
+        end
+        local page, lay = math.floor((map.r - 1) / 2) + 1, (map.r - 1) % 2 + 1;
+        local bd = hb.binding_at(lay, page, map.c);
+        local info = bd and require('core.actions').resolve(bd);
+        local now = info and (info.label or bd.name) or 'empty';
+        local foot = ui.label('mcr_placef', 'small', { font_height = 15, font_color = 0xFFE8E4D8 });
+        local keys = w.place and 'Enter: place here   Esc: cancel'
+                     or 'Enter: put a macro here   Delete / RB: clear   Esc: back';
+        text.draw(foot, string.format('%s %d, slot %d (now: %s).   %s', lay == 1 and 'Green' or 'Red', page, map.c, now,
+            keys), gx + 18, gy + gh - 18, 'baseline');
+        -- choosing which macro to put in the slot
+        if w.bars and w.bars.pick then
+            local list = ids();
+            local px, py, pw = gx + gw + 8, gy, 280;           -- beside the map, so the chosen slot stays in view
+            local ph = math.min(#list, 10) * 30 + 56;
+            draw.nine('win_body', px, py, pw, ph, 12, bw, bh);
+            draw.nine('win_body', px, py, pw, ph, 12, bw, bh);
+            local pt = ui.label('mcr_pickt', 'label', { font_height = 17 });
+            text.draw(pt, 'Put which macro here?', px + 14, py + 26, 'baseline');
+            local items = {};
+            for i, id in ipairs(list) do items[i] = { label = get(id).name, indent = 30 }; end
+            local first = math.max(0, w.bars.pick - 10);
+            w.pickrows = ui.list(w, 'mcrpick', items, w.bars.pick, px + 18, py + 38, pw - 32, 30, 10, first, true);
+            for _, r in ipairs(w.pickrows) do
+                local mm = get(list[r[5]]);
+                if mm and mm.icon then draw.image(icon_tex(mm.icon), r[1] + 4, r[2] + 2, { scale = 24 / 44 }); end
+            end
         end
     end
 end
 
+local function place_here(w)
+    local id = selected_id(w);
+    local m = get(id);
+    if m and w.place then
+        local page, lay = math.floor((w.place.r - 1) / 2) + 1, (w.place.r - 1) % 2 + 1;
+        require('ui.hotbar').assign_to(lay, page, w.place.c, { kind = 'macro', ref = id, name = m.name });
+    end
+    w.place = nil;
+end
+
 win.key = function (w, vk)
     -- while typing, keys that reach the window come from the controller: they drive the on-screen keyboard
-    if ti.active() then return ti.pad(vk); end
+    if ti.active() then
+        if ti.osk() then return ti.pad(vk); end
+        return true;
+    end
+    if w.bars then
+        local hb = require('ui.hotbar');
+        local b = w.bars;
+        local page, lay = math.floor((b.r - 1) / 2) + 1, (b.r - 1) % 2 + 1;
+        if b.pick then
+            local list = ids();
+            if vk == ui.VK.UP then b.pick = (b.pick - 2) % #list + 1;
+            elseif vk == ui.VK.DOWN then b.pick = b.pick % #list + 1;
+            elseif vk == ui.VK.RETURN then
+                local id = list[b.pick];
+                if id then hb.assign_to(lay, page, b.c, { kind = 'macro', ref = id, name = get(id).name }); end
+                b.pick = nil;
+            elseif vk == ui.VK.ESCAPE then b.pick = nil; end
+            return true;
+        end
+        local nrows = hb.PAGES * 2;
+        if vk == ui.VK.LEFT then b.c = (b.c - 2) % 10 + 1;
+        elseif vk == ui.VK.RIGHT then b.c = b.c % 10 + 1;
+        elseif vk == ui.VK.UP then b.r = (b.r - 2) % nrows + 1;
+        elseif vk == ui.VK.DOWN then b.r = b.r % nrows + 1;
+        elseif vk == ui.VK.RETURN then if #ids() > 0 then b.pick = 1; end
+        elseif vk == 0x2E or vk == 0x08 or vk == ui.VK.TAB then hb.assign_to(lay, page, b.c, nil);
+        elseif vk == ui.VK.ESCAPE then w.bars = nil; end
+        return true;
+    end
+    if w.place then
+        local nrows = require('ui.hotbar').PAGES * 2;
+        if vk == ui.VK.LEFT then w.place.c = (w.place.c - 2) % 10 + 1;
+        elseif vk == ui.VK.RIGHT then w.place.c = w.place.c % 10 + 1;
+        elseif vk == ui.VK.UP then w.place.r = (w.place.r - 2) % nrows + 1;
+        elseif vk == ui.VK.DOWN then w.place.r = w.place.r % nrows + 1;
+        elseif vk == ui.VK.RETURN then place_here(w);
+        elseif vk == ui.VK.ESCAPE then w.place = nil; end
+        return true;
+    end
     local nlist = #ids() + 2;
     if w.grid then
         local n = #ICONS;
@@ -205,7 +357,10 @@ win.key = function (w, vk)
         elseif vk == ui.VK.DOWN then w.sel = w.sel % nlist + 1;
         elseif vk == ui.VK.RETURN or vk == ui.VK.RIGHT then
             if books_row(w) then
-                if vk == ui.VK.RETURN then require('ui.gamein').ffxi_macros(); end
+                if vk == ui.VK.RETURN then
+                    local lay = require('ui.layers').current();
+                    w.bars = { r = (store.data.hotbar.page - 1) * 2 + (lay or 1), c = 1 };
+                end
                 return true;
             end
             if w.sel == 1 then
@@ -224,8 +379,48 @@ win.key = function (w, vk)
     return true;
 end
 
-win.click = function (w, mx, my)
+win.click = function (w, mx, my, button)
     if ti.active() then return true; end
+    if w.bars then
+        local hb = require('ui.hotbar');
+        if w.bars.pick then
+            for _, r in ipairs(w.pickrows or {}) do
+                if ui.hit(r, mx, my) then w.bars.pick = r[5]; win.key(w, ui.VK.RETURN); return true; end
+            end
+            w.bars.pick = nil;
+            return true;
+        end
+        for _, c in ipairs(w.pcells or {}) do
+            if ui.hit(c, mx, my) then
+                w.bars.r, w.bars.c = c[5], c[6];
+                if button == 2 then
+                    local page, lay = math.floor((c[5] - 1) / 2) + 1, (c[5] - 1) % 2 + 1;
+                    hb.assign_to(lay, page, c[6], nil);                  -- right click clears
+                elseif #ids() > 0 then
+                    w.bars.pick = 1;
+                end
+                return true;
+            end
+        end
+        return true;
+    end
+    if w.place then
+        for _, c in ipairs(w.pcells or {}) do
+            if ui.hit(c, mx, my) then w.place.r, w.place.c = c[5], c[6]; place_here(w); return true; end
+        end
+        return true;
+    end
+    if w.grid then
+        for _, c in ipairs(w.gcells or {}) do
+            if ui.hit(c, mx, my) then
+                local m = get(selected_id(w));
+                if m then m.icon = ICONS[c[5]]; store.save(); end
+                w.grid = nil;
+                return true;
+            end
+        end
+        return true;
+    end
     for _, r in ipairs(w.rows) do
         if ui.hit(r, mx, my) then
             w.sel, w.focus = r[5], 'list';
@@ -249,6 +444,13 @@ function M.command(args)
     elseif sub == 'icon' and m then m.icon = args[5];
     elseif sub == 'delete' and m then data()[args[4]] = nil; end
     store.save();
+end
+
+win.wheel = function (w, delta)
+    if w.grid then
+        local n = #ICONS;
+        w.grid = math.max(1, math.min(n, w.grid + (delta > 0 and -GRID_COLS or GRID_COLS)));
+    end
 end
 
 function M.open() ui.open(win); end

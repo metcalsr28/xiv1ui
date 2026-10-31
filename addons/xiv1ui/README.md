@@ -8,7 +8,7 @@ An interface for FINAL FANTASY XI (Ashita v4) modelled on the FINAL FANTASY XIV 
 
 | 1.0 element | Where | How to use |
 |---|---|---|
-| Action bar, 3 bars × 10 slots | bottom centre | Click a slot, or press 1–0 (`/xiv1ui keys on`). Shift+↑/↓ or click the crest to change bar. Hover for pop-up help. |
+| Action bar, 3 bars × 10 slots | bottom centre | Click a slot, or press 1–0 (`/xiv1ui keys on`). Shift+1/2/3 shows bar 1/2/3 (also Shift+↑/↓ with keys on, or click the crest). Hover for pop-up help. |
 | HP / MP / TP gauges, EXP bar | under the bar | – |
 | Cast bar | above the bar | Shown while casting. |
 | Target frame | top centre | Claim colours, aggression orb, enmity capsule, lock-on mark. |

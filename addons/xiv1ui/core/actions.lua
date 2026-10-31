@@ -115,7 +115,8 @@ function actions.resolve(b)
         if b.ref then
             local m = require('ui.win_macros').get(b.ref);
             if m == nil then return nil; end                     -- deleted: the slot shows empty
-            b = { kind = 'macro', name = m.name, lines = m.lines, icon = m.icon and ('mi_' .. m.icon), show_name = m.show_name };
+            local tex = m.icon and (m.icon:match('^ai_') and m.icon or ('mi_' .. m.icon));
+            b = { kind = 'macro', name = m.name, lines = m.lines, icon = tex, show_name = m.show_name };
             info.label = m.name;
         end
         info.disc = 'disc_command';

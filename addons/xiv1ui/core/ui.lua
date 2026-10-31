@@ -187,6 +187,8 @@ end
 local NAV_SET = {};
 for _, k in ipairs(NAV_DIK) do NAV_SET[k] = true; end
 function ui.key_data(e)
+    -- while a text field is edited the game gets no keys at all (it would walk / turn the camera)
+    if require('core.textinput').active() then e.blocked = true; return; end
     if NAV_SET[e.key] and ui.has_keys() then e.blocked = true; end
 end
 
@@ -203,7 +205,8 @@ function ui.key(e)
         end
         handled = true;
     elseif win.key and (vk == ui.VK.UP or vk == ui.VK.DOWN or vk == ui.VK.LEFT or vk == ui.VK.RIGHT
-            or vk == ui.VK.RETURN or vk == ui.VK.TAB or vk == ui.VK.PRIOR or vk == ui.VK.NEXT) then
+            or vk == ui.VK.RETURN or vk == ui.VK.TAB or vk == ui.VK.PRIOR or vk == ui.VK.NEXT
+            or vk == 0x2E or vk == 0x08) then                                  -- (+ Delete, Backspace)
         if not up then win.key(win, vk); end
         handled = true;
     end
