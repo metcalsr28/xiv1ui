@@ -111,6 +111,13 @@ local function sync(obj)
     obj.is_dirty = true;
 end
 
+--- Change a text object's wrap width (HUD units); it re-wraps at the next draw.
+function text.set_box_width(obj, w)
+    if obj.hud == nil or obj.hud.bw == w then return; end
+    obj.hud.bw = w;
+    obj.hud.scale = nil;          -- (sync re-applies the scaled width)
+end
+
 --- Text box size in HUD units.
 function text.size(obj)
     sync(obj);

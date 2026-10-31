@@ -163,6 +163,33 @@ local function chat_open()
     return ok and v and v ~= 0 and v ~= false;
 end
 
+--- True while an xiv1ui window has the keyboard (the same test ui.key uses): the arrow keys, Enter, Tab and Page
+-- Up / Down then belong to it, and the game mustn't see them in its DirectInput state either (Up / Down there tilt
+-- the camera in fixed steps).
+function ui.has_keys()
+    if #stack == 0 or chat_open() then return false; end
+    local win = stack[#stack];
+    return win.key ~= nil;
+end
+
+-- DirectInput codes of those keys (main block and numpad)
+local NAV_DIK = { 0xC8, 0xD0, 0xCB, 0xCD, 0x1C, 0x9C, 0x0F, 0xC9, 0xD1, 0x48, 0x50, 0x4B, 0x4D };
+
+--- key_state event: clear the keys an open xiv1ui window uses from the game's keyboard state.
+function ui.key_state(e)
+    if not ui.has_keys() then return; end
+    local p = require('ffi').cast('uint8_t*', e.data_raw);
+    for _, k in ipairs(NAV_DIK) do p[k] = 0; end
+end
+
+--- key_data event (DirectInput's buffered key events, a second way the game reads the keyboard): the same keys
+-- are kept from it while a window has the keyboard.
+local NAV_SET = {};
+for _, k in ipairs(NAV_DIK) do NAV_SET[k] = true; end
+function ui.key_data(e)
+    if NAV_SET[e.key] and ui.has_keys() then e.blocked = true; end
+end
+
 --- key event: returns true when consumed.
 function ui.key(e)
     if #stack == 0 or chat_open() then return false; end

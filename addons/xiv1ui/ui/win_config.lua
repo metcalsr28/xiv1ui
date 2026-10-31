@@ -1,6 +1,7 @@
 --[[
-* xiv1ui - Configuration window (reference §38): xiv1ui's own options as a list of On/Off rows, plus UI scale.
-* ↑/↓ choose, Enter or click toggles (UI scale: ←/→ or Enter/click steps through the sizes).
+* xiv1ui - Configuration window (reference §38): xiv1ui's own settings in sections (Appearance, Chat, HUD, Menus,
+* Controls, Layout). ↑/↓ choose, Enter or click toggles; settings with several values step with ←/→ or Enter/click.
+* Opened from the Main Menu, the gear in the bottom-right menu, or /xiv1ui config.
 --]]
 
 local ui    = require('core.ui');
@@ -45,68 +46,93 @@ local function step_theme()
     store.save();
 end
 
-local OPTIONS = {
-    { label = 'Window style',
-      value = function () return (store.data.theme or 'gold') == 'gold' and 'Modern' or 'Classic'; end,
-      step = step_theme },
-    { label = 'UI scale (Left/Right or click to change)',
-      value = function () return string.format('%d%%', math.floor((store.data.ui_scale or 1) * 100 + 0.5)); end,
-      step = step_scale },
-    { label = 'Minimum text size (small labels, numbers, timers)',
-      value = function () local v = store.data.min_text or 0; return v == 0 and 'Off' or string.format('%d px', v); end,
-      step = step_min },
-    { label = 'Chat text size',
-      value = function () return string.format('%d px', store.data.chat_size or 16); end,
-      step = step_chat },
-    { label = 'Number keys fire the action bar (1–0, Shift+↑/↓ pages)',
-      get = function () return store.data.hotbar.keys; end,
-      set = function (v) AshitaCore:GetChatManager():QueueCommand(-1, '/xiv1ui keys ' .. (v and 'on' or 'off')); end },
-    { label = 'Hide the game\'s own panels that xiv1ui replaces',
-      get = function () return store.data.hide_native; end,
-      set = function (v)
-          store.data.hide_native = v; store.save();
-          AshitaCore:GetChatManager():QueueCommand(-1, '/hxiui ' .. (v and 'on' or 'off'));
-      end },
-    { label = 'Action bar layers on Ctrl/Alt and LT/RT (replaces the game\'s macro palette)',
-      get = function () return store.data.macro.palette == true; end,
-      set = function (v) store.data.macro.palette = v; store.save(); end },
-    { label = 'Area map in the minimap (HD Remapster maps when installed)',
-      get = function () return store.data.minimap_hd ~= false; end,
-      set = function (v) store.data.minimap_hd = v; store.save(); end },
-    { label = 'Command menu (Enter / A) in the FF style',
-      get = function () return store.data.cmd_menu ~= false; end,
-      set = function (v) store.data.cmd_menu = v; store.save(); end },
-    { label = 'Names over characters in the HUD font (needs the Nameplate plugin)',
-      get = function () return store.data.nameplates ~= false; end,
-      set = function (v) store.data.nameplates = v; store.save(); end },
-    { label = 'Controller drives xiv1ui (Back+X menu, Back+A action bar)',
-      get = function () return store.data.pad ~= false; end,
-      set = function (v) store.data.pad = v; store.save(); end },
-    { label = 'UI Lock (widgets can\'t be dragged)',
-      get = function () return store.data.ui_locked == true; end,
-      set = function (v) store.data.ui_locked = v; store.save(); end },
-    { label = 'Reset UI positions',
-      get = function () return false; end,
-      set = function () require('core.layout').reset(); end },
-    { label = 'Chat logs fade out after 60 seconds',
-      get = function () return store.data.chat_autohide ~= false; end,
-      set = function (v) store.data.chat_autohide = v; store.save(); end },
+local function flag(key, default_on)
+    return function () if default_on then return store.data[key] ~= false; end return store.data[key] == true; end,
+           function (v) store.data[key] = v; store.save(); end;
+end
+local function opt(label, key, default_on)
+    local get, set = flag(key, default_on);
+    return { label = label, get = get, set = set };
+end
+
+-- The settings, by section. A row has value+step (a choice to step through) or get+set (On / Off).
+local SECTIONS = {
+    { title = 'Appearance', rows = {
+        { label = 'Window style',
+          value = function () return (store.data.theme or 'gold') == 'gold' and 'Modern' or 'Classic'; end,
+          step = step_theme },
+        { label = 'UI scale',
+          value = function () return string.format('%d%%', math.floor((store.data.ui_scale or 1) * 100 + 0.5)); end,
+          step = step_scale },
+        { label = 'Minimum text size (small labels, numbers, timers)',
+          value = function () local v = store.data.min_text or 0; return v == 0 and 'Off' or string.format('%d px', v); end,
+          step = step_min },
+        opt('Names over characters in the HUD font (needs the Nameplate plugin)', 'nameplates', true),
+    } },
+    { title = 'Chat', rows = {
+        { label = 'Chat text size',
+          value = function () return string.format('%d px', store.data.chat_size or 16); end,
+          step = step_chat },
+        opt('Chat logs fade out after 60 seconds of quiet', 'chat_autohide', true),
+    } },
+    { title = 'HUD', rows = {
+        opt('Hide the game\'s own panels that xiv1ui replaces', 'hide_native', true),
+        opt('Area map in the minimap (HD maps when available)', 'minimap_hd', true),
+        opt('Popup help when hovering actions and buttons', 'popup_help', true),
+        opt('Configuration button in the bottom-right menu', 'config_button', true),
+    } },
+    { title = 'Menus', rows = {
+        opt('Command menu (Enter / A) in the FF style', 'cmd_menu', true),
+        opt('Event choices (Yes / No, NPC options) in the FF style', 'choice_menu', true),
+        opt('Status window in the FF style', 'status_panel', true),
+    } },
+    { title = 'Controls', rows = {
+        { label = 'Number keys fire the action bar (1–0, Shift+↑/↓ pages)',
+          get = function () return store.data.hotbar.keys; end,
+          set = function (v) AshitaCore:GetChatManager():QueueCommand(-1, '/xiv1ui keys ' .. (v and 'on' or 'off')); end },
+        { label = 'Action bar layers on Ctrl/Alt and LT/RT (replaces the game\'s macro palette)',
+          get = function () return store.data.macro.palette == true; end,
+          set = function (v) store.data.macro.palette = v; store.save(); end },
+        opt('Controller drives xiv1ui (Back+X menu, Back+A action bar)', 'pad', true),
+    } },
+    { title = 'Layout', rows = {
+        opt('UI Lock (widgets can\'t be dragged)', 'ui_locked', false),
+        { label = 'Reset UI positions', action = true, value = function () return ''; end,
+          step = function () require('core.layout').reset(); end },
+    } },
 };
 
-local win = { id = 'config', title = 'Configuration', w = 560, h = 70 + #OPTIONS * 30 + 40, sel = 1, rows = {} };
+-- all rows in order (the cursor moves through them as one list)
+local OPTIONS = {};
+for _, sec in ipairs(SECTIONS) do
+    for _, r in ipairs(sec.rows) do OPTIONS[#OPTIONS + 1] = r; end
+end
+
+local ROW_H, HEAD_H = 28, 34;
+local win = { id = 'config', title = 'Configuration', w = 600, sel = 1, rows = {} };
+win.h = 52 + #SECTIONS * HEAD_H + #OPTIONS * ROW_H + 24;
 
 win.draw = function (w, x, y)
-    ui.header('cfg', 'Interface', x + 24, y + 62, w.w - 60);
-    local items = {};
-    for i, o in ipairs(OPTIONS) do
-        if o.value then
-            items[i] = { label = o.label, right = o.value(), color = 0xFFF4F0E6 };
-        else
-            items[i] = { label = o.label, right = o.get() and 'On' or 'Off',
-                color = o.get() and 0xFFF4F0E6 or 0xFFB0B4C0 };
+    w.rows = {};
+    local focused = ui.top() == w;
+    local cy, base = y + 52, 0;
+    for si, sec in ipairs(SECTIONS) do
+        ui.header('cfg' .. si, sec.title, x + 24, cy + 22, w.w - 60);
+        cy = cy + HEAD_H;
+        local items = {};
+        for i, o in ipairs(sec.rows) do
+            if o.value then
+                items[i] = { label = o.label, right = o.value(), color = 0xFFF4F0E6 };
+            else
+                local on = o.get();
+                items[i] = { label = o.label, right = on and 'On' or 'Off', color = on and 0xFFF4F0E6 or 0xFFB0B4C0 };
+            end
         end
+        local rects = ui.list(w, 'cfg' .. si, items, w.sel - base, x + 40, cy, w.w - 70, ROW_H, #items, 0, focused);
+        for _, r in ipairs(rects) do w.rows[#w.rows + 1] = { r[1], r[2], r[3], r[4], r[5] + base }; end
+        cy = cy + #items * ROW_H;
+        base = base + #items;
     end
-    w.rows = ui.list(w, 'cfg', items, w.sel, x + 40, y + 76, w.w - 70, 30, #items, 0, ui.top() == w);
 end
 
 local function toggle(i)
@@ -119,7 +145,7 @@ win.key = function (w, vk)
     if vk == ui.VK.UP then w.sel = (w.sel - 2) % #OPTIONS + 1;
     elseif vk == ui.VK.DOWN then w.sel = w.sel % #OPTIONS + 1;
     elseif vk == ui.VK.RETURN then toggle(w.sel);
-    elseif (vk == ui.VK.LEFT or vk == ui.VK.RIGHT) and OPTIONS[w.sel].step then
+    elseif (vk == ui.VK.LEFT or vk == ui.VK.RIGHT) and OPTIONS[w.sel].step and not OPTIONS[w.sel].action then
         OPTIONS[w.sel].step(vk == ui.VK.LEFT and -1 or 1);
     elseif vk == ui.VK.ESCAPE then return false; end
     return true;
@@ -132,5 +158,6 @@ win.click = function (w, mx, my)
 end
 
 function M.open() ui.open(win); end
+function M.toggle() ui.toggle(win); end
 
 return M;

@@ -876,6 +876,27 @@ def roundel(name, inner, outer, glyph, socket=False):
         g.pieslice([c - 11 * k, c, c + 5 * k, c + 16 * k], 180, 360, fill=W)
         g.line([(c + 6 * k, c - 6 * k), (c + 6 * k, c + 2 * k)], fill=W, width=2 * k)
         g.line([(c + 2 * k, c - 2 * k), (c + 10 * k, c - 2 * k)], fill=W, width=2 * k)
+    elif glyph == 'map':
+        # a folded map: three panels, the middle one darker, with a dotted route
+        xs = [c - 10 * k, c - 3.5 * k, c + 3.5 * k, c + 10 * k]
+        for i in range(3):
+            top = c - 8 * k if i % 2 == 0 else c - 6 * k
+            bot = c + 6 * k if i % 2 == 0 else c + 8 * k
+            g.polygon([(xs[i], top), (xs[i + 1], c - 6 * k if i % 2 == 0 else c - 8 * k),
+                       (xs[i + 1], c + 8 * k if i % 2 == 0 else c + 6 * k), (xs[i], bot)],
+                      fill=W if i != 1 else (220, 216, 200, 255))
+        for dx, dy in ((-7, 3), (-4, 0), (0, 1), (4, -2), (7, -4)):
+            g.ellipse([c + dx * k - k, c + dy * k - k, c + dx * k + k, c + dy * k + k], fill=outer)
+    elif glyph == 'gear':
+        import math
+        teeth = 8
+        pts = []
+        for i in range(teeth * 4):
+            ang = math.pi * 2 * i / (teeth * 4)
+            r = (9 if (i % 4) in (0, 1) else 6.5) * k
+            pts.append((c + r * math.cos(ang), c + r * math.sin(ang)))
+        g.polygon(pts, fill=W)
+        g.ellipse([c - 3 * k, c - 3 * k, c + 3 * k, c + 3 * k], fill=outer)
     elif glyph == 'chest':
         g.rounded_rectangle([c - 9 * k, c - 1 * k, c + 9 * k, c + 8 * k], radius=k, fill=W)   # box
         g.rounded_rectangle([c - 9 * k, c - 7 * k, c + 9 * k, c - 2 * k], radius=3 * k, fill=W) # lid
@@ -885,16 +906,19 @@ def roundel(name, inner, outer, glyph, socket=False):
 
 
 MICRO = [
-    ('menu', (255, 236, 170, 255), (150, 105, 30, 255), 'scroll'),
+    # one hue each, so the row reads at a glance (bright centre, deep rim colour)
+    ('menu', (255, 228, 150, 255), (168, 112, 18, 255), 'scroll'),      # Commands: gold
     ('battle', (255, 190, 170, 255), (150, 30, 30, 255), 'sword'),
-    ('item', (230, 210, 170, 255), (110, 70, 40, 255), 'bag'),
-    ('emote', (190, 230, 255, 255), (40, 90, 160, 255), 'bubble'),
-    ('lock', (255, 236, 170, 255), (60, 90, 170, 255), 'lock'),
+    ('item', (255, 196, 140, 255), (176, 78, 24, 255), 'bag'),          # Inventory: amber
+    ('emote', (255, 192, 220, 255), (170, 48, 104, 255), 'bubble'),     # Emotes: rose
+    ('lock', (214, 196, 255, 255), (92, 62, 176, 255), 'lock'),         # UI Lock: violet
     ('help', (220, 222, 230, 255), (90, 92, 104, 255), 'help'),
     ('check', (210, 240, 255, 255), (40, 110, 150, 255), 'eye'),
-    ('trade', (230, 255, 200, 255), (50, 120, 60, 255), 'trade'),
-    ('invite', (190, 220, 255, 255), (40, 70, 160, 255), 'invite'),
+    ('trade', (186, 240, 196, 255), (30, 118, 70, 255), 'trade'),       # Trade: jade
+    ('invite', (184, 216, 255, 255), (36, 86, 184, 255), 'invite'),     # Invite: azure
     ('loot', (255, 230, 160, 255), (140, 90, 20, 255), 'chest'),
+    ('config', (218, 222, 232, 255), (66, 76, 98, 255), 'gear'),        # Configuration: slate
+    ('map', (176, 236, 228, 255), (20, 110, 110, 255), 'map'),          # Map: teal
 ]
 
 

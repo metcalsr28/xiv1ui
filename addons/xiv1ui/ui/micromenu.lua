@@ -1,15 +1,16 @@
 --[[
-* xiv1ui - micro menu (bottom right), after FFXIV 1.0 (reference §19): two rows of small round buttons.
-* Upper row: interactions for the current target (Check, Trade, Invite to party), greyed when they don't apply.
-* Lower row: Main Menu, Active/Passive (engage/disengage), Use Item (inventory), Emotes, UI Lock, Popup Help.
-* Hover shows the button's name.
+* xiv1ui - the button row at the bottom right: quick ways into the menus, after FFXIV 1.0's small round buttons
+* (reference §19). Upper row: Trade and Invite (for the targeted player; greyed otherwise). Lower row: Commands
+* (FFXI's own Commands menu), Inventory (its Items menu), Map, Emotes, UI Lock, Configuration. The buttons open the
+* game's own menus where it has them (xiv1ui only restyles those). Hover shows the button's name; the Configuration
+* button can be hidden (/xiv1ui configbutton off).
 --]]
 
 local draw   = require('core.draw');
 local text   = require('core.text');
 local layout = require('core.layout');
-local world  = require('core.world');
 local store  = require('core.store');
+local world  = require('core.world');
 
 local micro = {};
 
@@ -18,29 +19,24 @@ local function has_pc_target()
     local idx = world.target_index();
     return idx ~= 0 and world.kind(idx) == 'pc' and idx ~= AshitaCore:GetMemoryManager():GetParty():GetMemberTargetIndex(0);
 end
-local function engaged()
-    local idx = AshitaCore:GetMemoryManager():GetParty():GetMemberTargetIndex(0);
-    return AshitaCore:GetMemoryManager():GetEntity():GetStatus(idx) == 1;
-end
 
 local UPPER = {
-    { icon = 'check',  name = 'Check',           ok = function () return world.target_index() ~= 0; end, run = function () cmd('/check <t>'); end },
-    { icon = 'trade',  name = 'Trade',           ok = has_pc_target, run = function () cmd('/trade <t>'); end },
+    { icon = 'trade',  name = 'Trade',          ok = has_pc_target, run = function () cmd('/trade <t>'); end },
     { icon = 'invite', name = 'Invite to Party', ok = has_pc_target, run = function () cmd('/pcmd add <t>'); end },
 };
-local LOWER = {
-    { icon = 'menu',   name = 'Main Menu',       run = function () require('ui.mainmenu').toggle(); end },
-    { icon = 'battle', name = 'Active / Passive Mode', on = engaged,
-      run = function () if engaged() then cmd('/attack off'); else cmd('/attack <t>'); end end },
-    { icon = 'item',   name = 'Use Item',        run = function () require('ui.win_inventory').open(); end },
-    { icon = 'emote',  name = 'Emotes',          run = function () require('ui.win_emotes').open(); end },
-    { icon = 'lock',   name = 'UI Lock',         on = function () return store.data.ui_locked == true; end,
+local BUTTONS = {
+    -- FFXI opens its Commands menu with numpad minus (DIK 0x4A)
+    { icon = 'menu',   name = 'Commands',       run = function () require('ui.gamein').press(0x4A); end },
+    { icon = 'item',   name = 'Inventory',      run = function () require('ui.gamein').open_command('Items'); end },
+    { icon = 'map',    name = 'Map',            run = function () cmd('/map'); end },
+    { icon = 'emote',  name = 'Emotes',         run = function () require('ui.win_emotes').open(); end },
+    { icon = 'lock',   name = 'UI Lock',        on = function () return store.data.ui_locked == true; end,
       run = function () store.data.ui_locked = not store.data.ui_locked; store.save(); end },
-    { icon = 'help',   name = 'Popup Help',      on = function () return store.data.popup_help ~= false; end,
-      run = function () store.data.popup_help = (store.data.popup_help == false); store.save(); end },
+    { icon = 'config', name = 'Configuration',  show = function () return store.data.config_button ~= false; end,
+      run = function () require('ui.win_config').toggle(); end },
 };
 
-local STEP = 34;
+local STEP, SIZE = 38, 34;
 local rects = {};
 local hover = nil;
 local tip;
@@ -50,25 +46,30 @@ function micro.init()
 end
 
 function micro.render()
-    local W = #LOWER * STEP;
-    local x0, y0 = layout.anchor('bottomright', W, 74, -16, -14, 'micromenu');
-    layout.bounds('micromenu', x0, y0, W, 74);
+    local list = {};
+    for _, b in ipairs(BUTTONS) do if b.show == nil or b.show() then list[#list + 1] = b; end end
+    local W, H = #list * STEP - (STEP - SIZE), SIZE * 2 + 6;
+    local x0, ytop = layout.anchor('bottomright', W, H, -16, -16, 'micromenu');
+    layout.bounds('micromenu', x0, ytop, W, H);
     rects = {};
-    local function row(list, y, upper)
-        local x = x0 + W - #list * STEP;
-        for i, b in ipairs(list) do
-            local ok = (b.ok == nil) or b.ok();
-            local col = ok and 0xFFFFFFFF or 0x70FFFFFF;
-            if b.on and b.on() then draw.image('slot_glow', x - 19, y - 19, { scale = 0.65, color = 0xC0FFE08C }); end
-            draw.image('micro_' .. b.icon, x, y, { color = col });
-            if hover == b then draw.image('slot_glow', x - 19, y - 19, { scale = 0.65, color = 0xA0FFFFFF }); end
-            rects[#rects + 1] = { x, y, 34, 34, b, ok };
-            x = x + STEP;
-        end
+    -- the upper row is right-aligned over the lower one
+    local function place(row, y)
+        local out = {};
+        local rw = #row * STEP - (STEP - SIZE);
+        for i, b in ipairs(row) do out[i] = { b, x0 + W - rw + (i - 1) * STEP, y }; end
+        return out;
     end
-    row(UPPER, y0, true);
-    row(LOWER, y0 + 38, false);
-    if hover then text.draw(tip, hover.name, x0 + W, y0 - 8, 'baseline'); end
+    local cells = place(UPPER, ytop);
+    for _, c in ipairs(place(list, ytop + SIZE + 6)) do cells[#cells + 1] = c; end
+    for _, cell in ipairs(cells) do
+        local b, x, y0 = cell[1], cell[2], cell[3];
+        local ok = b.ok == nil or b.ok();
+        if b.on and b.on() then draw.image('slot_glow', x - 19, y0 - 19, { scale = 0.65, color = 0xC0FFE08C }); end
+        draw.image('micro_' .. b.icon, x, y0, { color = ok and 0xFFFFFFFF or 0x70FFFFFF });
+        if hover == b then draw.image('slot_glow', x - 19, y0 - 19, { scale = 0.65, color = 0xA0FFFFFF }); end
+        rects[#rects + 1] = { x, y0, SIZE, SIZE, b, ok };
+    end
+    if hover then text.draw(tip, hover.name, x0 + W - #UPPER * STEP - 6, ytop + 24, 'baseline'); end
 end
 
 function micro.mouse(e)

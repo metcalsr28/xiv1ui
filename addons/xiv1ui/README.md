@@ -15,7 +15,7 @@ An interface for FINAL FANTASY XI (Ashita v4) modelled on the FINAL FANTASY XIV 
 | Target cursor, pop-up numbers | in the world | Gold ring over your target; damage, heal and miss numbers. |
 | Status effects + skillchain ("combo") indicator | under the target frame | Hover for the name; right-click to cancel a buff. |
 | Party list | bottom right | Click a member to target them. |
-| Micro menu | bottom right | Check, Trade, Invite / Main Menu, Active-Passive, Use Item, Emotes, UI Lock, Popup Help. |
+| Buttons | bottom right | Trade and Invite (targeted player) above; Commands (FFXI's Commands menu), Inventory (FFXI's Items menu), Map, Emotes, UI Lock, Configuration below (`/xiv1ui configbutton off` hides it). |
 | Chat logs (General / Battle) | bottom left | Mouse wheel scrolls. They fade after 60 s of quiet. |
 | Minimap and clock | top right | Vana'diel day, moon and time. |
 | NPC dialogue | lower centre | 1.0's talk window: the speaker on a grey name plate, the line in a soft black box, a gold arrow while the game waits for you. Closes when you continue (Enter/Esc, A/B), choose an option, or the conversation ends. Lines still go to the chat log, as in 1.0. |
@@ -58,6 +58,8 @@ Turn it on in Configuration.
 /xiv1ui bind <slot> cmd <label> <command>     e.g. /xiv1ui bind 1 cmd Attack /attack <t>
 /xiv1ui unbind <slot> | page <n|next|prev> | use <slot> | keys <on|off> | defaults
 /xiv1ui layout reset
+/xiv1ui config                       open/close the Configuration window
+/xiv1ui configbutton on|off          show/hide its button in the bottom-right row
 /xiv1ui scale <80..150>
 /xiv1ui import <book> <set>          copy an FFXI macro set onto this page's LT (Ctrl row) / RT (Alt row) layers
 ```

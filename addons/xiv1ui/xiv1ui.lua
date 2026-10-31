@@ -234,6 +234,12 @@ ashita.events.register('mouse', 'xiv1ui_mouse', function (raw)
     end
 end);
 
+-- DirectInput buffered keyboard events (the game reads the arrows this way too, e.g. for the camera).
+ashita.events.register('key_data', 'xiv1ui_key_data', function (e)
+    if not ready then return; end
+    pcall(ui.key_data, e);
+end);
+
 -- DirectInput keyboard state, before the game reads it (the macro palette takes Ctrl/Alt from the game).
 ashita.events.register('key_state', 'xiv1ui_key_state', function (e)
     if not ready then return; end
@@ -243,6 +249,8 @@ ashita.events.register('key_state', 'xiv1ui_key_state', function (e)
         for k = 0, 255 do p[k] = 0; end
         return;
     end
+    -- an open xiv1ui window keeps its navigation keys from the game (camera, menus)
+    pcall(ui.key_state, e);
     for _, m in ipairs(modules) do
         if m.key_state then
             local ok, err = pcall(m.key_state, e);
@@ -304,6 +312,17 @@ ashita.events.register('command', 'xiv1ui_command', function (e)
         return;
     end
     if args[2] == 'layout' and args[3] == 'reset' then layout.reset(); return; end
+    -- /xiv1ui config: the Configuration window; /xiv1ui configbutton on|off: its button in the bottom-right menu
+    if (args[2] or ''):lower() == 'config' then require('ui.win_config').toggle(); return; end
+    if (args[2] or ''):lower() == 'configbutton' then
+        local a3 = (args[3] or ''):lower();
+        if a3 == 'on' then store.data.config_button = true;
+        elseif a3 == 'off' then store.data.config_button = false;
+        else store.data.config_button = (store.data.config_button == false); end
+        store.save();
+        print('[xiv1ui] Configuration button ' .. (store.data.config_button ~= false and 'shown' or 'hidden') .. '.');
+        return;
+    end
     if (args[2] or ''):lower() == 'macro' then require('ui.win_macros').command(args); return; end
     -- /xiv1ui hide <part> / show <part>: stop drawing one HUD part (e.g. to see what's behind it); not saved
     if (args[2] == 'hide' or args[2] == 'show') and args[3] then
@@ -316,7 +335,7 @@ ashita.events.register('command', 'xiv1ui_command', function (e)
         local v = tonumber(args[3]);
         if v > 5 then v = v / 100; end
         draw.set_scale(v);
-        store.data.ui_scale = draw.scale;
+        store.data.ui_scale = draw.user_scale;
         store.save();
         return;
     end

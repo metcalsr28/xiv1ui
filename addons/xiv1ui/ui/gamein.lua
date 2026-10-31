@@ -93,8 +93,35 @@ function gamein.ffxi_macros()
     gamein.press(0x1C);      -- Enter on the Macro menu's "Edit Macros" (still selected underneath)
 end
 
+-- Opening one of FFXI's own menus for a button (keeping the game's behaviour): numpad minus opens the Commands menu,
+-- then once it has focus the cursor is moved to the wanted entry (by its label, as xiv1ui reads the menu) and
+-- confirmed. Gives up after a moment if the menu doesn't come up.
+local want = nil;            -- { label, since, pressed }
+function gamein.open_command(label)
+    ui.close_all();
+    want = { label = label, since = now(), pressed = false };
+    gamein.press(0x4A);
+end
+
+local function follow_command()
+    if want == nil then return; end
+    if now() - want.since > 2 then want = nil; return; end
+    if want.pressed then return; end
+    local ok, m = pcall(function () return require('ui.cmdmenu').read(); end);
+    if not ok or m == nil or (m.name ~= 'menuwind' and m.name ~= 'socialme') or m.rows == nil then return; end
+    local to = nil;
+    for i, l in ipairs(m.rows) do if l == want.label then to = i; end end
+    if to == nil or m.cursor == nil then want = nil; return; end
+    local d = to - m.cursor;
+    for _ = 1, math.abs(d) do gamein.press(d > 0 and 0xD0 or 0xC8); end
+    gamein.press(0x1C);
+    want.pressed = true;
+    want.since = now() - 1.5;      -- (then forget it shortly)
+end
+
 local was_open = false;
 function gamein.render()
+    follow_command();
     -- a window just closed (B / Esc): that press, still held, mustn't reach the game's menu underneath
     local open = ui.any_open();
     if was_open and not open then guard_until = math.max(guard_until, now() + 0.3); end

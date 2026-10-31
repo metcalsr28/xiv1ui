@@ -4,8 +4,10 @@
 * One ID3DXSprite batch per frame. Modules draw textures (PNG files under assets/) and text (gdifonts objects)
 * through the helpers here, in the order they are called, between draw.begin_frame() and draw.end_frame().
 *
-* UI scale (Configuration » UI scale): modules lay out in unscaled HUD units, and every helper here multiplies
-* positions and sizes by draw.scale on the way to the sprite. (D3DX8's sprite has no SetTransform.)
+* Scale: modules lay out in HUD units, designed for a 1080-pixel-high screen, and every helper here multiplies
+* positions and sizes by draw.scale on the way to the sprite (D3DX8's sprite has no SetTransform). draw.scale is the
+* screen's height / 1080 (so the HUD keeps its proportions at any resolution) times the player's UI scale
+* (Configuration » UI scale, draw.user_scale).
 --]]
 
 local d3d8 = require('d3d8');
@@ -13,13 +15,24 @@ local ffi  = require('ffi');
 
 local draw = {};
 
-draw.scale = 1;
+draw.scale = 1;              -- HUD units -> screen pixels (screen_k() * user_scale)
+draw.user_scale = 1;         -- the player's UI scale
 draw.SCALES = { 0.8, 0.9, 1, 1.1, 1.25, 1.4, 1.5 };
+draw.DESIGN_H = 1080;        -- the screen height the HUD is laid out for
 
---- Set the UI scale for the next frame (clamped to the offered range).
+--- Screen height / 1080: the HUD's size at a UI scale of 100%.
+function draw.screen_k()
+    local ok, h = pcall(function () return require('scaling').window.h; end);
+    h = ok and tonumber(h) or 0;
+    if h <= 0 then return 1; end
+    return math.max(0.5, math.min(4, h / draw.DESIGN_H));
+end
+
+--- Set the player's UI scale (clamped to the offered range) for the next frame.
 function draw.set_scale(s)
     s = tonumber(s) or 1;
-    draw.scale = math.max(draw.SCALES[1], math.min(draw.SCALES[#draw.SCALES], s));
+    draw.user_scale = math.max(draw.SCALES[1], math.min(draw.SCALES[#draw.SCALES], s));
+    draw.scale = draw.screen_k() * draw.user_scale;
 end
 
 local device  = d3d8.get_device();

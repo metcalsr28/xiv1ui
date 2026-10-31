@@ -24,7 +24,9 @@ local hider = require('core.gamewin').new();
 
 local KEEP     = 200;         -- lines kept per log
 local AUTOHIDE = 60;          -- seconds
-local LOG_W    = 400;         -- fixed: larger chat text (Configuration » Chat text size) wraps more and adds height
+local LOG_W    = 400;         -- larger chat text (Configuration » Chat text size) wraps more and adds height
+local LOG_MIN  = 280;         -- narrowest the logs get to make room for the action bar (narrow screens, large UI scale)
+local log_w    = LOG_W;       -- the logs' width this frame (see fit_width)
 local BASE_SIZE = 16;
 local size = BASE_SIZE;
 local LINE_PAD = 2;
@@ -81,7 +83,7 @@ local function clean(s)
 end
 
 local function add_line(log, str, color)
-    local obj = text.new('small', { font_height = size, font_color = color, box_width = LOG_W - 28, outline_width = 2 });
+    local obj = text.new('small', { font_height = size, font_color = color, box_width = log_w - 28, outline_width = 2 });
     text.set(obj, str);
     local lines = log.lines;
     lines[#lines + 1] = obj;
@@ -121,13 +123,13 @@ local function draw_log(i, x, y_bottom, alpha)
     local log = logs[i];
     local h = log.height;
     local y = y_bottom - h;
-    rects[i] = { x, y - 22, LOG_W, h + 22 };
+    rects[i] = { x, y - 22, log_w, h + 22 };
     if log.wash then
         if #log.lines == 0 then return y - 22; end     -- nothing to show: no wash either
         -- the Battle log: no box; a dark wash behind the lines (drawn below, once their height is known)
     else
         local pw, ph = layout.size('log_panel');
-        draw.image('log_panel', x, y, { scale = { LOG_W / pw, h / ph }, color = draw.alpha(0xFFFFFFFF, alpha) });
+        draw.image('log_panel', x, y, { scale = { log_w / pw, h / ph }, color = draw.alpha(0xFFFFFFFF, alpha) });
         draw.image('log_tab_active', x + 6, y - 21, { color = draw.alpha(0xFFFFFFFF, alpha) });
         if not log.tab_obj then log.tab_obj = text.new('label', { font_height = 15, font_alignment = text.align.Center }); end
         text.draw(log.tab_obj, log.title, x + 54, y - 5, 'baseline');
@@ -159,7 +161,7 @@ local function draw_log(i, x, y_bottom, alpha)
         end
         local ww, wh = layout.size('log_wash');
         local wy = top - 10;
-        draw.image('log_wash', 0, wy, { scale = { (x + LOG_W + 160) / ww, (y_bottom - wy + 6) / wh },
+        draw.image('log_wash', 0, wy, { scale = { (x + log_w + 160) / ww, (y_bottom - wy + 6) / wh },
                                         color = draw.alpha(0xFFFFFFFF, alpha) });
     end
     while n >= 1 do
@@ -174,7 +176,7 @@ local function draw_log(i, x, y_bottom, alpha)
     end
     if log.scroll > 0 then
         if not log.more_obj then log.more_obj = text.new('slotkey', { font_height = 13, font_alignment = text.align.Right }); end
-        text.draw(log.more_obj, string.format('▼ %d more', log.scroll), x + LOG_W - 10, y_bottom - 8, 'baseline');
+        text.draw(log.more_obj, string.format('▼ %d more', log.scroll), x + log_w - 10, y_bottom - 8, 'baseline');
     end
     return y - 22;
 end
@@ -316,8 +318,25 @@ function chatlog.early()
     hider:hide({ 'inline' });
 end
 
+-- The logs sit at the bottom left, beside the action bar. On a narrow screen (or at a large UI scale) the bar's left
+-- end, its crest, reaches into them: the logs then get narrower (down to LOG_MIN) and their lines re-wrap.
+local function fit_width()
+    local w = LOG_W;
+    local chat, bar = layout.widgets.chat, layout.widgets.hotbar;
+    if chat and bar and chat[2] < bar[2] + bar[4] and bar[2] < chat[2] + chat[4] and chat[1] < bar[1] then
+        w = math.max(LOG_MIN, math.min(LOG_W, math.floor(bar[1] - 12 - chat[1])));
+    end
+    if w == log_w then return; end
+    log_w = w;
+    for _, log in ipairs(logs) do
+        log.one_line = nil;
+        for _, obj in ipairs(log.lines) do text.set_box_width(obj, log_w - 28); end
+    end
+end
+
 function chatlog.render()
     apply_size();
+    fit_width();
     -- the chat input: the game's bar hidden, ours drawn under Log 1; the logs stay up while typing
     local open = bit.band(AshitaCore:GetChatManager():IsInputOpen() or 0, 0x10) ~= 0;
     typing = open;
@@ -332,9 +351,9 @@ function chatlog.render()
     local ox, oy = layout.offset('chat');
     -- Log 1 sits just above the game's own typing box at the bottom left; Log 2 above it.
     local top = draw_log(1, 16 + ox, sh - 46 + oy, alpha);
-    if open then draw_input(16 + ox + 6, sh - 46 + oy - INPUT_H - 4, LOG_W - 12); end
+    if open then draw_input(16 + ox + 6, sh - 46 + oy - INPUT_H - 4, log_w - 12); end
     local top2 = draw_log(2, 16 + ox, top - 8, alpha);
-    layout.bounds('chat', 16 + ox, top2, LOG_W, sh - 46 + oy - top2);
+    layout.bounds('chat', 16 + ox, top2, log_w, sh - 46 + oy - top2);
 end
 
 function chatlog.mouse(e)
