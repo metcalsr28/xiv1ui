@@ -112,9 +112,10 @@ function lobby.loading()
     return true;
 end
 
-function lobby.render_loading()
+-- (no_backdrop: only the "Now Loading..." mark, over the game's own screen; used between areas, ui/zoning.lua)
+function lobby.render_loading(no_backdrop)
     local sw, sh = layout.screen();
-    draw.rect(0, 0, sw, sh, 0xFF000000);
+    if not no_backdrop then draw.rect(0, 0, sw, sh, 0xFF000000); end
     local t = ui.label('lobby_loading', 'small', { font_height = 18, font_flags = 2, font_color = 0xFFE8E4D8,
                                                    font_alignment = text.align.Right });
     -- a soft pulse, and a small four-point sparkle before the words
@@ -933,9 +934,6 @@ end
 -- Mouse: a click on a row moves the game's cursor there (Up / Down, as the keys would) and confirms.
 function lobby.mouse(e)
     if click_rows == nil then return; end
-    -- the game's own list (hidden underneath, at its own row positions) follows the pointer too: keep mouse movement
-    -- from it, or hovering one of xiv1ui's rows moves the game's cursor to whatever row of its own lies under it
-    if e.message == 0x200 or e.message == 0x20A then e.blocked = true; return; end
     local hit = nil;
     for i, r in ipairs(click_rows.rects) do
         if e.x >= r[1] and e.x < r[1] + r[3] and e.y >= r[2] and e.y < r[2] + r[4] then hit = i; end

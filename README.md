@@ -52,6 +52,10 @@ also has known fixes for running CatsEyeXI on Apple Silicon Macs.
 The addon's [README](addons/xiv1ui/README.md) lists every element, the commands, controller support and the
 optional extras (the Nameplate plugin for name plates, HD area maps through XI-Pivot).
 
+## What's new
+
+See [CHANGELOG.md](CHANGELOG.md) for what changed in each release.
+
 ## Licence
 
 GNU General Public License v3.0 or later (`LICENSE`). Fonts: Alegreya and Noto Serif JP (SIL Open Font License 1.1).

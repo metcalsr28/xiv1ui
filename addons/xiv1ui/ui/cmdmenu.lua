@@ -38,6 +38,10 @@ local TITLES = {
     region = 'Region Info', map0 = 'Map', mogcont = 'Mog House', mcrmenu = 'Macro', configwi = 'Config',
     mnstorag = 'Show Gear From', iuse = 'Item', itmsort2 = 'Sort', missionm = 'Missions',
     ut_menu = 'Unity', mapv3 = 'Markers', quest00 = 'Quests', shopmain = 'Shop', shopsell = 'Sell?', shopbuy = 'Buy?',
+    faqsub = 'Help Desk', link1 = 'Linkshell', maplist = 'Change Map', bazaar = 'Bazaar',
+    evitem01 = 'Examine?', scanlist = 'Wide Scan', mount = 'Mount',
+    flistmai = 'Friend List', searchjo = 'Search: Job', searchna = 'Search: Country', searchra = 'Search: Race',
+    searchle = 'Search: Rank', comgenre = 'Comment',
 };
 -- menus whose buttons have no help text (labelled from ORDER by position only)
 local NOHELP = { missionm = true, shopmain = true, shopsell = true, shopbuy = true };
@@ -70,6 +74,16 @@ local ORDER = {
     shopmain = { 'Buy', 'Sell' },
     shopsell = { 'Sell', 'Cancel' },
     shopbuy  = { 'Buy', 'Cancel' },
+    bazaar   = { 'Set Prices', 'Edit Comment' },
+    flistmai = { 'Friends', 'Messages', 'Online Status' },
+    searchjo = { 'Warrior', 'Monk', 'White Mage', 'Black Mage', 'Red Mage', 'Thief', 'Paladin', 'Dark Knight',
+                 'Beastmaster', 'Bard', 'Ranger', 'Samurai', 'Ninja', 'Dragoon', 'Summoner', 'Blue Mage', 'Corsair',
+                 'Puppetmaster', 'Dancer', 'Scholar', 'Geomancer', 'Rune Fencer' },
+    searchna = { "San d'Oria", 'Bastok', 'Windurst' },
+    searchra = { 'Hume', 'Elvaan', 'Tarutaru', 'Mithra', 'Galka' },
+    searchle = { 'Rank 1', 'Rank 2', 'Rank 3', 'Rank 4', 'Rank 5', 'Rank 6', 'Rank 7', 'Rank 8', 'Rank 9', 'Rank 10' },
+    comgenre = { 'EXP Party', 'Battle Content', 'Missions & Quests', 'Item', 'Linkshell', 'Looking for Friends',
+                 'Others' },
     ut_menu  = { 'Unity Info', 'Ranking Info', 'Members' },
     itmsort2 = { 'Auto Sort', 'Manual Sort', 'Recycle Bin' },
     missionm = { 'Nations', 'Rise of the Zilart', 'Chains of Promathia', 'Treasures of Aht Urhgan',
@@ -135,6 +149,8 @@ local LABELS = {
     { 'View list of geomancy', 'Geomancy' }, { 'View list of Trust', 'Trust' },
     -- Communication
     { "Use the PlayOnline viewer's Friend List", 'Friend List' }, { 'Display the Emote List', 'Emote List' },
+    -- Linkshell » (a linkshell)
+    { 'Give a name to your linkshell', 'Name Linkshell' }, { 'Dispose of this', 'Drop' },
 };
 
 local focus_ptr = nil;       -- address that holds the focused-menu pointer (Balloon addon's pattern)
@@ -245,7 +261,15 @@ end
 local function declined(name, obj)
     track_focus();
     if ACTION_MENUS[name] then return obj == nil or action_rows(name, obj) == nil; end
-    return name == 'evitem' and opener.evitem == 'statcom2';
+    if name == 'evitem' then
+        if opener.evitem == 'statcom2' then return true; end
+        -- Key Items: the same window shows the categories (class +0x90 = 1) and, once one is chosen, that category's
+        -- key items (+0x90 = 2), which xiv1ui doesn't draw yet: the game draws the list
+        local slot = slot_of(name);
+        local cls = slot and mem.u32(slot);
+        if cls and mem.u32(cls + 0x90) ~= 1 then return true; end
+    end
+    return false;
 end
 
 function cmd.read()
@@ -282,6 +306,104 @@ function cmd.read()
         local helps = { 'Quests you are working on.\n' .. sum, 'Quests you have completed.\n' .. sum,
                         'Records of Eminence you have taken on.\n' .. sum,
                         'Choose new Records of Eminence to take on.\n' .. sum, "Vana'Bout.\n" .. sum };
+        return { obj = obj, rows = labels, helps = helps, cursor = c, name = name, style = 'list' };
+    end
+    if name == 'maplist' then
+        -- Map » Change Map: the areas you hold maps for. The class object ([slot]) points (+0x38) at the entries,
+        -- 0x54 apart until one with no flags (+0x00): name text at +0x28, then the number of maps (+0x2C; the
+        -- current area's entry has text there instead; shown at the row's right), help text at +0x4C. The cursor is the visible row (+0x24,
+        -- 1-based) plus the scroll offset (+0x1A).
+        local slot = slot_of(name);
+        local cls = slot and mem.u32(slot);
+        local base = cls and mem.u32(cls + 0x38);
+        local vis, top = cls and mem.u16(cls + 0x24), cls and mem.u16(cls + 0x1A);
+        if base == nil or vis == nil or top == nil or not mem.ok(base, 0x54) then return nil; end
+        local labels, helps, values = {}, {}, {};
+        for k = 0, 63 do
+            local e = base + k * 0x54;
+            if not mem.ok(e, 0x54) or (mem.u32(e) or 0) == 0 then break; end
+            local nm, n, h = mem.u32(e + 0x28), mem.u32(e + 0x2C), mem.u32(e + 0x4C);
+            local label = (nm and mem.ok(nm, 2)) and (ashita.memory.read_string(nm, 40) or ''):match('^[^%z]*') or '';
+            labels[#labels + 1] = label;
+            helps[#helps + 1] = (h and mem.ok(h, 2)) and (ashita.memory.read_string(h, 80) or ''):match('^[^%z]*') or '';
+            if k > 0 and n and n < 1000 then
+                values[#labels] = tostring(n);
+                helps[#helps] = helps[#helps] .. string.format('\n%d map%s of this area.', n, n == 1 and '' or 's');
+            end
+        end
+        local c = top + vis;
+        if #labels == 0 or c < 1 or c > #labels then return nil; end
+        return { obj = obj, rows = labels, helps = helps, values = values, cursor = c, name = name, style = 'list' };
+    end
+    if name == 'evitem01' then
+        -- Key Items » a key item » "Examine <name>?": Yes / No (cursor +0x4C; no help texts)
+        local c = mem.u32(obj + 0x4C);
+        if c == nil or c < 1 or c > 2 then return nil; end
+        local id = require('ui.keyitems').selected();
+        local nm = id and AshitaCore:GetResourceManager():GetString('keyitems.names', id) or nil;
+        local what = nm and ('Examine ' .. nm .. '.') or 'Examine it.';
+        return { obj = obj, rows = { 'Yes', 'No' }, helps = { what, 'Back to the list.' }, cursor = c, name = name,
+                 style = 'list' };
+    end
+    if name == 'scanlist' then
+        -- Map » Wide Scan: what the scan found. Laid out like maplist (class +0x38 -> entries 0x54 apart, cursor
+        -- +0x1A + +0x24), with the name at +0x2C and, at [+0x48] + 4, the entity's index (u16): its distance is shown
+        -- while it's near enough to be loaded.
+        local slot = slot_of(name);
+        local cls = slot and mem.u32(slot);
+        local base = cls and mem.u32(cls + 0x38);
+        local vis, top = cls and mem.u16(cls + 0x24), cls and mem.u16(cls + 0x1A);
+        if base == nil or vis == nil or top == nil or not mem.ok(base, 0x54) then return nil; end
+        local ent = AshitaCore:GetMemoryManager():GetEntity();
+        local labels, helps, values = {}, {}, {};
+        for k = 0, 255 do
+            local e = base + k * 0x54;
+            if not mem.ok(e, 0x54) or (mem.u32(e) or 0) == 0 then break; end
+            local nm = mem.u32(e + 0x2C);
+            labels[#labels + 1] = (nm and mem.ok(nm, 2)) and (ashita.memory.read_string(nm, 40) or ''):match('^[^%z]*') or '';
+            local rec = mem.u32(e + 0x48);
+            local idx = (rec and mem.ok(rec, 8)) and mem.u16(rec + 4) or nil;
+            local d = idx and idx > 0 and idx < 2304 and (ent:GetName(idx) or '') ~= '' and ent:GetDistance(idx) or nil;
+            values[#labels] = d and string.format('%dy', math.floor(math.sqrt(d) + 0.5)) or nil;
+            helps[#labels] = 'Marked on the map.  Confirm: follow it (an arrow shows the way).';
+        end
+        local c = top + vis;
+        if #labels == 0 or c < 1 or c > #labels then return nil; end
+        return { obj = obj, rows = labels, helps = helps, values = values, cursor = c, name = name, style = 'list' };
+    end
+    if name == 'mount' then
+        -- Abilities » Mount: the mounts she has, in id order (mount k comes with key item 3072 + k, "... companion").
+        -- Cursor: class +0x30 (0-based), count +0x40; the help line is the game's.
+        local slot = slot_of(name);
+        local cls = slot and mem.u32(slot);
+        local c, n = cls and mem.u32(cls + 0x30), cls and mem.u32(cls + 0x40);
+        if c == nil or n == nil then return nil; end
+        local ki = require('ui.keyitems');
+        local rm = AshitaCore:GetResourceManager();
+        local labels = {};
+        for k = 0, 63 do
+            local nm = rm:GetString('mounts.names', k);
+            if nm == nil or nm == '' then break; end
+            local has = ki.has(3072 + k);
+            if has == nil then return nil; end
+            if has then labels[#labels + 1] = nm; end
+        end
+        if #labels ~= n or c >= n then return nil; end
+        local helps = {};
+        helps[c + 1] = require('ui.listpanel').help_line();
+        return { obj = obj, rows = labels, helps = helps, cursor = c + 1, name = name, style = 'list' };
+    end
+    if name == 'faqsub' then
+        -- Commands » Help Desk: six buttons with no help texts. The class object ([slot]) keeps the id of the button
+        -- under the cursor at +0x2E (not its position): Q&A 0x10, Adventuring Primer 0x18, Mentor Search 0x12,
+        -- Help Desk 0x13, Config 0x14, Back 0xFFFF.
+        local slot = slot_of(name);
+        local cls = slot and mem.u32(slot);
+        local c = ({ [0x10] = 1, [0x18] = 2, [0x12] = 3, [0x13] = 4, [0x14] = 5, [0xFFFF] = 6 })[cls and mem.u16(cls + 0x2E) or 0];
+        if c == nil then return nil; end
+        local labels = { 'Q&A', 'Adventuring Primer', 'Mentor Search', 'Help Desk', 'Config', 'Back' };
+        local helps = { 'Search the game\'s answers by keyword.', 'A guide to the basics of adventuring.',
+                        'Find a mentor to ask for advice.', 'Contact a GM.', 'Help Desk settings.', 'Close the Help Desk.' };
         return { obj = obj, rows = labels, helps = helps, cursor = c, name = name, style = 'list' };
     end
     if name == 'mapv3' then
@@ -430,8 +552,23 @@ local function unhide() restore_all(); end
 -- The Commands menu: a 1.0 window (title, rows, selected row lit, gold cursor) below the minimap.
 local ui = require('core.ui');
 local LIST_W, ROW_H = 250, 27;
+-- long lists (Wide Scan) show this many rows at a time, scrolling with the cursor; first row shown by menu name
+local MAX_ROWS = 14;
+local list_first = {};
+
 local function render_list(m, now, depth, dim)
-    local h = dim and 40 or (46 + #m.rows * ROW_H + 12);     -- a parent under a sub-menu shows its title only
+    local n = #m.rows;
+    local shown = math.min(n, MAX_ROWS);
+    local first = 1;
+    if n > MAX_ROWS then
+        first = list_first[m.name] or 1;
+        local c = m.cursor or 1;
+        if c < first then first = c; end
+        if c > first + MAX_ROWS - 1 then first = c - MAX_ROWS + 1; end
+        first = math.max(1, math.min(first, n - MAX_ROWS + 1));
+        list_first[m.name] = first;
+    end
+    local h = dim and 40 or (46 + shown * ROW_H + 12);       -- a parent under a sub-menu shows its title only
     -- to the left of the minimap, so neither covers the other
     -- sub-menus stack straight down under their parent's title strip, aligned with it (a parent shows its title only)
     local x, y = layout.anchor('topright', LIST_W, h, -250, 50 + depth * 42, 'commands');
@@ -454,18 +591,34 @@ local function render_list(m, now, depth, dim)
         draw.image('dlg_arrow', x + LIST_W - 74, y + 12, { rot = -math.pi / 2, color = col });    -- pointing left
         draw.image('dlg_arrow', x + LIST_W - 30, y + 12, { rot = math.pi / 2, color = col });     -- pointing right
     end
+    if n > MAX_ROWS and not dim then
+        local rg = ui.label('cmdlist_range' .. depth, 'small', { font_height = 14, font_color = 0xFFC8C4B8,
+                                                                  font_alignment = text.align.Right });
+        rg:set_opacity(t);
+        text.draw(rg, string.format('%d-%d / %d', first, first + shown - 1, n), x + LIST_W - 16, y + 25, 'baseline');
+    end
     local sw, sh = layout.size('row_sel');
-    for i, label in ipairs(dim and {} or m.rows) do
-        local ry = y + 44 + (i - 1) * ROW_H;
+    for r = 1, dim and 0 or shown do
+        local i = first + r - 1;
+        local label = m.rows[i];
+        local ry = y + 44 + (r - 1) * ROW_H;
         local sel = (i == m.cursor);
         if sel then
             draw.nine('row_sel', x + 22, ry, LIST_W - 34, ROW_H - 4, 6, sw, sh, col);
             if not dim then draw.image('cursor_gold', x + 2, ry + 2, { color = col }); end
         end
-        local o = ui.label('cmdlist_row' .. depth .. '_' .. i, 'small', { font_height = 19 });
+        local o = ui.label('cmdlist_row' .. depth .. '_' .. r, 'small', { font_height = 19 });
         o:set_font_color(sel and 0xFFFFFFFF or 0xFFD8D4C8);
         o:set_opacity(t);
         text.draw(o, label, x + 34, ry + ROW_H - 9, 'baseline');
+        local v = m.values and m.values[i];
+        if v then
+            local vo = ui.label('cmdlist_val' .. depth .. '_' .. r, 'small',
+                                { font_height = 16, font_alignment = text.align.Right });
+            vo:set_font_color(sel and 0xFFF0DCA0 or 0xFFB8A880);
+            vo:set_opacity(t);
+            text.draw(vo, v, x + LIST_W - 18, ry + ROW_H - 9, 'baseline');
+        end
     end
     return x, y + h, t;
 end
@@ -550,7 +703,16 @@ local function helpbar_hide(on)
     end
 end
 
-function cmd.release() restore_all(); helpbar_hide(false); end
+-- windows the game opens alongside some menus, hidden while xiv1ui draws them (Mount: the ability list's sort
+-- tabs and the "Next" recast box)
+local EXTRA_HIDE = { mount = { 'abisortw', 'subwindo' } };
+local extra_hider = require('core.gamewin').new();
+local function extras(name)
+    local list = name and EXTRA_HIDE[name];
+    if list then extra_hider:hide(list); elseif extra_hider:active() then extra_hider:restore(); end
+end
+
+function cmd.release() restore_all(); helpbar_hide(false); extra_hider:restore(); end
 
 --- Called at the start of each frame's first scene (before the game draws its UI): a menu that just opened is hidden
 -- here already, so its own drawing never shows for a frame. Full reading and drawing still happen in render().
@@ -765,8 +927,9 @@ local stack = {};             -- snapshots of the restyled menus under the focus
 local last_m = nil;           -- the focused menu at the previous frame
 
 function cmd.render()
-    if store.data.cmd_menu == false then unhide(); helpbar_hide(false); return; end
+    if store.data.cmd_menu == false then unhide(); helpbar_hide(false); extras(nil); return; end
     local m = cmd.read();
+    extras(m and m.name);
     -- (while the game waits for a target nothing has focus, but the action menu and its lists are still open; and
     -- for a moment after a command is confirmed nothing has focus either, before the game reopens its list, e.g. when
     -- the target is out of range: that moment counts as still open, or the help bar would flash)
@@ -787,7 +950,27 @@ function cmd.render()
         for obj in pairs(shown_obj) do
             if alive(obj) then live = true; else restore_menu(obj); end
         end
-        if live and last_m and last_m.style == 'list' then
+        -- (only while some other window has focus: a menu closing (Esc) loses focus at once but stays in memory for
+        -- a few frames, and drawing it then made closing look slow)
+        -- (and not when that window is the one with focus, now declined: e.g. Key Items showing a list)
+        -- back from a sub-menu to a menu under it that the game draws now (e.g. Key Items' list, after "Examine?"):
+        -- that menu is the current one again
+        for i, p in ipairs(stack) do
+            if p.name == focused_name() then
+                last_m = p;
+                for j = #stack, i, -1 do stack[j] = nil; end
+                break;
+            end
+        end
+        if live and last_m and last_m.style == 'list' and focused_name() == last_m.name then
+            -- the game draws that window; the menus under it stay xiv1ui's (dimmed, titles only)
+            if shown_obj[last_m.obj] then restore_menu(last_m.obj); end
+            for _, p in ipairs(stack) do render_list(p, now, depth, true); depth = depth + 1; end
+            helpbar_hide(false);
+            last_obj = nil;
+            return;
+        end
+        if live and last_m and last_m.style == 'list' and focused_name() ~= '' then
             for _, p in ipairs(stack) do render_list(p, now, depth, true); depth = depth + 1; end
             render_list(last_m, now, depth, false);
         elseif live and last_m and last_m.style == 'stack' and (CHILDREN[focused_name()] or waiting) then
@@ -795,7 +978,9 @@ function cmd.render()
             -- ui/listpanel.lua / ui/itempanel.lua); the action menu stays hidden underneath
         else
             stack, last_m = {}, nil;
-            if next(zeroed) then restore_all(); end
+            -- a menu that's closing (no focus, still in memory for a few frames) stays hidden until it's gone (the loop
+            -- above hands each back once it is), or the game's own box would flash as it closes
+            if next(zeroed) and not (live and focused_name() == '') then restore_all(); end
             helpbar_hide(false);
         end
         last_obj = nil;

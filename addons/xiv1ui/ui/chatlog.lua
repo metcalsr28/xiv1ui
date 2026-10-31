@@ -69,6 +69,7 @@ local function font_family(id)
     for _, f in ipairs(chatlog.FONTS) do if f.id == id then return f.family or text.SERIF; end end
     return text.SERIF;
 end
+chatlog.font_family = font_family;
 
 -- channel -> colour (ARGB)
 local COLORS = {

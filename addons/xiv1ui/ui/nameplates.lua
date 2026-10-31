@@ -101,6 +101,9 @@ function plates.render()
     set_native(true);
     -- during an event the HUD (names included) steps aside, but the game's own names stay off too
     if require('core.event').active() then fade = {}; return; end
+    -- nor over the full-screen maps (the area map, "mapframe"; Region Info's, "cnqframe")
+    local gw = require('core.gamewin');
+    if gw.window('mapframe') ~= nil or gw.window('cnqframe') ~= nil then fade = {}; return; end
 
     local now = xi_now();
     if now >= next_scan then scan(); next_scan = now + 0.25; end

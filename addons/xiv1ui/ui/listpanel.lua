@@ -42,6 +42,14 @@ local SPELL_TYPES = { ['White Magic'] = 1, ['Black Magic'] = 2, ['Summoning'] = 
                       ['Blue Magic'] = 6, ['Geomancy'] = 7, ['Trust'] = 8 };
 
 local cache = { key = nil, list = nil, t = 0 };
+-- Commands » Abilities lists built from the ability resource (category label -> id range and type)
+local ABILITY_LISTS = {
+    ['Weapon Skills'] = { from = 1, to = 255 },
+    ['Job Abilities'] = { from = 512, to = 1023, type = 1 },
+    ['Pet Command']   = { from = 512, to = 1023, type = 2 },
+    ['Pet Commands']  = { from = 512, to = 1023, type = 2 },
+    ['Job Traits']    = { from = 1536, to = 2047, type = 4 },
+};
 local type_cache = {};       -- help line -> spell type name (or false)
 
 --- The entries the game lists for a category: { name, desc, sub (right-hand text), dim }.
@@ -53,13 +61,16 @@ local function entries(category)
     local job, lvl = pl:GetMainJob(), pl:GetMainJobLevel();
     local sjob, slvl = pl:GetSubJob(), pl:GetSubJobLevel();
     local out = {};
-    if category == 'Job Abilities' or category == 'Weapon Skills' then
+    if ABILITY_LISTS[category] then
+        -- the ability resource: weapon skills 1-255, job abilities (type 1) and pet commands (type 2) 512-1023,
+        -- job traits (type 4) from 1536
         local ws = (category == 'Weapon Skills');
-        for id = ws and 1 or 512, ws and 255 or 1023 do
+        local want = ABILITY_LISTS[category];
+        for id = want.from, want.to do
             local ok, has = pcall(function () if ws then return pl:HasWeaponSkill(id); end return pl:HasAbility(id); end);
             if ok and has then
                 local a = rm:GetAbilityById(id);
-                if a and a.Name and (a.Name[1] or '') ~= '' then
+                if a and a.Name and (a.Name[1] or '') ~= '' and (want.type == nil or a.Type == want.type) then
                     out[#out + 1] = { name = a.Name[1], desc = a.Description and a.Description[1] or '' };
                 end
             end
@@ -90,6 +101,7 @@ end
 function panel.release() hider:restore(); end
 
 local W, ROWS, ROW_H = 440, 12, 32;
+local view = { key = nil, first = 0 };      -- scroll position of the list shown
 local desc_obj = nil;
 local ring_since = nil;     -- when the ring form appeared (slide-in)
 local last_ring = nil;      -- the ring last drawn { key, items, cursor, since }
@@ -119,8 +131,8 @@ function panel.render()
     local cmdm = require('ui.cmdmenu');
     local from = cmdm.last_menu == 'abiselec' and last.abiselec or last.abimenu;
     local category = fname == 'ability' and (from or 'Job Abilities') or ((cmdm.last_menu == 'magselec' and last.magselec) or (ACTION[cmdm.last_menu] and (last[cmdm.last_menu] == 'Trust' and 'Trust' or 'White Magic')) or last.mgcmenu or 'White Magic');
-    if category ~= 'Job Abilities' and category ~= 'Weapon Skills' and fname == 'ability' then
-        -- Job Traits, Mount, Pet Commands ... aren't built yet: the game draws its own
+    if fname == 'ability' and not ABILITY_LISTS[category] then
+        -- other lists in the ability window (Ranged Attack ...) aren't built yet: the game draws its own
         if hider:active() then hider:restore(); end
         return;
     end
@@ -182,8 +194,13 @@ function panel.render()
         text.draw(none, fname == 'magic' and 'No spells learned.' or 'None available.', x + 34, y + 76, 'baseline');
     end
     local sw, sh = layout.size('row_sel');
-    local first = 0;
-    if at and at > ROWS then first = at - ROWS; end
+    -- the view only scrolls when the cursor leaves it (as the game's lists do)
+    local first = (view.key == category) and view.first or 0;
+    if at then
+        if at <= first then first = at - 1; elseif at > first + ROWS then first = at - ROWS; end
+    end
+    first = math.max(0, math.min(first, math.max(0, #list - ROWS)));
+    view.key, view.first = category, first;
     for r = 1, math.min(ROWS, #list - first) do
         local i = r + first;
         local e = list[i];

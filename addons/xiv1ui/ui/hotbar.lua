@@ -18,6 +18,7 @@ local xi_now = require('core.now');
 local draw    = require('core.draw');
 local text    = require('core.text');
 local layout  = require('core.layout');
+local bit     = require('bit');
 local actions = require('core.actions');
 local store   = require('core.store');
 
@@ -181,13 +182,15 @@ local function add_learned()
     for k, b in pairs(t) do if type(b) == 'table' and b.name then on_bar[b.name] = true; end end
     local changed = false;
     for _, b in ipairs(actions.defaults(true)) do
+        -- (marked as offered only once it's placed: with the bar full it waits, shown as New in Macros »
+        -- Abilities & Spells, until the player places it or a slot frees up)
         if b.kind ~= 'cmd' and not on_bar[b.name] and not offered[b.name] then
-            offered[b.name] = true;
-            changed = true;
             for s = 1, SLOTS do
                 if t[tostring(s)] == nil then
                     t[tostring(s)] = b;
                     on_bar[b.name] = true;
+                    offered[b.name] = true;
+                    changed = true;
                     break;
                 end
             end
@@ -236,10 +239,15 @@ function hotbar.render()
         draw.image('slot_shadow', x, y);
         draw.image('slot_well', x + WELL_IN, y + WELL_IN, { color = tint });
         local recasting = false;
+        local tier_late = nil;            -- a family emblem's tier (Cure II, Fire IV ...), drawn on top of the ring
         if info then
             local dim = info.usable and tint or 0xFF6A6A6A;    -- unusable: greyed
             draw.image(info.disc, x + WELL_IN, y + WELL_IN, { color = dim });
-            if info.icon then draw.image(info.icon, x + WELL_IN, y + WELL_IN, { color = dim }); end
+            -- (a category's emblem stays faint under the action's letters)
+            if info.icon then
+                draw.image(info.icon, x + WELL_IN, y + WELL_IN, { color = info.generic and (bit.band(dim, 0x00FFFFFF) + 0x50000000) or dim });
+            end
+            local letters = not info.icon or info.generic;
             if info.lines then
                 -- a macro: its name across the slot (or the initials if there's no icon and the name is off)
                 if info.show_name then
@@ -270,12 +278,14 @@ function hotbar.render()
                     else
                         text.draw(o.mn1, o.mn_a, cxs, cys + o.mn_fh * 0.35, 'baseline');
                     end
-                elseif not info.icon then
+                elseif letters then
                     text.draw(o.glyph, info.glyph, x + RING_W / 2, y + RING_W / 2 + 10, 'baseline');
                 end
-            elseif info.timer == 0 and not info.icon then   -- the countdown replaces the letters while recasting
+            elseif info.timer == 0 and letters then   -- the countdown replaces the letters while recasting
                 text.draw(o.glyph, info.glyph, x + RING_W / 2, y + RING_W / 2 + 10, 'baseline');
                 if info.tier ~= '' then text.draw(o.tier, info.tier, x + RING_W / 2 + 10, y + RING_W / 2 + 14, 'baseline'); end
+            elseif info.timer == 0 and info.tier and info.tier ~= '' then
+                tier_late = info.tier;        -- (drawn over the ring, below)
             end
 
             -- recast: dimmed icon with a cyan arc for the time remaining, and an mm:ss countdown
@@ -309,6 +319,7 @@ function hotbar.render()
         draw.image(info and info.motif or 'motif_sword', x + 1, y + RING_W - 10,
                    { color = info and 0xFFFFFFFF or 0x80FFFFFF });
         text.draw(o.key, keys[i], x + RING_W - 4, y + RING_W + 9, 'baseline');
+        if tier_late then text.draw(o.tier, tier_late, x + RING_W / 2 + 13, y + RING_W - 13, 'baseline'); end
         if info and info.cost then
             local col = info.cost_kind == 'TP' and 0xFF8CE6F0 or 0xFFC8F0A0;    -- cyan TP, pale green MP
             if not info.usable then col = 0xFFFF7060; end
@@ -359,6 +370,30 @@ function hotbar.assign_to(lay, page, slot, b)
     hb.bars[j][p] = hb.bars[j][p] or T{};
     hb.bars[j][p][PREFIX[lay] .. tostring(slot)] = b;
     store.save();
+end
+
+--- Is an action (by name) on any of the current job's bars?
+function hotbar.on_any_bar(name)
+    local t = store.data.hotbar.bars[tostring(job())];
+    for _, page in pairs(t or {}) do
+        if type(page) == 'table' then
+            for _, b in pairs(page) do if type(b) == 'table' and b.name == name then return true; end end
+        end
+    end
+    return false;
+end
+
+--- Note that an action was offered to the player (it's no longer New).
+function hotbar.mark_offered(name)
+    local hb = store.data.hotbar;
+    local j = tostring(job());
+    hb.offered = hb.offered or T{};
+    hb.offered[j] = hb.offered[j] or T{};
+    hb.offered[j][name] = true;
+end
+function hotbar.offered(name)
+    local o = store.data.hotbar.offered;
+    return o ~= nil and o[tostring(job())] ~= nil and o[tostring(job())][name] == true;
 end
 
 --- The binding on a layer / bar / slot of the current job, or nil.

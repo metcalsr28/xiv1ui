@@ -1,0 +1,2222 @@
+spell	1	Cure	1	6	33	3=1,5=3,7=5,20=5	8
+spell	2	Cure II	1	6	33	3=11,5=14,7=17,20=17	24
+spell	3	Cure III	1	6	33	3=21,5=26,7=30,20=30	46
+spell	4	Cure IV	1	6	33	3=41,5=48,7=55,20=55	88
+spell	5	Cure V	1	6	33	3=61	135
+spell	6	Cure VI	1	6	33	3=80	227
+spell	7	Curaga	1	6	33	3=16	60
+spell	8	Curaga II	1	6	33	3=31	120
+spell	9	Curaga III	1	6	33	3=51	180
+spell	10	Curaga IV	1	6	33	3=71	260
+spell	11	Curaga V	1	6	33	3=91	380
+spell	12	Raise	1	6	33	3=25,5=38,7=50,20=35	150
+spell	13	Raise II	1	6	33	3=56,5=95,20=70	150
+spell	14	Poisona	1	6	33	3=6,20=10	8
+spell	15	Paralyna	1	6	33	3=9,20=12	12
+spell	16	Blindna	1	6	33	3=14,20=17	16
+spell	17	Silena	1	6	33	3=19,20=22	24
+spell	18	Stona	1	6	33	3=39,20=50	40
+spell	19	Viruna	1	6	33	3=34,20=46	48
+spell	20	Cursna	1	6	33	3=29,20=32	30
+spell	21	Holy	1	6	32	3=50,7=55	100
+spell	22	Holy II	1	6	32	3=95,7=99	150
+spell	23	Dia	1	6	35	3=3,5=1	7
+spell	24	Dia II	1	6	35	3=36,5=31	30
+spell	25	Dia III	1	6	35	5=75	45
+spell	26	Dia IV	1	6	35		164
+spell	27	Dia V	1	6	35		217
+spell	28	Banish	1	6	32	3=5,7=7	15
+spell	29	Banish II	1	6	32	3=30,7=34	57
+spell	30	Banish III	1	6	32	3=65	96
+spell	31	Banish IV	1	6	32	3=90	108
+spell	32	Banish V	1	6	32		159
+spell	33	Diaga	1	6	35	3=18,5=15	12
+spell	34	Diaga II	1	6	35	3=52,5=45	60
+spell	35	Diaga III	1	6	35	5=75	120
+spell	36	Diaga IV	1	6	35		180
+spell	37	Diaga V	1	6	35		240
+spell	38	Banishga	1	6	32	3=15	41
+spell	39	Banishga II	1	6	32	3=40	120
+spell	40	Banishga III	1	6	32	3=65	233
+spell	41	Banishga IV	1	6	32		380
+spell	42	Banishga V	1	6	32		563
+spell	43	Protect	1	6	34	3=7,5=7,7=10,20=10,22=20	9
+spell	44	Protect II	1	6	34	3=27,5=27,7=30,20=30,22=40	28
+spell	45	Protect III	1	6	34	3=47,5=47,7=50,20=50,22=60	46
+spell	46	Protect IV	1	6	34	3=63,5=63,7=70,20=66,22=80	65
+spell	47	Protect V	1	6	34	3=76,5=77,7=90,20=80	84
+spell	48	Shell	1	6	34	3=17,5=17,7=20,20=20,22=10	18
+spell	49	Shell II	1	6	34	3=37,5=37,7=40,20=40,22=30	37
+spell	50	Shell III	1	6	34	3=57,5=57,7=60,20=60,22=50	56
+spell	51	Shell IV	1	6	34	3=68,5=68,7=80,20=71,22=70	75
+spell	52	Shell V	1	6	34	3=76,5=87,20=90,22=90	93
+spell	53	Blink	1	2	34	3=19,5=23,20=29,22=35	20
+spell	54	Stoneskin	1	3	34	3=28,5=34,20=44,22=55	29
+spell	55	Aquaveil	1	5	34	3=10,5=12,20=13,22=15	12
+spell	56	Slow	1	3	35	3=13,5=13	15
+spell	57	Haste	1	2	34	3=40,5=48	40
+spell	58	Paralyze	1	1	35	3=4,5=6	6
+spell	59	Silence	1	2	35	3=15,5=18	16
+spell	60	Barfire	1	5	34	5=17,22=16	6
+spell	61	Barblizzard	1	0	34	5=21,22=20	6
+spell	62	Baraero	1	1	34	5=13,22=12	6
+spell	63	Barstone	1	2	34	5=5,22=4	6
+spell	64	Barthunder	1	3	34	5=25,22=24	6
+spell	65	Barwater	1	4	34	5=9,22=8	6
+spell	66	Barfira	1	5	34	3=17	12
+spell	67	Barblizzara	1	0	34	3=21	12
+spell	68	Baraera	1	1	34	3=13	12
+spell	69	Barstonra	1	2	34	3=5	12
+spell	70	Barthundra	1	3	34	3=25	12
+spell	71	Barwatera	1	4	34	3=9	12
+spell	72	Barsleep	1	6	34	5=7,22=6	7
+spell	73	Barpoison	1	4	34	5=10,22=9	9
+spell	74	Barparalyze	1	0	34	5=12,22=11	11
+spell	75	Barblind	1	6	34	5=18,22=17	13
+spell	76	Barsilence	1	1	34	5=23,22=22	15
+spell	77	Barpetrify	1	2	34	5=43,22=42	20
+spell	78	Barvirus	1	5	34	5=39,22=38	25
+spell	79	Slow II	1	3	35	5=75	45
+spell	80	Paralyze II	1	1	35	5=75	36
+spell	81	Recall-Jugner	1	6	34	3=53	125
+spell	82	Recall-Pashh	1	6	34	3=53	125
+spell	83	Recall-Meriph	1	6	34	3=53	125
+spell	84	Baramnesia	1	5	34	5=78,22=76	30
+spell	85	Baramnesra	1	5	34	3=78	60
+spell	86	Barsleepra	1	6	34	3=7	14
+spell	87	Barpoisonra	1	4	34	3=10	18
+spell	88	Barparalyzra	1	0	34	3=12	22
+spell	89	Barblindra	1	6	34	3=18	26
+spell	90	Barsilencera	1	1	34	3=23	30
+spell	91	Barpetra	1	2	34	3=43	40
+spell	92	Barvira	1	5	34	3=39	50
+spell	93	Cura	1	6	33	3=40	30
+spell	94	Sacrifice	1	6	33	3=65	18
+spell	95	Esuna	1	6	33	3=61	24
+spell	96	Auspice	1	6	34	3=55	48
+spell	97	Reprisal	1	6	34	7=75	24
+spell	98	Repose	1	6	32	3=48	26
+spell	99	Sandstorm	1	3	34	20=41	30
+spell	100	Enfire	1	0	34	5=24	12
+spell	101	Enblizzard	1	1	34	5=22	12
+spell	102	Enaero	1	2	34	5=20	12
+spell	103	Enstone	1	3	34	5=18	12
+spell	104	Enthunder	1	4	34	5=16	12
+spell	105	Enwater	1	5	34	5=27	12
+spell	106	Phalanx	1	6	34	5=33,7=77,22=68	21
+spell	107	Phalanx II	1	6	34	5=75	42
+spell	108	Regen	1	6	34	3=21,5=21,20=18,22=23	15
+spell	109	Refresh	1	6	34	5=41,22=62	50
+spell	110	Regen II	1	6	34	3=44,5=76,20=37,22=48	36
+spell	111	Regen III	1	6	34	3=66,20=59,22=70	64
+spell	112	Flash	1	6	32	3=45,7=37,22=45	25
+spell	113	Rainstorm	1	5	34	20=42	30
+spell	114	Windstorm	1	2	34	20=43	30
+spell	115	Firestorm	1	0	34	20=44	30
+spell	116	Hailstorm	1	1	34	20=45	30
+spell	117	Thunderstorm	1	4	34	20=46	30
+spell	118	Voidstorm	1	7	34	20=47	30
+spell	119	Aurorastorm	1	6	34	20=48	30
+spell	120	Teleport-Yhoat	1	6	34	3=38	100
+spell	121	Teleport-Altep	1	6	34	3=38	100
+spell	122	Teleport-Holla	1	6	34	3=36	75
+spell	123	Teleport-Dem	1	6	34	3=36	75
+spell	124	Teleport-Mea	1	6	34	3=36	75
+spell	125	Protectra	1	6	34	3=7	9
+spell	126	Protectra II	1	6	34	3=27	28
+spell	127	Protectra III	1	6	34	3=47	46
+spell	128	Protectra IV	1	6	34	3=63	65
+spell	129	Protectra V	1	6	34	3=75	84
+spell	130	Shellra	1	6	34	3=17	18
+spell	131	Shellra II	1	6	34	3=37	37
+spell	132	Shellra III	1	6	34	3=57	56
+spell	133	Shellra IV	1	6	34	3=68	75
+spell	134	Shellra V	1	6	34	3=75	93
+spell	135	Reraise	1	6	33	3=25,20=35	150
+spell	136	Invisible	1	2	34	3=25,5=25,20=25	15
+spell	137	Sneak	1	2	34	3=20,5=20,20=20	12
+spell	138	Deodorize	1	2	34	3=15,5=15,20=15	10
+spell	139	Teleport-Vahzl	1	6	34	3=42	100
+spell	140	Raise III	1	6	33	3=70,20=91	150
+spell	141	Reraise II	1	6	33	3=56,20=70	150
+spell	142	Reraise III	1	6	33	3=70,20=91	150
+spell	143	Erase	1	6	34	3=32,20=39	18
+spell	144	Fire	2	0	36	4=13,5=19,8=23,20=16,21=19	24
+spell	145	Fire II	2	0	36	4=38,5=50,8=60,20=42,21=46	68
+spell	146	Fire III	2	0	36	4=62,5=71,8=88,20=63,21=67	113
+spell	147	Fire IV	2	0	36	4=73,5=86,20=73,21=85	157
+spell	148	Fire V	2	0	36	4=86,5=100,20=91,21=100	228
+spell	149	Blizzard	2	1	36	4=17,5=24,8=29,20=20,21=24	30
+spell	150	Blizzard II	2	1	36	4=42,5=55,8=66,20=46,21=50	77
+spell	151	Blizzard III	2	1	36	4=64,5=73,8=92,20=66,21=70	120
+spell	152	Blizzard IV	2	1	36	4=74,5=89,20=74,21=88	164
+spell	153	Blizzard V	2	1	36	4=89,5=100,20=95,21=100	267
+spell	154	Aero	2	2	36	4=9,5=14,8=17,20=12,21=14	18
+spell	155	Aero II	2	2	36	4=34,5=45,8=54,20=38,21=42	59
+spell	156	Aero III	2	2	36	4=59,5=69,8=84,20=60,21=64	106
+spell	157	Aero IV	2	2	36	4=72,5=83,20=72,21=82	150
+spell	158	Aero V	2	2	36	4=83,5=100,20=87,21=100	198
+spell	159	Stone	2	3	36	4=1,5=4,8=5,20=4,21=4	9
+spell	160	Stone II	2	3	36	4=26,5=35,8=42,20=30,21=34	43
+spell	161	Stone III	2	3	36	4=51,5=65,8=76,20=54,21=58	92
+spell	162	Stone IV	2	3	36	4=68,5=77,20=70,21=76	138
+spell	163	Stone V	2	3	36	4=77,5=100,20=79,21=100	156
+spell	164	Thunder	2	4	36	4=21,5=29,8=35,20=24,21=29	37
+spell	165	Thunder II	2	4	36	4=46,5=60,8=72,20=51,21=54	86
+spell	166	Thunder III	2	4	36	4=66,5=75,8=96,20=69,21=73	128
+spell	167	Thunder IV	2	4	36	4=75,5=92,20=75,21=91	171
+spell	168	Thunder V	2	4	36	4=92,5=100,20=99,21=100	306
+spell	169	Water	2	5	36	4=5,5=9,8=11,20=8,21=9	13
+spell	170	Water II	2	5	36	4=30,5=40,8=48,20=34,21=38	51
+spell	171	Water III	2	5	36	4=55,5=67,8=80,20=57,21=61	98
+spell	172	Water IV	2	5	36	4=70,5=80,20=71,21=79	144
+spell	173	Water V	2	5	36	4=80,5=100,20=83,21=100	175
+spell	174	Firaga	2	0	36	4=28	71
+spell	175	Firaga II	2	0	36	4=53	158
+spell	176	Firaga III	2	0	36	4=69	277
+spell	177	Firaga IV	2	0	36		360
+spell	178	Firaga V	2	0	36		450
+spell	179	Blizzaga	2	1	36	4=32	82
+spell	180	Blizzaga II	2	1	36	4=57	175
+spell	181	Blizzaga III	2	1	36	4=71	299
+spell	182	Blizzaga IV	2	1	36		403
+spell	183	Blizzaga V	2	1	36		500
+spell	184	Aeroga	2	2	36	4=23	57
+spell	185	Aeroga II	2	2	36	4=48	138
+spell	186	Aeroga III	2	2	36	4=67	252
+spell	187	Aeroga IV	2	2	36		318
+spell	188	Aeroga V	2	2	36		402
+spell	189	Stonega	2	3	36	4=15	37
+spell	190	Stonega II	2	3	36	4=40	109
+spell	191	Stonega III	2	3	36	4=63	211
+spell	192	Stonega IV	2	3	36		243
+spell	193	Stonega V	2	3	36		315
+spell	194	Thundaga	2	4	36	4=36	95
+spell	195	Thundaga II	2	4	36	4=61	193
+spell	196	Thundaga III	2	4	36	4=73	322
+spell	197	Thundaga IV	2	4	36		450
+spell	198	Thundaga V	2	4	36		520
+spell	199	Waterga	2	5	36	4=19	47
+spell	200	Waterga II	2	5	36	4=44	123
+spell	201	Waterga III	2	5	36	4=65	231
+spell	202	Waterga IV	2	5	36		280
+spell	203	Waterga V	2	5	36		357
+spell	204	Flare	2	0	36	4=60	383
+spell	205	Flare II	2	0	36	4=75	287
+spell	206	Freeze	2	1	36	4=50	307
+spell	207	Freeze II	2	1	36	4=75	287
+spell	208	Tornado	2	2	36	4=52	322
+spell	209	Tornado II	2	2	36	4=75	287
+spell	210	Quake	2	3	36	4=54	337
+spell	211	Quake II	2	3	36	4=75	287
+spell	212	Burst	2	4	36	4=56	352
+spell	213	Burst II	2	4	36	4=75	287
+spell	214	Flood	2	5	36	4=58	368
+spell	215	Flood II	2	5	36	4=75	287
+spell	216	Gravity	2	2	35	5=21	24
+spell	217	Gravity II	2	2	35	5=98	36
+spell	218	Meteor	2	15	36	4=99	418
+spell	219	Comet	2	7	36	4=94	350
+spell	220	Poison	2	5	35	4=3,5=5,8=6	5
+spell	221	Poison II	2	5	35	4=43,5=46,8=46	38
+spell	222	Poison III	2	5	35		72
+spell	223	Poison IV	2	5	35		106
+spell	224	Poison V	2	5	35		140
+spell	225	Poisonga	2	5	35	4=24,8=26	44
+spell	226	Poisonga II	2	5	35	4=64,8=66	112
+spell	227	Poisonga III	2	5	35		180
+spell	228	Poisonga IV	2	5	35		248
+spell	229	Poisonga V	2	5	35		314
+spell	230	Bio	2	7	37	4=10,5=10,8=15	15
+spell	231	Bio II	2	7	37	4=35,5=36,8=40	36
+spell	232	Bio III	2	7	37	5=75	54
+spell	233	Bio IV	2	7	37		154
+spell	234	Bio V	2	7	37		197
+spell	235	Burn	2	0	36	4=24	25
+spell	236	Frost	2	1	36	4=22	25
+spell	237	Choke	2	2	36	4=20	25
+spell	238	Rasp	2	3	36	4=18	25
+spell	239	Shock	2	4	36	4=16	25
+spell	240	Drown	2	5	36	4=27	25
+spell	241	Retrace	2	7	34	4=55	150
+spell	242	Absorb-ACC	2	7	37	8=61	33
+spell	243	Absorb-Attri	2	7	37	8=91	33
+spell	244	Meteor II	2	6	36	3=75,4=75,5=75	150
+spell	245	Drain	2	7	37	4=12,8=10,20=21,21=15	21
+spell	246	Drain II	2	7	37	8=62	37
+spell	247	Aspir	2	7	37	4=25,8=20,20=36,21=30	10
+spell	248	Aspir II	2	7	37	4=83,8=78,20=97,21=90	5
+spell	249	Blaze Spikes	2	0	34	4=10,5=20,20=30,22=45	8
+spell	250	Ice Spikes	2	1	34	4=20,5=40,20=50,22=65	16
+spell	251	Shock Spikes	2	4	34	4=30,5=60,20=70,22=85	24
+spell	252	Stun	2	4	37	4=45,8=37	25
+spell	253	Sleep	2	7	35	4=20,5=25,8=30,20=30,21=35	19
+spell	254	Blind	2	7	35	4=4,5=8	5
+spell	255	Break	2	3	35	4=85,5=87,8=95,20=90	39
+spell	256	Virus	2	0	35	4=1	10
+spell	257	Curse	2	7	37	4=1	10
+spell	258	Bind	2	1	35	4=7,5=11,8=20	8
+spell	259	Sleep II	2	7	35	4=41,5=46,8=56,20=65,21=70	29
+spell	260	Dispel	2	7	35	5=32,20=32	25
+spell	261	Warp	2	7	34	4=17	100
+spell	262	Warp II	2	7	34	4=40	150
+spell	263	Escape	2	7	34	4=29	125
+spell	264	Tractor	2	7	37	4=25,8=32	26
+spell	265	Tractor II	2	7	37		50
+spell	266	Absorb-STR	2	7	37	8=43	33
+spell	267	Absorb-DEX	2	7	37	8=41	33
+spell	268	Absorb-VIT	2	7	37	8=35	33
+spell	269	Absorb-AGI	2	7	37	8=37	33
+spell	270	Absorb-INT	2	7	37	8=39	33
+spell	271	Absorb-MND	2	7	37	8=31	33
+spell	272	Absorb-CHR	2	7	37	8=33	33
+spell	273	Sleepga	2	7	35	4=31	38
+spell	274	Sleepga II	2	7	35	4=56	58
+spell	275	Absorb-TP	2	7	37	8=45	33
+spell	276	Blind II	2	7	35	5=75	31
+spell	277	Dread Spikes	2	7	37	8=71	78
+spell	278	Geohelix	2	3	36	20=18	26
+spell	279	Hydrohelix	2	5	36	20=20	26
+spell	280	Anemohelix	2	2	36	20=22	26
+spell	281	Pyrohelix	2	0	36	20=24	26
+spell	282	Cryohelix	2	1	36	20=26	26
+spell	283	Ionohelix	2	4	36	20=28	26
+spell	284	Noctohelix	2	7	36	20=30	26
+spell	285	Luminohelix	2	6	36	20=32	26
+spell	286	Addle	1	0	35	3=93,5=83	36
+spell	287	Klimaform	2	7	37	20=46	30
+spell	288	Fire Spirit	3	0	38	15=1	10
+spell	289	Ice Spirit	3	1	38	15=1	10
+spell	290	Air Spirit	3	2	38	15=1	10
+spell	291	Earth Spirit	3	3	38	15=1	10
+spell	292	Thunder Spirit	3	4	38	15=1	10
+spell	293	Water Spirit	3	5	38	15=1	10
+spell	294	Light Spirit	3	6	38	15=1	10
+spell	295	Dark Spirit	3	7	38	15=1	10
+spell	296	Carbuncle	3	6	38	15=1	5
+spell	297	Fenrir	3	7	38	15=1	15
+spell	298	Ifrit	3	0	38	15=1	7
+spell	299	Titan	3	3	38	15=1	7
+spell	300	Leviathan	3	5	38	15=1	7
+spell	301	Garuda	3	2	38	15=1	7
+spell	302	Shiva	3	1	38	15=1	7
+spell	303	Ramuh	3	4	38	15=1	7
+spell	304	Diabolos	3	7	38	15=1	15
+spell	305	Odin	3	7	38	15=75	0
+spell	306	Alexander	3	6	38	15=75	0
+spell	307	Cait Sith	3	6	38	15=1	5
+spell	308	Animus Augeo	1	7	34	20=85	21
+spell	309	Animus Minuo	1	6	34	20=85	21
+spell	310	Enlight	1	6	32	7=40	24
+spell	311	Endark	2	7	37	8=85	24
+spell	312	Enfire II	1	0	34	5=58	24
+spell	313	Enblizzard II	1	1	34	5=56	24
+spell	314	Enaero II	1	2	34	5=54	24
+spell	315	Enstone II	1	3	34	5=52	24
+spell	316	Enthunder II	1	4	34	5=50	24
+spell	317	Enwater II	1	5	34	5=60	24
+spell	318	Monomi: Ichi	4	2	39	13=25	0
+spell	319	Aisha: Ichi	4	5	39	13=78	0
+spell	320	Katon: Ichi	4	0	39	13=12	0
+spell	321	Katon: Ni	4	0	39	13=40	0
+spell	322	Katon: San	4	0	39	13=75	0
+spell	323	Hyoton: Ichi	4	1	39	13=12	0
+spell	324	Hyoton: Ni	4	1	39	13=40	0
+spell	325	Hyoton: San	4	1	39	13=75	0
+spell	326	Huton: Ichi	4	2	39	13=12	0
+spell	327	Huton: Ni	4	2	39	13=40	0
+spell	328	Huton: San	4	2	39	13=75	0
+spell	329	Doton: Ichi	4	3	39	13=12	0
+spell	330	Doton: Ni	4	3	39	13=40	0
+spell	331	Doton: San	4	3	39	13=75	0
+spell	332	Raiton: Ichi	4	4	39	13=12	0
+spell	333	Raiton: Ni	4	4	39	13=40	0
+spell	334	Raiton: San	4	4	39	13=75	0
+spell	335	Suiton: Ichi	4	5	39	13=12	0
+spell	336	Suiton: Ni	4	5	39	13=40	0
+spell	337	Suiton: San	4	5	39	13=75	0
+spell	338	Utsusemi: Ichi	4	2	39	13=12	0
+spell	339	Utsusemi: Ni	4	2	39	13=37	0
+spell	340	Utsusemi: San	4	2	39	13=100	0
+spell	341	Jubaku: Ichi	4	1	39	13=30	0
+spell	342	Jubaku: Ni	4	1	39	13=55	0
+spell	343	Jubaku: San	4	1	39		0
+spell	344	Hojo: Ichi	4	3	39	13=23	0
+spell	345	Hojo: Ni	4	3	39	13=48	0
+spell	346	Hojo: San	4	3	39	13=73	0
+spell	347	Kurayami: Ichi	4	7	39	13=19	0
+spell	348	Kurayami: Ni	4	7	39	13=44	0
+spell	349	Kurayami: San	4	7	39	13=69	0
+spell	350	Dokumori: Ichi	4	5	39	13=27	0
+spell	351	Dokumori: Ni	4	5	39	13=52	0
+spell	352	Dokumori: San	4	5	39		0
+spell	353	Tonko: Ichi	4	2	39	13=9	0
+spell	354	Tonko: Ni	4	2	39	13=34	0
+spell	355	Siren	3	2	38	15=1	7
+spell	356	Paralyga	1	1	35	3=61,5=61	12
+spell	357	Slowga	1	3	35	3=61,5=61	30
+spell	358	Hastega	1	2	34	3=61,5=61	80
+spell	359	Silencega	1	2	35	3=61,5=61	32
+spell	360	Dispelga	2	7	35	3=99,4=99,5=99,10=99,15=99,20=99,21=99	200
+spell	361	Blindga	2	7	35	4=61,5=61	10
+spell	362	Bindga	2	1	35	4=61,5=61	16
+spell	363	Sleepga	2	7	35	4=31	38
+spell	364	Sleepga II	2	7	35	4=56	58
+spell	365	Breakga	2	3	35	4=95	78
+spell	366	Graviga	2	2	35		48
+spell	367	Death	2	7	37		1
+spell	368	Foe Requiem	5	6	40	10=7	0
+spell	369	Foe Requiem II	5	6	40	10=17	0
+spell	370	Foe Requiem III	5	6	40	10=37	0
+spell	371	Foe Requiem IV	5	6	40	10=47	0
+spell	372	Foe Requiem V	5	6	40	10=57	0
+spell	373	Foe Requiem VI	5	6	40	10=67	0
+spell	374	Foe Requiem VII	5	6	40	10=76	0
+spell	375	Foe Requiem VIII	5	6	40		0
+spell	376	Horde Lullaby	5	6	40	10=27	0
+spell	377	Horde Lullaby II	5	6	40	10=92	0
+spell	378	Army's Paeon	5	6	40	10=5	0
+spell	379	Army's Paeon II	5	6	40	10=15	0
+spell	380	Army's Paeon III	5	6	40	10=35	0
+spell	381	Army's Paeon IV	5	6	40	10=45	0
+spell	382	Army's Paeon V	5	6	40	10=65	0
+spell	383	Army's Paeon VI	5	6	40	10=78	0
+spell	384	Army's Paeon VII	5	6	40		0
+spell	385	Army's Paeon VIII	5	6	40		0
+spell	386	Mage's Ballad	5	6	40	10=25	0
+spell	387	Mage's Ballad II	5	6	40	10=55	0
+spell	388	Mage's Ballad III	5	6	40	10=85	0
+spell	389	Knight's Minne	5	3	40	10=1	0
+spell	390	Knight's Minne II	5	3	40	10=21	0
+spell	391	Knight's Minne III	5	3	40	10=41	0
+spell	392	Knight's Minne IV	5	3	40	10=61	0
+spell	393	Knight's Minne V	5	3	40	10=80	0
+spell	394	Valor Minuet	5	0	40	10=3	0
+spell	395	Valor Minuet II	5	0	40	10=23	0
+spell	396	Valor Minuet III	5	0	40	10=43	0
+spell	397	Valor Minuet IV	5	0	40	10=63	0
+spell	398	Valor Minuet V	5	0	40	10=87	0
+spell	399	Sword Madrigal	5	4	40	10=11	0
+spell	400	Blade Madrigal	5	4	40	10=51	0
+spell	401	Hunter's Prelude	5	4	40	10=31	0
+spell	402	Archer's Prelude	5	4	40	10=71	0
+spell	403	Sheepfoe Mambo	5	2	40	10=13	0
+spell	404	Dragonfoe Mambo	5	2	40	10=53	0
+spell	405	Fowl Aubade	5	6	40	10=33	0
+spell	406	Herb Pastoral	5	4	40	10=9	0
+spell	407	Chocobo Hum	5	0	40	10=52	0
+spell	408	Shining Fantasia	5	6	40	10=56	0
+spell	409	Scop's Operetta	5	1	40	10=19	0
+spell	410	Puppet's Operetta	5	1	40	10=69	0
+spell	411	Jester's Operetta	5	1	40		0
+spell	412	Gold Capriccio	5	2	40	10=54	0
+spell	413	Devotee Serenade	5	5	40		0
+spell	414	Warding Round	5	6	40	10=73	0
+spell	415	Goblin Gavotte	5	0	40	10=49	0
+spell	416	Cactuar Fugue	5	1	40	10=58	0
+spell	417	Honor March	5	6	40	10=99	0
+spell	418	Aria of Passion	5	6	40	10=99	0
+spell	419	Advancing March	5	4	40	10=29	0
+spell	420	Victory March	5	4	40	10=60	0
+spell	421	Battlefield Elegy	5	3	40	10=39	0
+spell	422	Carnage Elegy	5	3	40	10=59	0
+spell	423	Massacre Elegy	5	3	40		0
+spell	424	Sinewy Etude	5	0	40	10=34	0
+spell	425	Dextrous Etude	5	4	40	10=32	0
+spell	426	Vivacious Etude	5	3	40	10=30	0
+spell	427	Quick Etude	5	2	40	10=28	0
+spell	428	Learned Etude	5	1	40	10=26	0
+spell	429	Spirited Etude	5	5	40	10=24	0
+spell	430	Enchanting Etude	5	6	40	10=22	0
+spell	431	Herculean Etude	5	0	40	10=74	0
+spell	432	Uncanny Etude	5	4	40	10=72	0
+spell	433	Vital Etude	5	3	40	10=70	0
+spell	434	Swift Etude	5	2	40	10=68	0
+spell	435	Sage Etude	5	1	40	10=66	0
+spell	436	Logical Etude	5	5	40	10=64	0
+spell	437	Bewitching Etude	5	6	40	10=62	0
+spell	438	Fire Carol	5	5	40	10=44	0
+spell	439	Ice Carol	5	0	40	10=46	0
+spell	440	Wind Carol	5	1	40	10=42	0
+spell	441	Earth Carol	5	2	40	10=38	0
+spell	442	Lightning Carol	5	3	40	10=48	0
+spell	443	Water Carol	5	4	40	10=40	0
+spell	444	Light Carol	5	7	40	10=36	0
+spell	445	Dark Carol	5	6	40	10=50	0
+spell	446	Fire Carol II	5	5	40	10=90	0
+spell	447	Ice Carol II	5	0	40	10=93	0
+spell	448	Wind Carol II	5	1	40	10=87	0
+spell	449	Earth Carol II	5	2	40	10=81	0
+spell	450	Lightning Carol II	5	3	40	10=96	0
+spell	451	Water Carol II	5	4	40	10=84	0
+spell	452	Light Carol II	5	7	40	10=99	0
+spell	453	Dark Carol II	5	6	40	10=99	0
+spell	454	Fire Threnody	5	5	40	10=20	0
+spell	455	Ice Threnody	5	0	40	10=22	0
+spell	456	Wind Threnody	5	1	40	10=18	0
+spell	457	Earth Threnody	5	2	40	10=14	0
+spell	458	Ltng. Threnody	5	3	40	10=24	0
+spell	459	Water Threnody	5	4	40	10=16	0
+spell	460	Light Threnody	5	7	40	10=10	0
+spell	461	Dark Threnody	5	6	40	10=12	0
+spell	462	Magic Finale	5	6	40	10=33	0
+spell	463	Foe Lullaby	5	6	40	10=16	0
+spell	464	Goddess's Hymnus	5	6	40	10=71	0
+spell	465	Chocobo Mazurka	5	2	40	10=73	0
+spell	466	Maiden's Virelai	5	6	40	10=75	0
+spell	467	Raptor Mazurka	5	2	40	10=37	0
+spell	468	Foe Sirvente	5	6	40	10=75	0
+spell	469	Adventurer's Dirge	5	6	40	10=75	0
+spell	470	Sentinel's Scherzo	5	3	40	10=82	0
+spell	471	Foe Lullaby II	5	6	40	10=83	0
+spell	472	Pining Nocturne	5	0	40	10=95	0
+spell	473	Refresh II	1	6	34	5=82	60
+spell	474	Cura II	1	6	33	3=83	45
+spell	475	Cura III	1	6	33	3=96	60
+spell	476	Crusade	1	7	34	7=88,22=88	18
+spell	477	Regen IV	1	6	34	3=86,20=79,22=99	82
+spell	478	Embrava	1	6	34	20=5	1
+spell	479	Boost-STR	1	0	34	3=93	36
+spell	480	Boost-DEX	1	4	34	3=99	36
+spell	481	Boost-VIT	1	3	34	3=81	36
+spell	482	Boost-AGI	1	2	34	3=90	36
+spell	483	Boost-INT	1	1	34	3=96	36
+spell	484	Boost-MND	1	5	34	3=84	36
+spell	485	Boost-CHR	1	6	34	3=87	36
+spell	486	Gain-STR	1	0	34	5=93	36
+spell	487	Gain-DEX	1	4	34	5=99	36
+spell	488	Gain-VIT	1	3	34	5=81	36
+spell	489	Gain-AGI	1	2	34	5=90	36
+spell	490	Gain-INT	1	1	34	5=96	36
+spell	491	Gain-MND	1	5	34	5=84	36
+spell	492	Gain-CHR	1	6	34	5=87	36
+spell	493	Temper	1	6	34	5=95	36
+spell	494	Arise	1	6	33	3=99	300
+spell	495	Adloquium	1	6	34	20=88	50
+spell	496	Firaja	2	0	36	4=90	358
+spell	497	Blizzaja	2	1	36	4=93	378
+spell	498	Aeroja	2	2	36	4=87	338
+spell	499	Stoneja	2	3	36	4=81	298
+spell	500	Thundaja	2	4	36	4=96	398
+spell	501	Waterja	2	5	36	4=84	318
+spell	502	Kaustra	2	7	37	20=5	1
+spell	503	Impact	2	7	36	3=90,4=90,5=90,8=90,15=90,20=90,21=90	666
+spell	504	Regen V	1	6	34	20=99	100
+spell	505	Gekka: Ichi	4	7	39	13=88	0
+spell	506	Yain: Ichi	4	6	39	13=91	0
+spell	507	Myoshu: Ichi	4	6	39	13=85	0
+spell	508	Yurin: Ichi	4	7	39	13=83	0
+spell	509	Kakka: Ichi	4	6	39	13=93	0
+spell	510	Migawari: Ichi	4	3	39	13=88	0
+spell	511	Haste II	1	2	34	5=96	80
+spell	512	dummy	6	5	43		1
+spell	513	Venom Shell	6	5	43	16=42	86
+spell	515	Maelstrom	6	5	43	16=61	115
+spell	517	Metallic Body	6	15	43	16=8	19
+spell	519	Screwdriver	6	15	43	16=26	21
+spell	521	MP Drainkiss	6	7	43	16=42	20
+spell	522	Death Ray	6	7	43	16=34	49
+spell	524	Sandspin	6	3	43	16=1	10
+spell	527	Smite of Rage	6	15	43	16=34	28
+spell	529	Bludgeon	6	15	43	16=18	16
+spell	530	Refueling	6	15	43	16=48	29
+spell	531	Ice Break	6	1	43	16=50	98
+spell	532	Blitzstrahl	6	4	43	16=44	70
+spell	533	Self-Destruct	6	0	43	16=50	100
+spell	534	Mysterious Light	6	2	43	16=40	73
+spell	535	Cold Wave	6	1	43	16=52	37
+spell	536	Poison Breath	6	5	43	16=22	22
+spell	537	Stinking Gas	6	2	43	16=44	37
+spell	538	Memento Mori	6	15	43	16=62	46
+spell	539	Terror Touch	6	15	43	16=40	31
+spell	540	Spinal Cleave	6	15	43	16=63	61
+spell	541	Blood Saber	6	7	43	16=48	48
+spell	542	Digest	6	7	43	16=36	20
+spell	543	Mandibular Bite	6	15	43	16=44	38
+spell	544	Cursed Sphere	6	5	43	16=18	36
+spell	545	Sickle Slash	6	15	43	16=48	41
+spell	547	Cocoon	6	15	43	16=8	10
+spell	548	Filamented Hold	6	3	43	16=52	38
+spell	549	Pollen	6	15	43	16=1	5
+spell	551	Power Attack	6	15	43	16=4	5
+spell	554	Death Scissors	6	15	43	16=60	51
+spell	555	Magnetite Cloud	6	3	43	16=46	86
+spell	557	Eyes On Me	6	7	43	16=61	112
+spell	560	Frenetic Rip	6	15	43	16=63	61
+spell	561	Frightful Roar	6	2	43	16=50	32
+spell	563	Hecatomb Wave	6	2	43	16=54	116
+spell	564	Body Slam	6	15	43	16=62	74
+spell	565	Radiant Breath	6	6	43	16=54	116
+spell	567	Helldive	6	15	43	16=16	16
+spell	569	Jet Stream	6	15	43	16=38	47
+spell	570	Blood Drain	6	7	43	16=20	10
+spell	572	Sound Blast	6	0	43	16=32	25
+spell	573	Feather Tickle	6	2	43	16=64	48
+spell	574	Feather Barrier	6	15	43	16=56	56
+spell	575	Jettatura	6	7	43	16=48	37
+spell	576	Yawn	6	6	43	16=64	55
+spell	577	Foot Kick	6	15	43	16=1	5
+spell	578	Wild Carrot	6	15	43	16=30	37
+spell	579	Voracious Trunk	6	2	43	16=64	72
+spell	581	Healing Breeze	6	15	43	16=16	55
+spell	582	Chaotic Eye	6	2	43	16=32	13
+spell	584	Sheep Song	6	6	43	16=16	22
+spell	585	Ram Charge	6	15	43	16=73	79
+spell	587	Claw Cyclone	6	15	43	16=20	24
+spell	588	Lowing	6	0	43	16=71	66
+spell	589	Dimensional Death	6	15	43	16=60	48
+spell	591	Heat Breath	6	0	43	16=71	169
+spell	592	Blank Gaze	6	6	43	16=38	25
+spell	593	Magic Fruit	6	15	43	16=58	72
+spell	594	Uppercut	6	15	43	16=38	31
+spell	595	1000 Needles	6	6	43	16=62	350
+spell	596	Pinecone Bomb	6	15	43	16=36	48
+spell	597	Sprout Smack	6	15	43	16=4	6
+spell	598	Soporific	6	7	43	16=24	38
+spell	599	Queasyshroom	6	15	43	16=8	20
+spell	603	Wild Oats	6	15	43	16=4	9
+spell	604	Bad Breath	6	3	43	16=61	212
+spell	605	Geist Wall	6	7	43	16=46	35
+spell	606	Awful Eye	6	5	43	16=46	32
+spell	608	Frost Breath	6	1	43	16=66	136
+spell	610	Infrasonics	6	1	43	16=65	42
+spell	611	Disseverment	6	15	43	16=72	74
+spell	612	Actinic Burst	6	6	43	16=74	24
+spell	613	Reactor Cool	6	15	43	16=74	28
+spell	614	Saline Coat	6	15	43	16=72	66
+spell	615	Plasma Charge	6	15	43	16=75	24
+spell	616	Temporal Shift	6	4	43	16=73	48
+spell	617	Vertical Cleave	6	15	43	16=75	86
+spell	618	Blastbomb	6	0	43	16=18	36
+spell	620	Battle Dance	6	15	43	16=12	12
+spell	621	Sandspray	6	7	43	16=66	43
+spell	622	Grand Slam	6	15	43	16=30	24
+spell	623	Head Butt	6	15	43	16=12	12
+spell	626	Bomb Toss	6	0	43	16=28	42
+spell	628	Frypan	6	15	43	16=63	65
+spell	629	Flying Hip Press	6	2	43	16=58	125
+spell	631	Hydro Shot	6	15	43	16=63	55
+spell	632	Diamondhide	6	15	43	16=67	99
+spell	633	Enervation	6	7	43	16=67	48
+spell	634	Light of Penance	6	6	43	16=58	38
+spell	636	Warm-Up	6	15	43	16=68	59
+spell	637	Firespit	6	0	43	16=68	121
+spell	638	Feather Storm	6	15	43	16=12	12
+spell	640	Tail Slap	6	15	43	16=69	77
+spell	641	Hysteric Barrage	6	15	43	16=69	61
+spell	642	Amplification	6	15	43	16=70	48
+spell	643	Cannonball	6	15	43	16=70	66
+spell	644	Mind Blast	6	4	43	16=73	82
+spell	645	Exuviation	6	0	43	16=75	40
+spell	646	Magic Hammer	6	6	43	16=74	30
+spell	647	Zephyr Mantle	6	2	43	16=65	31
+spell	648	Regurgitation	6	5	43	16=69	69
+spell	649	jet-stream-attack	6	15	43		58
+spell	650	Seedspray	6	3	43	16=61	61
+spell	651	Corrosive Ooze	6	5	43	16=66	55
+spell	652	Spiral Spin	6	15	43	16=60	39
+spell	653	Asuran Claws	6	15	43	16=70	81
+spell	654	Sub-zero Smash	6	15	43	16=72	44
+spell	655	Triumphant Roar	6	0	43	16=71	24
+spell	656	Acrid Stream	6	5	43	16=77	89
+spell	657	Blazing Bound	6	0	43	16=80	113
+spell	658	Plenilune Embrace	6	6	43	16=76	106
+spell	659	Demoralizing Roar	6	5	43	16=80	46
+spell	660	Cimicine Discharge	6	3	43	16=78	32
+spell	661	Animating Wail	6	2	43	16=79	53
+spell	662	Battery Charge	6	6	43	16=74	50
+spell	663	Leafstorm	6	2	43	16=77	132
+spell	664	Regeneration	6	6	43	16=78	36
+spell	665	Final Sting	6	15	43	16=81	88
+spell	666	Goblin Rush	6	15	43	16=68	76
+spell	667	Vanity Dive	6	15	43	16=28	29
+spell	668	Magic Barrier	6	7	43	16=82	29
+spell	669	Whirl of Rage	6	15	43	16=83	73
+spell	670	Benthic Typhoon	6	15	43	16=83	43
+spell	671	Auroral Drape	6	2	43	16=42	71
+spell	672	Osmosis	6	7	43	16=84	47
+spell	673	Quad. Continuum	6	15	43	16=54	55
+spell	674	Fantod	6	0	43	16=85	12
+spell	675	Thermal Pulse	6	0	43	16=86	151
+spell	676	jet-stream-attack	6	4	43		1
+spell	677	Empty Thrash	6	15	43	16=34	45
+spell	678	Dream Flower	6	7	43	16=87	68
+spell	679	Occultation	6	2	43	16=38	28
+spell	680	Charged Whisker	6	4	43	16=88	183
+spell	681	Winds of Promy.	6	6	43	16=56	108
+spell	682	Delta Thrust	6	15	43	16=89	28
+spell	683	Evryone. Grudge	6	7	43	16=65	57
+spell	684	Reaving Wind	6	2	43	16=90	84
+spell	685	Barrier Tusk	6	3	43	16=91	41
+spell	686	Mortal Ray	6	7	43	16=91	267
+spell	687	Water Bomb	6	5	43	16=92	67
+spell	688	Heavy Strike	6	15	43	16=92	32
+spell	689	Dark Orb	6	7	43	16=93	124
+spell	690	White Wind	6	2	43	16=94	145
+spell	691	jet-stream-attack	6	1	43		283
+spell	692	Sudden Lunge	6	15	43	16=95	18
+spell	693	Quadrastrike	6	15	43	16=96	98
+spell	694	Vapor Spray	6	5	43	16=96	172
+spell	695	Thunder Breath	6	4	43	16=97	193
+spell	696	O. Counterstance	6	0	43	16=98	18
+spell	697	Amorphic Spikes	6	15	43	16=98	79
+spell	698	Wind Breath	6	2	43	16=99	26
+spell	699	Barbed Crescent	6	15	43	16=99	52
+spell	700	Nat. Meditation	6	0	43	16=99	38
+spell	701	Tem. Upheaval	6	2	43	16=99	133
+spell	702	Rending Deluge	6	5	43	16=99	118
+spell	703	Embalming Earth	6	3	43	16=99	57
+spell	704	Paralyzing Triad	6	15	43	16=99	33
+spell	705	Foul Waters	6	5	43	16=99	76
+spell	706	Glutinous Dart	6	15	43	16=99	16
+spell	707	Retinal Glare	6	6	43	16=99	26
+spell	708	Subduction	6	2	43	16=99	27
+spell	709	Thrashing Assault	6	15	43	16=99	119
+spell	710	Erratic Flutter	6	2	43	16=99	92
+spell	711	Restoral	6	6	43	16=99	127
+spell	712	Rail Cannon	6	6	43	16=72	126
+spell	713	Diffusion Ray	6	6	43	16=99	238
+spell	714	Sinker Drill	6	15	43	16=99	91
+spell	715	Molting Plumage	6	2	43	16=99	146
+spell	716	Nectarous Deluge	6	5	43	16=99	97
+spell	717	Sweeping Gouge	6	15	43	16=99	29
+spell	718	Atra. Libations	6	7	43	16=99	164
+spell	719	Searing Tempest	6	0	43	16=99	116
+spell	720	Spectral Floe	6	1	43	16=99	116
+spell	721	Anvil Lightning	6	4	43	16=99	116
+spell	722	Entomb	6	3	43	16=99	116
+spell	723	Saurian Slide	6	15	43	16=99	109
+spell	724	Palling Salvo	6	7	43	16=99	175
+spell	725	Blinding Fulgor	6	6	43	16=99	116
+spell	726	Scouring Spate	6	5	43	16=99	116
+spell	727	Silent Storm	6	2	43	16=99	116
+spell	728	Tenebral Crush	6	7	43	16=99	116
+spell	736	Thunderbolt	6	4	43	16=95	138
+spell	737	Harden Shell	6	3	43	16=95	20
+spell	738	Absolute Terror	6	7	43	16=96	29
+spell	739	Gates of Hades	6	0	43	16=97	156
+spell	740	Tourbillion	6	15	43	16=97	108
+spell	741	Pyric Bulwark	6	6	43	16=98	50
+spell	742	Bilgestorm	6	15	43	16=99	122
+spell	743	Bloodrake	6	15	43	16=99	99
+spell	744	Droning Whirlwind	6	2	43	16=99	224
+spell	745	Carcharian Verve	6	5	43	16=99	65
+spell	746	Blistering Roar	6	7	43	16=99	43
+spell	747	Uproot	6	6	43	16=99	88
+spell	748	Crashing Thunder	6	4	43	16=99	172
+spell	749	Polar Roar	6	1	43	16=99	126
+spell	750	Mighty Guard	6	6	43	16=99	299
+spell	751	Cruel Joke	6	7	43	16=99	187
+spell	752	Cesspool	6	5	43	16=99	166
+spell	753	Tearing Gust	6	2	43	16=99	202
+spell	754	jet-stream-attack	6	0	43		1
+spell	755	jet-stream-attack	6	0	43		1
+spell	756	jet-stream-attack	6	0	43		1
+spell	757	jet-stream-attack	6	0	43		1
+spell	758	jet-stream-attack	6	0	43		1
+spell	759	jet-stream-attack	6	0	43		1
+spell	760	jet-stream-attack	6	0	43		1
+spell	761	jet-stream-attack	6	0	43		1
+spell	762	jet-stream-attack	6	0	43		1
+spell	763	jet-stream-attack	6	0	43		1
+spell	764	jet-stream-attack	6	0	43		1
+spell	765	jet-stream-attack	6	0	43		1
+spell	766	jet-stream-attack	6	0	43		1
+spell	767	jet-stream-attack	6	0	43		1
+spell	768	Indi-Regen	7	6	44	21=15	37
+spell	769	Indi-Poison	7	5	44	21=1	12
+spell	770	Indi-Refresh	7	6	44	21=30	63
+spell	771	Indi-Haste	7	2	44	21=93	100
+spell	772	Indi-STR	7	0	44	21=48	63
+spell	773	Indi-DEX	7	4	44	21=45	63
+spell	774	Indi-VIT	7	3	44	21=42	63
+spell	775	Indi-AGI	7	2	44	21=39	63
+spell	776	Indi-INT	7	1	44	21=36	63
+spell	777	Indi-MND	7	5	44	21=33	63
+spell	778	Indi-CHR	7	6	44	21=30	63
+spell	779	Indi-Fury	7	0	44	21=34	70
+spell	780	Indi-Barrier	7	3	44	21=28	59
+spell	781	Indi-Acumen	7	1	44	21=46	91
+spell	782	Indi-Fend	7	5	44	21=40	80
+spell	783	Indi-Precision	7	4	44	21=10	25
+spell	784	Indi-Voidance	7	2	44	21=4	17
+spell	785	Indi-Focus	7	7	44	21=22	49
+spell	786	Indi-Attunement	7	6	44	21=16	38
+spell	787	Indi-Wilt	7	5	44	21=82	161
+spell	788	Indi-Frailty	7	2	44	21=76	147
+spell	789	Indi-Fade	7	0	44	21=94	186
+spell	790	Indi-Malaise	7	4	44	21=88	174
+spell	791	Indi-Slip	7	3	44	21=58	112
+spell	792	Indi-Torpor	7	1	44	21=52	101
+spell	793	Indi-Vex	7	6	44	21=70	136
+spell	794	Indi-Languor	7	7	44	21=64	124
+spell	795	Indi-Slow	7	3	44	21=48	94
+spell	796	Indi-Paralysis	7	1	44	21=68	107
+spell	797	Indi-Gravity	7	2	44	21=88	174
+spell	798	Geo-Regen	7	6	44	21=19	74
+spell	799	Geo-Poison	7	5	44	21=5	25
+spell	800	Geo-Refresh	7	6	44	21=34	126
+spell	801	Geo-Haste	7	2	44	21=97	200
+spell	802	Geo-STR	7	0	44	21=52	126
+spell	803	Geo-DEX	7	4	44	21=49	126
+spell	804	Geo-VIT	7	3	44	21=46	126
+spell	805	Geo-AGI	7	2	44	21=43	126
+spell	806	Geo-INT	7	1	44	21=40	126
+spell	807	Geo-MND	7	5	44	21=37	126
+spell	808	Geo-CHR	7	6	44	21=34	126
+spell	809	Geo-Fury	7	0	44	21=38	140
+spell	810	Geo-Barrier	7	3	44	21=32	119
+spell	811	Geo-Acumen	7	1	44	21=50	182
+spell	812	Geo-Fend	7	5	44	21=44	161
+spell	813	Geo-Precision	7	4	44	21=14	50
+spell	814	Geo-Voidance	7	2	44	21=8	35
+spell	815	Geo-Focus	7	7	44	21=26	98
+spell	816	Geo-Attunement	7	6	44	21=20	77
+spell	817	Geo-Wilt	7	5	44	21=86	322
+spell	818	Geo-Frailty	7	2	44	21=80	294
+spell	819	Geo-Fade	7	0	44	21=98	372
+spell	820	Geo-Malaise	7	4	44	21=92	348
+spell	821	Geo-Slip	7	3	44	21=62	225
+spell	822	Geo-Torpor	7	1	44	21=56	203
+spell	823	Geo-Vex	7	6	44	21=74	273
+spell	824	Geo-Languor	7	7	44	21=68	249
+spell	825	Geo-Slow	7	3	44	21=52	189
+spell	826	Geo-Paralysis	7	1	44	21=72	215
+spell	827	Geo-Gravity	7	2	44	21=92	348
+spell	828	Fira	2	0	36	21=40	93
+spell	829	Fira II	2	0	36	21=85	206
+spell	830	Blizzara	2	1	36	21=45	108
+spell	831	Blizzara II	2	1	36	21=90	229
+spell	832	Aera	2	2	36	21=35	79
+spell	833	Aera II	2	2	36	21=80	184
+spell	834	Stonera	2	3	36	21=25	54
+spell	835	Stonera II	2	3	36	21=70	143
+spell	836	Thundara	2	4	36	21=50	123
+spell	837	Thundara II	2	4	36	21=95	253
+spell	838	Watera	2	5	36	21=30	66
+spell	839	Watera II	2	5	36	21=75	163
+spell	840	Foil	1	2	34	22=58	48
+spell	841	Distract	2	1	35	5=35	32
+spell	842	Distract II	2	1	35	5=85	58
+spell	843	Frazzle	2	7	35	5=42	38
+spell	844	Frazzle II	2	7	35	5=92	64
+spell	845	Flurry	1	2	34	5=48	40
+spell	846	Flurry II	1	2	34	5=96	80
+spell	847	Atomos	3	7	38	15=75	50
+spell	848	Reraise IV	1	6	33	3=100	150
+spell	849	Fire VI	2	0	36	4=100	339
+spell	850	Blizzard VI	2	1	36	4=100	386
+spell	851	Aero VI	2	2	36	4=100	299
+spell	852	Stone VI	2	3	36	4=100	237
+spell	853	Thunder VI	2	4	36	4=100	437
+spell	854	Water VI	2	5	36	4=100	266
+spell	855	Enlight II	1	6	32	7=100	36
+spell	856	Endark II	2	7	37	8=100	36
+spell	857	Sandstorm II	1	3	34	20=100	60
+spell	858	Rainstorm II	1	5	34	20=100	60
+spell	859	Windstorm II	1	2	34	20=100	60
+spell	860	Firestorm II	1	0	34	20=100	60
+spell	861	Hailstorm II	1	1	34	20=100	60
+spell	862	Thunderstorm II	1	4	34	20=100	60
+spell	863	Voidstorm II	1	7	34	20=100	60
+spell	864	Aurorastorm II	1	6	34	20=100	60
+spell	865	Fira III	2	0	36		390
+spell	866	Blizzara III	2	1	36		432
+spell	867	Aera III	2	2	36		350
+spell	868	Stonera III	2	3	36		276
+spell	869	Thundara III	2	4	36		476
+spell	870	Watera III	2	5	36		312
+spell	871	Fire Threnody II	5	5	40	10=100	0
+spell	872	Ice Threnody II	5	0	40	10=100	0
+spell	873	Wind Threnody II	5	1	40	10=100	0
+spell	874	Earth Threnody II	5	2	40	10=100	0
+spell	875	Ltng. Threnody II	5	3	40	10=100	0
+spell	876	Water Threnody II	5	4	40	10=100	0
+spell	877	Light Threnody II	5	7	40	10=100	0
+spell	878	Dark Threnody II	5	6	40	10=100	0
+spell	879	Inundation	1	6	35	5=64	48
+spell	880	Drain III	2	7	37		53
+spell	881	Aspir III	2	7	37		2
+spell	882	Distract III	2	1	35		84
+spell	883	Frazzle III	2	7	35		90
+spell	884	Addle II	1	0	35		63
+spell	885	Geohelix II	2	3	36		78
+spell	886	Hydrohelix II	2	5	36		78
+spell	887	Anemohelix II	2	2	36		78
+spell	888	Pyrohelix II	2	0	36		78
+spell	889	Cryohelix II	2	1	36		78
+spell	890	Ionohelix II	2	4	36		78
+spell	891	Noctohelix II	2	7	36		78
+spell	892	Luminohelix II	2	6	36		78
+spell	893	Full Cure	1	6	33	3=75	1
+spell	894	Refresh III	1	6	34		80
+spell	895	Temper II	1	6	34		72
+spell	896	Shantotto	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	897	Naji	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	898	Kupipi	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	899	Excenmille	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	900	Ayame	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	901	Nanaa Mihgo	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	902	Curilla	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	903	Volker	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	904	Ajido-Marujido	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	905	Trion	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	906	Zeid	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	907	Lion	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	908	Tenzen	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	909	Mihli Aliapoh	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	910	Valaineral	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	911	Joachim	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	912	Naja Salaheem	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	913	Prishe	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	914	Ulmia	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	915	Shikaree Z	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	916	Cherukiki	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	917	Iron Eater	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	918	Gessho	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	919	Gadalar	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	920	Rainemard	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	921	Ingrid	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	922	Lehko Habhoka	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	923	Nashmeira	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	924	Zazarg	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	925	Ovjang	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	926	Mnejing	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	927	Sakura	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	928	Luzaf	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	929	Najelith	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	930	Aldo	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	931	Moogle	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	932	Fablinix	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	933	Maat	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	934	D. Shantotto	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	935	Star Sibyl	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	936	Karaha-Baruha	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	937	Cid	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	938	Gilgamesh	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	939	Areuhat	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	940	Semih Lafihna	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	941	Elivira	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	942	Noillurie	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	943	Lhu Mhakaracca	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	944	Ferreous Coffin	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	945	Lilisette	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	946	Mumor	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	947	Uka Totlihn	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	948	Klara	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	949	Romaa Mihgo	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	950	Kuyin Hathdenna	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	951	Rahal	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	952	Koru-Moru	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	953	Pieuje (UC)	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	954	I. Shield (UC)	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	955	Apururu (UC)	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	956	Jakoh (UC)	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	957	Flaviria (UC)	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	958	Babban	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	959	Abenzio	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	960	Rughadjeen	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	961	Kukki-Chebukki	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	962	Margret	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	963	Chacharoon	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	964	Lhe Lhangavo	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	965	Arciela	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	966	Mayakov	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	967	Qultada	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	968	Adelheid	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	969	Amchuchu	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	970	Brygid	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	971	Mildaurion	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	972	Halver	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	973	Rongelouts	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	974	Leonoyne	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	975	Maximilian	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	976	Kayeel-Payeel	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	977	Robel-Akbel	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	978	Kupofried	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	979	Selh'teus	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	980	Yoran-Oran (UC)	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	981	Sylvie (UC)	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	982	Abquhbah	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	983	Balamor	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	984	August	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	985	Rosulatia	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	986	Teodor	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	987	Ullegore	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	988	Makki-Chebukki	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	989	King of Hearts	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	990	Morimar	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	991	Darrcuiln	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	992	AAHM	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	993	AAEV	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	994	AAMR	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	995	AATT	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	996	AAGK	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	997	Iroha	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	998	Ygnas	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	999	Monberaux	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	1002	Cornelia	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	1003	Matsui-P	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	1004	Excenmille [S]	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	1005	Ayame (UC)	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	1006	Maat (UC)	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	1007	Aldo (UC)	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	1008	Naja (UC)	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	1009	Lion II	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	1010	Zeid II	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	1011	Prishe II	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	1012	Nashmeira II	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	1013	Lilisette II	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	1014	Tenzen II	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	1015	Mumor II	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	1016	Ingrid II	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	1017	Arciela II	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	1018	Iroha II	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+spell	1019	Shantotto II	8	6	0	1=1,2=1,3=1,4=1,5=1,6=1,7=1,8=1,9=1,10=1,11=1,12=1,13=1,14=1,15=1,16=1,17=1,18=1,19=1,20=1,21=1,22=1	0
+ws	1	Combo	3	46			-1
+ws	2	Shoulder Tackle	3	44			-1
+ws	3	One Inch Punch	3	46			-1
+ws	4	Backhand Blow	3	46			-1
+ws	5	Raging Fists	3	46			-1
+ws	6	Spinning Attack	3	46			-1
+ws	7	Howling Fist	3	46			-1
+ws	8	Dragon Kick	3	46			-1
+ws	9	Asuran Fists	3	46			-1
+ws	10	Final Heaven	3	46			-1
+ws	11	Ascetic's Fury	3	46			-1
+ws	12	Stringing Pummel	3	46			-1
+ws	13	Tornado Kick	3	46			-1
+ws	14	Victory Smite	3	46			-1
+ws	15	Shijin Spiral	3	40			-1
+ws	16	Wasp Sting	3	45			-1
+ws	17	Viper Bite	3	45			-1
+ws	18	Shadowstitch	3	41			-1
+ws	19	Gust Slash	3	42			-1
+ws	20	Cyclone	3	42			-1
+ws	21	Energy Steal	3	47			-1
+ws	22	Energy Drain	3	47			-1
+ws	23	Dancing Edge	3	46			-1
+ws	24	Shark Bite	3	46			-1
+ws	25	Evisceration	3	46			-1
+ws	26	Mercy Stroke	3	46			-1
+ws	27	Mandalic Stab	3	46			-1
+ws	28	Mordant Rime	3	42			-1
+ws	29	Pyrrhic Kleos	3	41			-1
+ws	30	Aeolian Edge	3	42			-1
+ws	31	Rudra's Storm	3	42			-1
+ws	32	Fast Blade	3	46			-1
+ws	33	Burning Blade	3	40			-1
+ws	34	Red Lotus Blade	3	40			-1
+ws	35	Flat Blade	3	44			-1
+ws	36	Shining Blade	3	46			-1
+ws	37	Seraph Blade	3	46			-1
+ws	38	Circle Blade	3	46			-1
+ws	39	Spirits Within	3	46			-1
+ws	40	Vorpal Blade	3	46			-1
+ws	41	Swift Blade	3	46			-1
+ws	42	Savage Blade	3	46			-1
+ws	43	Knights of Round	3	46			-1
+ws	44	Death Blossom	3	44			-1
+ws	45	Atonement	3	46			-1
+ws	46	Expiacion	3	46			-1
+ws	47	Sanguine Blade	3	47			-1
+ws	48	Hard Slash	3	46			-1
+ws	49	Power Slash	3	46			-1
+ws	50	Frostbite	3	41			-1
+ws	51	Freezebite	3	41			-1
+ws	52	Shockwave	3	47			-1
+ws	53	Crescent Moon	3	46			-1
+ws	54	Sickle Moon	3	46			-1
+ws	55	Spinning Slash	3	46			-1
+ws	56	Ground Strike	3	46			-1
+ws	57	Scourge	3	46			-1
+ws	58	Herculean Slash	3	41			-1
+ws	59	Torcleaver	3	46			-1
+ws	60	Resolution	3	46			-1
+ws	61	Dimidiation	3	46			-1
+ws	62	Fimbulvetr	3	46			-1
+ws	64	Raging Axe	3	46			-1
+ws	65	Smash Axe	3	44			-1
+ws	66	Gale Axe	3	42			-1
+ws	67	Avalanche Axe	3	46			-1
+ws	68	Spinning Axe	3	46			-1
+ws	69	Rampage	3	46			-1
+ws	70	Calamity	3	46			-1
+ws	71	Mistral Axe	3	46			-1
+ws	72	Decimation	3	46			-1
+ws	73	Onslaught	3	46			-1
+ws	74	Primal Rend	3	46			-1
+ws	75	Bora Axe	3	41			-1
+ws	76	Cloudsplitter	3	44			-1
+ws	77	Ruinator	3	46			-1
+ws	78	Blitz	3	46			-1
+ws	80	Shield Break	3	46			-1
+ws	81	Iron Tempest	3	46			-1
+ws	82	Sturmwind	3	46			-1
+ws	83	Armor Break	3	46			-1
+ws	84	Keen Edge	3	46			-1
+ws	85	Weapon Break	3	46			-1
+ws	86	Raging Rush	3	46			-1
+ws	87	Full Break	3	46			-1
+ws	88	Steel Cyclone	3	46			-1
+ws	89	Metatron Torment	3	46			-1
+ws	90	King's Justice	3	46			-1
+ws	91	Fell Cleave	3	46			-1
+ws	92	Ukko's Fury	3	43			-1
+ws	93	Upheaval	3	46			-1
+ws	94	Disaster	3	46			-1
+ws	96	Slice	3	46			-1
+ws	97	Dark Harvest	3	47			-1
+ws	98	Shadow of Death	3	47			-1
+ws	99	Nightmare Scythe	3	47			-1
+ws	100	Spinning Scythe	3	46			-1
+ws	101	Vorpal Scythe	3	46			-1
+ws	102	Guillotine	3	42			-1
+ws	103	Cross Reaper	3	46			-1
+ws	104	Spiral Hell	3	46			-1
+ws	105	Catastrophe	3	46			-1
+ws	106	Insurgency	3	46			-1
+ws	107	Infernal Scythe	3	47			-1
+ws	108	Quietus	3	47			-1
+ws	109	Entropy	3	47			-1
+ws	110	Origin	3	46			-1
+ws	112	Double Thrust	3	46			-1
+ws	113	Thunder Thrust	3	44			-1
+ws	114	Raiden Thrust	3	44			-1
+ws	115	Leg Sweep	3	44			-1
+ws	116	Penta Thrust	3	46			-1
+ws	117	Vorpal Thrust	3	46			-1
+ws	118	Skewer	3	46			-1
+ws	119	Wheeling Thrust	3	46			-1
+ws	120	Impulse Drive	3	46			-1
+ws	121	Geirskogul	3	46			-1
+ws	122	Drakesbane	3	46			-1
+ws	123	Sonic Thrust	3	46			-1
+ws	124	Camlann's Torment	3	46			-1
+ws	125	Stardiver	3	43			-1
+ws	126	Diarmuid	3	46			-1
+ws	128	Blade: Rin	3	46			-1
+ws	129	Blade: Retsu	3	41			-1
+ws	130	Blade: Teki	3	45			-1
+ws	131	Blade: To	3	41			-1
+ws	132	Blade: Chi	3	43			-1
+ws	133	Blade: Ei	3	47			-1
+ws	134	Blade: Jin	3	46			-1
+ws	135	Blade: Ten	3	46			-1
+ws	136	Blade: Ku	3	46			-1
+ws	137	Blade: Metsu	3	46			-1
+ws	138	Blade: Kamu	3	43			-1
+ws	139	Blade: Yu	3	45			-1
+ws	140	Blade: Hi	3	46			-1
+ws	141	Blade: Shun	3	46			-1
+ws	142	Zesho Meppo	3	46			-1
+ws	144	Tachi: Enpi	3	46			-1
+ws	145	Tachi: Hobaku	3	44			-1
+ws	146	Tachi: Goten	3	44			-1
+ws	147	Tachi: Kagero	3	40			-1
+ws	148	Tachi: Jinpu	3	42			-1
+ws	149	Tachi: Koki	3	46			-1
+ws	150	Tachi: Yukikaze	3	47			-1
+ws	151	Tachi: Gekko	3	42			-1
+ws	152	Tachi: Kasha	3	41			-1
+ws	153	Tachi: Kaiten	3	46			-1
+ws	154	Tachi: Rana	3	46			-1
+ws	155	Tachi: Ageha	3	42			-1
+ws	156	Tachi: Fudo	3	46			-1
+ws	157	Tachi: Shoha	3	46			-1
+ws	158	Tachi: Suikawari	3	46			-1
+ws	159	Tachi: Mumei	3	46			-1
+ws	160	Shining Strike	3	46			-1
+ws	161	Seraph Strike	3	46			-1
+ws	162	Brainshaker	3	44			-1
+ws	163	Starlight	3	46			-1
+ws	164	Moonlight	3	46			-1
+ws	165	Skullbreaker	3	40			-1
+ws	166	True Strike	3	46			-1
+ws	167	Judgment	3	46			-1
+ws	168	Hexa Strike	3	46			-1
+ws	169	Black Halo	3	46			-1
+ws	170	Randgrith	3	46			-1
+ws	171	Mystic Boon	3	46			-1
+ws	172	Flash Nova	3	46			-1
+ws	173	Dagan	3	46			-1
+ws	174	Realmrazer	3	46			-1
+ws	175	Exudation	3	46			-1
+ws	176	Heavy Swing	3	46			-1
+ws	177	Rock Crusher	3	43			-1
+ws	178	Earth Crusher	3	43			-1
+ws	179	Starburst	3	46			-1
+ws	180	Sunburst	3	46			-1
+ws	181	Shell Crusher	3	46			-1
+ws	182	Full Swing	3	46			-1
+ws	183	Spirit Taker	3	46			-1
+ws	184	Retribution	3	46			-1
+ws	185	Gate of Tartarus	3	46			-1
+ws	186	Vidohunir	3	47			-1
+ws	187	Garland of Bliss	3	46			-1
+ws	188	Omniscience	3	47			-1
+ws	189	Cataclysm	3	47			-1
+ws	190	Myrkr	3	47			-1
+ws	191	Shattersoul	3	44			-1
+ws	192	Flaming Arrow	3	40			-1
+ws	193	Piercing Arrow	3	42			-1
+ws	194	Dulling Arrow	3	40			-1
+ws	196	Sidewinder	3	46			-1
+ws	197	Blast Arrow	3	46			-1
+ws	198	Arching Arrow	3	46			-1
+ws	199	Empyreal Arrow	3	46			-1
+ws	200	Namas Arrow	3	46			-1
+ws	201	Refulgent Arrow	3	46			-1
+ws	202	Jishnu's Radiance	3	46			-1
+ws	203	Apex Arrow	3	46			-1
+ws	204	Sarv	3	46			-1
+ws	208	Hot Shot	3	40			-1
+ws	209	Split Shot	3	42			-1
+ws	210	Sniper Shot	3	40			-1
+ws	212	Slug Shot	3	46			-1
+ws	213	Blast Shot	3	46			-1
+ws	214	Heavy Shot	3	46			-1
+ws	215	Detonator	3	46			-1
+ws	216	Coronach	3	46			-1
+ws	217	Trueflight	3	46			-1
+ws	218	Leaden Salute	3	47			-1
+ws	219	Numbing Shot	3	41			-1
+ws	220	Wildfire	3	40			-1
+ws	221	Last Stand	3	46			-1
+ws	222	Terminus	3	46			-1
+ws	224	Exenterator	3	43			-1
+ws	225	Chant du Cygne	3	46			-1
+ws	226	Requiescat	3	46			-1
+ws	227	Knights of Rotund	3	46			-1
+ws	228	Final Paradise	3	46			-1
+ws	229	Fast Blade II	3	46			-1
+ws	230	Dragon Blow	3	46			-1
+ws	231	Maru Kala	3	46			-1
+ws	232	Ruthless Stroke	3	46			-1
+ws	233	Imperator	3	46			-1
+ws	234	Dagda	3	46			-1
+ws	235	Oshala	3	46			-1
+ws	238	Uriel Blade	3	46			-1
+ws	239	Glory Slash	3	44			-1
+ws	240	Tartarus Torpor	3	47			-1
+ws	241	Netherspikes	3	46			-1
+ws	242	Carnal Nightmare	3	46			-1
+ws	243	Aegis Schism	3	46			-1
+ws	244	Dancing Chains	3	46			-1
+ws	245	Barbed Crescent	3	46			-1
+ws	246	Shackled Fists	3	46			-1
+ws	247	Foxfire	3	46			-1
+ws	248	Grim Halo	3	46			-1
+ws	249	Netherspikes	3	46			-1
+ws	250	Carnal Nightmare	3	46			-1
+ws	251	Aegis Schism	3	46			-1
+ws	252	Dancing Chains	3	46			-1
+ws	253	Barbed Crescent	3	46			-1
+ws	254	Vulcan Shot	3	46			-1
+ws	255	Dimensional Death	3	46			-1
+ability	528	Mighty Strikes	1	40			-1
+ability	529	Hundred Fists	1	44			-1
+ability	530	Benediction	1	46			-1
+ability	531	Manafont	1	45			-1
+ability	532	Chainspell	1	44			-1
+ability	533	Perfect Dodge	1	42			-1
+ability	534	Invincible	1	43			-1
+ability	535	Blood Weapon	1	47			-1
+ability	536	Familiar	1	46			-1
+ability	537	Soul Voice	1	46			-1
+ability	538	Eagle Eye Shot	1	44			-1
+ability	539	Meikyo Shisui	1	45			-1
+ability	540	Mijin Gakure	1	40			-1
+ability	541	Spirit Surge	1	46			-1
+ability	542	Astral Flow	1	46			-1
+ability	543	Berserk	1	40			-1
+ability	544	Warcry	1	40			-1
+ability	545	Defender	1	43			-1
+ability	546	Aggressor	1	44			-1
+ability	547	Provoke	1	41			-1
+ability	548	Focus	1	44			-1
+ability	549	Dodge	1	42			-1
+ability	550	Chakra	1	46			-1
+ability	551	Boost	1	40			-1
+ability	552	Counterstance	1	44			-1
+ability	553	Steal	1	42			-1
+ability	554	Flee	1	42			-1
+ability	555	Hide	1	42			-1
+ability	556	Sneak Attack	1	42			-1
+ability	557	Mug	1	42			-1
+ability	558	Shield Bash	1	44			-1
+ability	559	Holy Circle	1	46			-1
+ability	560	Sentinel	1	43			-1
+ability	561	Souleater	1	47			-1
+ability	562	Arcane Circle	1	47			-1
+ability	563	Last Resort	1	40			-1
+ability	564	Charm	1	46			-1
+ability	565	Gauge	1	46			-1
+ability	566	Tame	1	46			-1
+ability	567	Pet commands	1	46			-1
+ability	568	Scavenge	1	43			-1
+ability	569	Shadowbind	1	41			-1
+ability	570	Camouflage	1	42			-1
+ability	571	Sharpshot	1	44			-1
+ability	572	Barrage	1	44			-1
+ability	573	Call Wyvern	1	46			-1
+ability	574	Third Eye	1	42			-1
+ability	575	Meditate	1	46			-1
+ability	576	Warding Circle	1	46			-1
+ability	577	Ancient Circle	1	47			-1
+ability	578	Jump	1	42			-1
+ability	579	High Jump	1	42			-1
+ability	580	Super Jump	1	42			-1
+ability	581	Fight	2	46			-1
+ability	582	Heel	2	46			-1
+ability	583	Leave	2	46			-1
+ability	584	Sic	2	46			-1
+ability	585	Stay	2	46			-1
+ability	586	Divine Seal	1	46			-1
+ability	587	Elemental Seal	1	47			-1
+ability	588	Trick Attack	1	42			-1
+ability	589	Weapon Bash	1	44			-1
+ability	590	Reward	1	46			-1
+ability	591	Cover	1	46			-1
+ability	592	Spirit Link	1	46			-1
+ability	593	Enrage	1	46			-1
+ability	594	Chi Blast	1	46			-1
+ability	595	Convert	1	47			-1
+ability	596	Accomplice	1	46			-1
+ability	597	Call Beast	1	46			-1
+ability	598	Unlimited Shot	1	44			-1
+ability	599	Dismiss	2	46			-1
+ability	600	Assault	2	46			-1
+ability	601	Retreat	2	46			-1
+ability	602	Release	2	46			-1
+ability	603	Blood Pact: Rage	2	46			-1
+ability	604	Rampart	1	43			-1
+ability	605	Azure Lore	1	46			-1
+ability	606	Chain Affinity	1	46			-1
+ability	607	Burst Affinity	1	46			-1
+ability	608	Wild Card	1	46			-1
+ability	609	Phantom Roll	1	46			-1
+ability	610	Fighter's Roll	8	65			-1
+ability	611	Monk's Roll	8	65			-1
+ability	612	Healer's Roll	8	65			-1
+ability	613	Wizard's Roll	8	65			-1
+ability	614	Warlock's Roll	8	65			-1
+ability	615	Rogue's Roll	8	65			-1
+ability	616	Gallant's Roll	8	65			-1
+ability	617	Chaos Roll	8	65			-1
+ability	618	Beast Roll	8	65			-1
+ability	619	Choral Roll	8	65			-1
+ability	620	Hunter's Roll	8	65			-1
+ability	621	Samurai Roll	8	65			-1
+ability	622	Ninja Roll	8	65			-1
+ability	623	Drachen Roll	8	65			-1
+ability	624	Evoker's Roll	8	65			-1
+ability	625	Magus's Roll	8	65			-1
+ability	626	Corsair's Roll	8	65			-1
+ability	627	Puppet Roll	8	65			-1
+ability	628	Dancer's Roll	8	65			-1
+ability	629	Scholar's Roll	8	65			-1
+ability	630	Bolter's Roll	8	65			-1
+ability	631	Caster's Roll	8	65			-1
+ability	632	Courser's Roll	8	65			-1
+ability	633	Blitzer's Roll	8	65			-1
+ability	634	Tactician's Roll	8	65			-1
+ability	635	Double-Up	1	46			-1
+ability	636	Quick Draw	1	46			-1
+ability	637	Fire Shot	9	48			-1
+ability	638	Ice Shot	9	49			-1
+ability	639	Wind Shot	9	50			-1
+ability	640	Earth Shot	9	51			-1
+ability	641	Thunder Shot	9	52			-1
+ability	642	Water Shot	9	53			-1
+ability	643	Light Shot	9	54			-1
+ability	644	Dark Shot	9	55			-1
+ability	645	Random Deal	1	46			-1
+ability	647	Overdrive	1	46			-1
+ability	648	Activate	1	46			-1
+ability	649	Repair	1	46			-1
+ability	650	Deploy	2	46			-1
+ability	651	Deactivate	2	46			-1
+ability	652	Retrieve	2	46			-1
+ability	653	Fire Maneuver	2	40			-1
+ability	654	Ice Maneuver	2	41			-1
+ability	655	Wind Maneuver	2	42			-1
+ability	656	Earth Maneuver	2	43			-1
+ability	657	Thunder Maneuver	2	44			-1
+ability	658	Water Maneuver	2	45			-1
+ability	659	Light Maneuver	2	46			-1
+ability	660	Dark Maneuver	2	47			-1
+ability	661	Warrior's Charge	1	46			-1
+ability	662	Tomahawk	1	46			-1
+ability	663	Mantra	1	46			-1
+ability	664	Formless Strikes	1	46			-1
+ability	665	Martyr	1	46			-1
+ability	666	Devotion	1	46			-1
+ability	667	Assassin's Charge	1	46			-1
+ability	668	Feint	1	46			-1
+ability	669	Fealty	1	46			-1
+ability	670	Chivalry	1	46			-1
+ability	671	Dark Seal	1	47			-1
+ability	672	Diabolic Eye	1	46			-1
+ability	673	Feral Howl	1	46			-1
+ability	674	Killer Instinct	1	46			-1
+ability	675	Nightingale	1	46			-1
+ability	676	Troubadour	1	46			-1
+ability	677	Stealth Shot	1	46			-1
+ability	678	Flashy Shot	1	46			-1
+ability	679	Shikikoyo	1	46			-1
+ability	680	Blade Bash	1	46			-1
+ability	681	Deep Breathing	1	46			-1
+ability	682	Angon	1	46			-1
+ability	683	Sange	1	46			-1
+ability	684	Blood Pact: Ward	2	46			-1
+ability	685	Hasso	1	46			-1
+ability	686	Seigan	1	46			-1
+ability	687	Convergence	1	46			-1
+ability	688	Diffusion	1	46			-1
+ability	689	Snake Eye	1	46			-1
+ability	690	Fold	1	46			-1
+ability	691	Role Reversal	1	46			-1
+ability	692	Ventriloquy	1	46			-1
+ability	693	Trance	1	46			-1
+ability	694	Sambas	1	46			-1
+ability	695	Waltzes	1	46			-1
+ability	696	Drain Samba	11	46			100
+ability	697	Drain Samba II	11	46			250
+ability	698	Drain Samba III	11	46			400
+ability	699	Aspir Samba	11	46			100
+ability	700	Aspir Samba II	11	46			250
+ability	701	Haste Samba	11	46			350
+ability	702	Curing Waltz	12	46			200
+ability	703	Curing Waltz II	12	46			350
+ability	704	Curing Waltz III	12	46			500
+ability	705	Curing Waltz IV	12	46			650
+ability	706	Healing Waltz	12	46			200
+ability	707	Divine Waltz	12	46			400
+ability	708	Spectral Jig	16	46			0
+ability	709	Chocobo Jig	16	46			0
+ability	710	Jigs	1	46			-1
+ability	711	Steps	1	46			-1
+ability	712	Flourishes I	1	46			-1
+ability	713	Quickstep	13	46			100
+ability	714	Box Step	13	46			100
+ability	715	Stutter Step	13	46			100
+ability	716	Animated Flourish	14	46			-1
+ability	717	Desperate Flourish	14	46			-1
+ability	718	Reverse Flourish	17	46			-1
+ability	719	Violent Flourish	14	46			-1
+ability	720	Building Flourish	17	46			-1
+ability	721	Wild Flourish	17	46			-1
+ability	722	Tabula Rasa	1	46			-1
+ability	723	Light Arts	1	46			-1
+ability	724	Dark Arts	1	47			-1
+ability	725	Flourishes II	1	46			-1
+ability	726	Modus Veritas	1	46			-1
+ability	727	Penury	15	46			-1
+ability	728	Celerity	15	46			-1
+ability	729	Rapture	15	46			-1
+ability	730	Accession	15	46			-1
+ability	731	Parsimony	15	47			-1
+ability	732	Alacrity	15	47			-1
+ability	733	Ebullience	15	47			-1
+ability	734	Manifestation	15	47			-1
+ability	735	Stratagems	1	46			-1
+ability	736	Velocity Shot	1	46			-1
+ability	737	Snarl	2	46			-1
+ability	738	Retaliation	1	43			-1
+ability	739	Footwork	1	40			-1
+ability	740	Despoil	1	42			-1
+ability	741	Pianissimo	1	46			-1
+ability	742	Sekkanoki	1	46			-1
+ability	744	Elemental Siphon	1	46			-1
+ability	745	Sublimation	1	46			-1
+ability	746	Addendum: White	15	46			-1
+ability	747	Addendum: Black	15	47			-1
+ability	748	Collaborator	1	46			-1
+ability	749	Saber Dance	1	46			-1
+ability	750	Fan Dance	1	46			-1
+ability	751	No Foot Rise	1	46			-1
+ability	752	Altruism	15	46			-1
+ability	753	Focalization	15	47			-1
+ability	754	Tranquility	15	46			-1
+ability	755	Equanimity	15	47			-1
+ability	756	Enlightenment	1	46			-1
+ability	757	Afflatus Solace	1	46			-1
+ability	758	Afflatus Misery	1	46			-1
+ability	759	Composure	1	46			-1
+ability	760	Yonin	1	46			-1
+ability	761	Innin	1	47			-1
+ability	762	Avatar's Favor	2	46			-1
+ability	763	Ready	2	46			-1
+ability	764	Restraint	1	40			-1
+ability	765	Perfect Counter	1	46			-1
+ability	766	Mana Wall	1	47			-1
+ability	767	Divine Emblem	1	46			-1
+ability	768	Nether Void	1	47			-1
+ability	769	Double Shot	1	46			-1
+ability	770	Sengikori	1	46			-1
+ability	771	Futae	1	47			-1
+ability	772	Spirit Jump	1	42			-1
+ability	773	Presto	1	46			-1
+ability	774	Divine Waltz II	12	46			800
+ability	775	Flourishes III	1	46			-1
+ability	776	Climactic Flourish	19	46			-1
+ability	777	Libra	1	46			-1
+ability	778	Tactical Switch	1	46			-1
+ability	779	Blood Rage	1	44			-1
+ability	781	Impetus	1	40			-1
+ability	782	Divine Caress	1	46			-1
+ability	783	Sacrosanctity	1	46			-1
+ability	784	Enmity Douse	1	47			-1
+ability	785	Manawell	1	45			-1
+ability	786	Saboteur	1	47			-1
+ability	787	Spontaneity	1	44			-1
+ability	788	Conspirator	1	44			-1
+ability	789	Sepulcher	1	46			-1
+ability	790	Palisade	1	46			-1
+ability	791	Arcane Crest	1	47			-1
+ability	792	Scarlet Delirium	1	47			-1
+ability	793	Spur	2	46			-1
+ability	794	Run Wild	2	46			-1
+ability	795	Tenuto	1	46			-1
+ability	796	Marcato	1	46			-1
+ability	797	Bounty Shot	1	46			-1
+ability	798	Decoy Shot	1	46			-1
+ability	799	Hamanoha	1	46			-1
+ability	800	Hagakure	1	46			-1
+ability	803	Issekigan	1	46			-1
+ability	804	Dragon Breaker	1	47			-1
+ability	805	Soul Jump	1	42			-1
+ability	807	Steady Wing	2	46			-1
+ability	808	Mana Cede	1	46			-1
+ability	809	Efflux	1	46			-1
+ability	810	Unbridled Learning	1	46			-1
+ability	813	Triple Shot	1	46			-1
+ability	814	Allies' Roll	8	65			-1
+ability	815	Miser's Roll	8	65			-1
+ability	816	Companion's Roll	8	65			-1
+ability	817	Avenger's Roll	8	65			-1
+ability	821	Cooldown	1	46			-1
+ability	822	Deus Ex Automata	1	46			-1
+ability	823	Curing Waltz V	12	46			800
+ability	824	Feather Step	13	46			100
+ability	825	Striking Flourish	19	46			-1
+ability	826	Ternary Flourish	19	46			-1
+ability	828	Perpetuance	15	46			-1
+ability	829	Immanence	15	47			-1
+ability	830	Smiting Breath	2	40			-1
+ability	831	Restoring Breath	2	46			-1
+ability	832	Konzen-ittai	1	46			-1
+ability	833	Bully	1	46			-1
+ability	834	Maintenance	1	46			-1
+ability	835	Brazen Rush	1	46			-1
+ability	836	Inner Strength	1	46			-1
+ability	837	Sanctuary	1	46			-1
+ability	838	Subtle Sorcery	1	47			-1
+ability	839	Stymie	1	46			-1
+ability	840	Larceny	1	46			-1
+ability	841	Intervene	1	46			-1
+ability	842	Soul Enslavement	1	47			-1
+ability	843	Unleash	1	46			-1
+ability	844	Clarion Call	1	46			-1
+ability	845	Overkill	1	46			-1
+ability	846	Yaegasumi	1	42			-1
+ability	847	Mikage	1	46			-1
+ability	848	Fly High	1	46			-1
+ability	849	Astral Conduit	1	46			-1
+ability	850	Unbridled Wisdom	1	46			-1
+ability	851	Cutting Cards	1	46			-1
+ability	852	Heady Artifice	1	46			-1
+ability	853	Grand Pas	1	46			-1
+ability	854	Caper Emissarius	1	46			-1
+ability	855	Bolster	1	46			-1
+ability	856	Swipe	23	46			-1
+ability	857	Full Circle	1	46			-1
+ability	858	Lasting Emanation	1	46			-1
+ability	859	Ecliptic Attrition	1	46			-1
+ability	860	Collimated Fervor	1	47			-1
+ability	861	Life Cycle	1	46			-1
+ability	862	Blaze of Glory	1	46			-1
+ability	863	Dematerialize	1	46			-1
+ability	864	Theurgic Focus	1	47			-1
+ability	865	Concentric Pulse	1	47			-1
+ability	866	Mending Halation	1	46			-1
+ability	867	Radial Arcana	1	46			-1
+ability	868	Elemental Sforzo	1	46			-1
+ability	869	Rune Enchantment	1	46			-1
+ability	870	Ignis	21	40			-1
+ability	871	Gelus	21	41			-1
+ability	872	Flabra	21	42			-1
+ability	873	Tellus	21	43			-1
+ability	874	Sulpor	21	44			-1
+ability	875	Unda	21	45			-1
+ability	876	Lux	21	46			-1
+ability	877	Tenebrae	21	47			-1
+ability	878	Vallation	22	46			-1
+ability	879	Swordplay	1	42			-1
+ability	880	Lunge	23	46			-1
+ability	881	Pflug	22	46			-1
+ability	882	Embolden	1	46			-1
+ability	883	Valiance	22	46			-1
+ability	884	Gambit	23	46			-1
+ability	885	Liement	22	46			-1
+ability	886	One for All	1	46			-1
+ability	887	Rayke	23	46			-1
+ability	888	Battuta	22	46			-1
+ability	889	Widened Compass	1	46			-1
+ability	890	Odyllic Subterfuge	1	47			-1
+ability	891	Ward	1	46			-1
+ability	892	Effusion	1	46			-1
+ability	893	Chocobo Jig II	16	46			0
+ability	894	Relinquish	1	46			-1
+ability	895	Vivacious Pulse	1	46			-1
+ability	896	Contradance	1	46			-1
+ability	897	Apogee	1	46			-1
+ability	898	Entrust	1	46			-1
+ability	899	Bestial Loyalty	1	46			-1
+ability	900	Cascade	1	47			-1
+ability	901	Consume Mana	1	47			-1
+ability	902	Naturalist's Roll	8	65			-1
+ability	903	Runeist's Roll	8	65			-1
+ability	904	Crooked Cards	1	46			-1
+ability	905	Spirit Bond	1	46			-1
+ability	906	Majesty	1	46			-1
+ability	907	Hover Shot	1	46			-1
+ability	1024	Healing Ruby	10	22			-1
+ability	1025	Poison Nails	6	22			-1
+ability	1026	Shining Ruby	10	22			-1
+ability	1027	Glittering Ruby	10	22			-1
+ability	1028	Meteorite	6	22			-1
+ability	1029	Healing Ruby II	10	22			-1
+ability	1030	Searing Light	6	22			-1
+ability	1031	Holy Mist	6	22			-1
+ability	1032	Soothing Ruby	10	22			-1
+ability	1033	Regal Scratch	6	22			-1
+ability	1034	Mewing Lullaby	10	22			-1
+ability	1035	Eerie Eye	10	22			-1
+ability	1036	Level ? Holy	6	22			-1
+ability	1037	Raise II	10	22			-1
+ability	1038	Reraise II	10	22			-1
+ability	1039	Altana's Favor	10	22			-1
+ability	1040	Moonlit Charge	6	23			-1
+ability	1041	Crescent Fang	6	23			-1
+ability	1042	Lunar Cry	10	23			-1
+ability	1043	Lunar Roar	10	23			-1
+ability	1044	Ecliptic Growl	10	23			-1
+ability	1045	Ecliptic Howl	10	23			-1
+ability	1046	Eclipse Bite	6	23			-1
+ability	1048	Howling Moon	6	23			-1
+ability	1049	Lunar Bay	6	23			-1
+ability	1050	Heavenward Howl	10	23			-1
+ability	1051	Impact	6	23			-1
+ability	1056	Punch	6	16			-1
+ability	1057	Fire II	6	16			-1
+ability	1058	Burning Strike	6	16			-1
+ability	1059	Double Punch	6	16			-1
+ability	1060	Crimson Howl	10	16			-1
+ability	1061	Fire IV	6	16			-1
+ability	1062	Flaming Crush	6	16			-1
+ability	1063	Meteor Strike	6	16			-1
+ability	1064	Inferno	6	16			-1
+ability	1065	Inferno Howl	10	16			-1
+ability	1066	Conflag Strike	6	16			-1
+ability	1072	Rock Throw	6	19			-1
+ability	1073	Stone II	6	19			-1
+ability	1074	Rock Buster	6	19			-1
+ability	1075	Megalith Throw	6	19			-1
+ability	1076	Earthen Ward	10	19			-1
+ability	1077	Stone IV	6	19			-1
+ability	1078	Mountain Buster	6	19			-1
+ability	1079	Geocrush	6	19			-1
+ability	1080	Earthen Fury	6	19			-1
+ability	1081	Earthen Armor	10	19			-1
+ability	1082	Crag Throw	6	19			-1
+ability	1088	Barracuda Dive	6	21			-1
+ability	1089	Water II	6	21			-1
+ability	1090	Tail Whip	6	21			-1
+ability	1091	Spring Water	10	21			-1
+ability	1092	Slowga	10	21			-1
+ability	1093	Water IV	6	21			-1
+ability	1094	Spinning Dive	6	21			-1
+ability	1095	Grand Fall	6	21			-1
+ability	1096	Tidal Wave	6	21			-1
+ability	1097	Tidal Roar	10	21			-1
+ability	1098	Soothing Current	10	21			-1
+ability	1104	Claw	6	18			-1
+ability	1105	Aero II	6	18			-1
+ability	1106	Whispering Wind	10	18			-1
+ability	1107	Hastega	10	18			-1
+ability	1108	Aerial Armor	10	18			-1
+ability	1109	Aero IV	6	18			-1
+ability	1110	Predator Claws	6	18			-1
+ability	1111	Wind Blade	6	18			-1
+ability	1112	Aerial Blast	6	18			-1
+ability	1113	Fleet Wind	10	18			-1
+ability	1114	Hastega II	10	18			-1
+ability	1120	Axe Kick	6	17			-1
+ability	1121	Blizzard II	6	17			-1
+ability	1122	Frost Armor	10	17			-1
+ability	1123	Sleepga	10	17			-1
+ability	1124	Double Slap	6	17			-1
+ability	1125	Blizzard IV	6	17			-1
+ability	1126	Rush	6	17			-1
+ability	1127	Heavenly Strike	6	17			-1
+ability	1128	Diamond Dust	6	17			-1
+ability	1129	Diamond Storm	10	17			-1
+ability	1130	Crystal Blessing	10	17			-1
+ability	1136	Shock Strike	6	20			-1
+ability	1137	Thunder II	6	20			-1
+ability	1138	Rolling Thunder	10	20			-1
+ability	1139	Thunderspark	6	20			-1
+ability	1140	Lightning Armor	10	20			-1
+ability	1141	Thunder IV	6	20			-1
+ability	1142	Chaotic Strike	6	20			-1
+ability	1143	Thunderstorm	6	20			-1
+ability	1144	Judgment Bolt	6	20			-1
+ability	1145	Shock Squall	10	20			-1
+ability	1146	Volt Strike	6	20			-1
+ability	1151	Healing Breath IV	6	22			-1
+ability	1152	Healing Breath	6	22			-1
+ability	1153	Healing Breath II	6	22			-1
+ability	1154	Healing Breath III	6	22			-1
+ability	1155	Remove Poison	6	22			-1
+ability	1156	Remove Blindness	6	22			-1
+ability	1157	Remove Paralysis	6	22			-1
+ability	1158	Flame Breath	6	22			-1
+ability	1159	Frost Breath	6	22			-1
+ability	1160	Gust Breath	6	22			-1
+ability	1161	Sand Breath	6	22			-1
+ability	1162	Lightning Breath	6	22			-1
+ability	1163	Hydro Breath	6	22			-1
+ability	1164	Super Climb	6	22			-1
+ability	1165	Remove Curse	6	22			-1
+ability	1166	Remove Disease	6	22			-1
+ability	1168	Camisado	6	23			-1
+ability	1169	Somnolence	10	23			-1
+ability	1170	Nightmare	10	23			-1
+ability	1171	Ultimate Terror	10	23			-1
+ability	1172	Noctoshield	10	23			-1
+ability	1173	Dream Shroud	10	23			-1
+ability	1174	Nether Blast	6	23			-1
+ability	1175	Cacodemonia	6	23			-1
+ability	1176	Ruinous Omen	6	23			-1
+ability	1177	Night Terror	6	23			-1
+ability	1178	Pavor Nocturnus	10	23			-1
+ability	1179	Blindside	6	23			-1
+ability	1180	Deconstruction	6	23			-1
+ability	1181	Chronoshift	6	23			-1
+ability	1182	Zantetsuken	6	23			-1
+ability	1183	Perfect Defense	6	23			-1
+ability	1184	Foot Kick	18	46			-1
+ability	1185	Dust Cloud	18	43			-1
+ability	1186	Whirl Claws	18	46			-1
+ability	1187	Head Butt	18	46			-1
+ability	1188	Dream Flower	18	47			-1
+ability	1189	Wild Oats	18	42			-1
+ability	1190	Leaf Dagger	18	45			-1
+ability	1191	Scream	18	44			-1
+ability	1192	Roar	18	41			-1
+ability	1193	Razor Fang	18	46			-1
+ability	1194	Claw Cyclone	18	46			-1
+ability	1195	Tail Blow	18	46			-1
+ability	1196	Fireball	18	40			-1
+ability	1197	Blockhead	18	46			-1
+ability	1198	Brain Crush	18	42			-1
+ability	1199	Infrasonics	18	41			-1
+ability	1200	Secretion	18	42			-1
+ability	1201	Lamb Chop	18	46			-1
+ability	1202	Rage	18	40			-1
+ability	1203	Sheep Charge	18	46			-1
+ability	1204	Sheep Song	18	46			-1
+ability	1205	Bubble Shower	18	45			-1
+ability	1206	Bubble Curtain	18	45			-1
+ability	1207	Big Scissors	18	46			-1
+ability	1208	Scissor Guard	18	43			-1
+ability	1209	Metallic Body	18	43			-1
+ability	1210	Needleshot	18	46			-1
+ability	1211	??? Needles	18	46			-1
+ability	1212	Frogkick	18	46			-1
+ability	1213	Spore	18	41			-1
+ability	1214	Queasyshroom	18	47			-1
+ability	1215	Numbshroom	18	47			-1
+ability	1216	Shakeshroom	18	47			-1
+ability	1217	Silence Gas	18	47			-1
+ability	1218	Dark Spore	18	47			-1
+ability	1219	Power Attack	18	46			-1
+ability	1220	Hi-Freq Field	18	41			-1
+ability	1221	Rhino Attack	18	46			-1
+ability	1222	Rhino Guard	18	42			-1
+ability	1223	Spoil	18	45			-1
+ability	1224	Cursed Sphere	18	46			-1
+ability	1225	Venom	18	45			-1
+ability	1226	Sandblast	18	47			-1
+ability	1227	Sandpit	18	41			-1
+ability	1228	Venom Spray	18	45			-1
+ability	1229	Mandibular Bite	18	46			-1
+ability	1230	Soporific	18	47			-1
+ability	1231	Gloeosuccus	18	43			-1
+ability	1232	Palsy Pollen	18	41			-1
+ability	1233	Geist Wall	18	47			-1
+ability	1234	Numbing Noise	18	44			-1
+ability	1235	Nimble Snap	18	46			-1
+ability	1236	Cyclotail	18	46			-1
+ability	1237	Toxic Spit	18	45			-1
+ability	1238	Double Claw	18	46			-1
+ability	1239	Grapple	18	46			-1
+ability	1240	Spinning Top	18	46			-1
+ability	1241	Filamented Hold	18	43			-1
+ability	1242	Chaotic Eye	18	42			-1
+ability	1243	Blaster	18	41			-1
+ability	1244	Suction	18	46			-1
+ability	1245	Drainkiss	18	47			-1
+ability	1246	Snow Cloud	18	41			-1
+ability	1247	Wild Carrot	18	46			-1
+ability	1248	Sudden Lunge	18	46			-1
+ability	1249	Spiral Spin	18	46			-1
+ability	1250	Noisome Powder	18	45			-1
+ability	1252	Acid Mist	18	45			-1
+ability	1253	TP Drainkiss	18	47			-1
+ability	1255	Scythe Tail	18	44			-1
+ability	1256	Ripper Fang	18	46			-1
+ability	1257	Chomp Rush	18	43			-1
+ability	1258	Charged Whisker	18	44			-1
+ability	1259	Purulent Ooze	18	45			-1
+ability	1260	Corrosive Ooze	18	45			-1
+ability	1261	Back Heel	18	46			-1
+ability	1262	Jettatura	18	47			-1
+ability	1263	Choke Breath	18	42			-1
+ability	1264	Fantod	18	40			-1
+ability	1265	Tortoise Stomp	18	42			-1
+ability	1266	Harden Shell	18	43			-1
+ability	1267	Aqua Breath	18	45			-1
+ability	1268	Wing Slap	18	44			-1
+ability	1269	Beak Lunge	18	46			-1
+ability	1270	Intimidate	18	43			-1
+ability	1271	Recoil Dive	18	46			-1
+ability	1272	Water Wall	18	43			-1
+ability	1273	Sensilla Blades	18	46			-1
+ability	1274	Tegmina Buffet	18	46			-1
+ability	1275	Molting Plumage	18	42			-1
+ability	1276	Swooping Frenzy	18	42			-1
+ability	1277	Sweeping Gouge	18	42			-1
+ability	1278	Zealous Snort	18	46			-1
+ability	1279	Pentapeck	18	40			-1
+ability	1280	Tickling Tendrils	18	44			-1
+ability	1281	Stink Bomb	18	43			-1
+ability	1282	Nectarous Deluge	18	45			-1
+ability	1283	Nepenthic Plunge	18	45			-1
+ability	1284	Somersault	18	46			-1
+ability	1285	Pacifying Ruby	10	22			-1
+ability	1286	Foul Waters	18	45			-1
+ability	1287	Pestilent Plume	18	47			-1
+ability	1288	Pecking Flurry	18	46			-1
+ability	1289	Sickle Slash	18	46			-1
+ability	1290	Acid Spray	18	45			-1
+ability	1291	Spider Web	18	43			-1
+ability	1292	Regal Gash	6	22			-1
+ability	1293	Infected Leech	18	47			-1
+ability	1294	Gloom Spray	18	47			-1
+ability	1298	Disembowel	18	46			-1
+ability	1299	Extirpating Salvo	18	44			-1
+ability	1300	Venom Shower	18	45			-1
+ability	1301	Mega Scissors	18	46			-1
+ability	1302	Frenzied Rage	18	40			-1
+ability	1303	Rhinowrecker	18	42			-1
+ability	1304	Fluid Toss	18	46			-1
+ability	1305	Fluid Spread	18	46			-1
+ability	1306	Digest	18	47			-1
+ability	1307	Crossthrash	18	47			-1
+ability	1308	Predatory Glare	18	44			-1
+ability	1309	Hoof Volley	18	46			-1
+ability	1310	Nihility Song	18	47			-1
+ability	1472	Clarsach Call	6	18			-1
+ability	1473	Welt	6	18			-1
+ability	1474	Katabatic Blades	10	18			-1
+ability	1475	Lunatic Voice	10	18			-1
+ability	1476	Roundhouse	6	18			-1
+ability	1477	Chinook	10	18			-1
+ability	1478	Bitter Elegy	10	18			-1
+ability	1479	Sonic Buffet	6	18			-1
+ability	1480	Tornado II	6	18			-1
+ability	1481	Wind's Blessing	10	18			-1
+ability	1482	Hysteric Assault	6	18			-1
+ability	1537	Accuracy Bonus	4	44			-1
+ability	1538	Evasion Bonus	4	42			-1
+ability	1539	Attack Bonus	4	40			-1
+ability	1540	Defense Bonus	4	43			-1
+ability	1541	Magic Atk. Bonus	4	46			-1
+ability	1542	Magic Def. Bonus	4	46			-1
+ability	1543	Max HP Boost	4	46			-1
+ability	1544	Max MP Boost	4	46			-1
+ability	1545	Auto Regen	4	46			-1
+ability	1546	Auto Refresh	4	46			-1
+ability	1547	Rapid Shot	4	42			-1
+ability	1548	Fast Cast	4	46			-1
+ability	1549	Conserve MP	4	46			-1
+ability	1550	Store TP	4	46			-1
+ability	1551	Double Attack	4	46			-1
+ability	1552	Triple Attack	4	46			-1
+ability	1553	Counter	4	46			-1
+ability	1554	Dual Wield	4	46			-1
+ability	1555	Treasure Hunter	4	46			-1
+ability	1556	Gilfinder	4	46			-1
+ability	1557	Alertness	4	46			-1
+ability	1558	Stealth	4	46			-1
+ability	1559	Martial Arts	4	42			-1
+ability	1560	Clear Mind	4	41			-1
+ability	1561	Shield Mastery	4	46			-1
+ability	1562	Shuuren	4	46			-1
+ability	1568	Beast Killer	4	46			-1
+ability	1569	Plantoid Killer	4	46			-1
+ability	1570	Vermin Killer	4	46			-1
+ability	1571	Lizard Killer	4	46			-1
+ability	1572	Bird Killer	4	46			-1
+ability	1573	Amorph Killer	4	46			-1
+ability	1574	Aquan Killer	4	46			-1
+ability	1575	Undead Killer	4	46			-1
+ability	1577	Arcana Killer	4	47			-1
+ability	1578	Demon Killer	4	46			-1
+ability	1579	Dragon Killer	4	47			-1
+ability	1584	Resist Sleep	4	46			-1
+ability	1585	Resist Poison	4	44			-1
+ability	1586	Resist Paralyze	4	40			-1
+ability	1587	Resist Blind	4	46			-1
+ability	1588	Resist Silence	4	41			-1
+ability	1589	Resist Petrify	4	42			-1
+ability	1590	Resist Virus	4	45			-1
+ability	1591	Resist Curse	4	46			-1
+ability	1592	Resist Stun	4	40			-1
+ability	1593	Resist Bind	4	40			-1
+ability	1594	Resist Gravity	4	41			-1
+ability	1595	Resist Slow	4	42			-1
+ability	1596	Resist Charm	4	46			-1
+ability	1599	Resist Amnesia	4	45			-1
+ability	1600	Treasure Hunter II	4	46			-1
+ability	1601	Treas. Hunter III	4	46			-1
+ability	1602	Kick Attacks	4	46			-1
+ability	1603	Subtle Blow	4	42			-1
+ability	1604	Assassin	4	42			-1
+ability	1605	Divine Veil	4	46			-1
+ability	1606	Zanshin	4	46			-1
+ability	1607	Savagery	4	46			-1
+ability	1608	Aggressive Aim	4	46			-1
+ability	1609	Invigorate	4	46			-1
+ability	1610	Penance	4	46			-1
+ability	1611	Aura Steal	4	46			-1
+ability	1612	Oppressor	4	46			-1
+ability	1613	Iron Will	4	46			-1
+ability	1614	Guardian	4	46			-1
+ability	1615	Muted Soul	4	46			-1
+ability	1616	Desperate Blows	4	46			-1
+ability	1617	Beast Affinity	4	46			-1
+ability	1618	Beast Healer	4	46			-1
+ability	1619	Snapshot	4	46			-1
+ability	1620	Recycle	4	46			-1
+ability	1621	Ikishoten	4	46			-1
+ability	1622	Overwhelm	4	46			-1
+ability	1623	Ninja Tool Expert.	4	46			-1
+ability	1624	Empathy	4	46			-1
+ability	1625	Strafe	4	46			-1
+ability	1626	Enchainment	4	46			-1
+ability	1627	Assimilation	4	46			-1
+ability	1628	Winning Streak	4	46			-1
+ability	1629	Loaded Deck	4	46			-1
+ability	1630	Fine-Tuning	4	46			-1
+ability	1631	Optimization	4	46			-1
+ability	1632	Closed Position	4	46			-1
+ability	1633	Stormsurge	4	46			-1
+ability	1634	Crit. Atk. Bonus	4	46			-1
+ability	1635	Crit. Def. Bonus	4	46			-1
+ability	1636	Tactical Parry	4	46			-1
+ability	1637	Tactical Guard	4	46			-1
+ability	1638	Shield Def. Bonus	4	46			-1
+ability	1639	Stout Servant	4	46			-1
+ability	1640	True Shot	4	46			-1
+ability	1641	Blood Boon	4	46			-1
+ability	1642	Skillchain Bonus	4	46			-1
+ability	1643	Fencer	4	46			-1
+ability	1644	Conserve TP	4	46			-1
+ability	1645	Occult Acumen	4	46			-1
+ability	1646	Mag. Burst Bonus	4	46			-1
+ability	1647	Divine Benison	4	46			-1
+ability	1648	Elemental Celerity	4	47			-1
+ability	1649	Dead Aim	4	46			-1
+ability	1650	Tranquil Heart	4	46			-1
+ability	1651	Stalwart Soul	4	47			-1
+ability	1652	Cardinal Chant	4	46			-1
+ability	1653	Tenacity	4	46			-1
+ability	1654	Inquartata	4	46			-1
+ability	1655	C. Recantation	4	46			-1
+ability	1656	Primeval Zeal	4	47			-1
+ability	1657	Inspiration	4	46			-1
+ability	1658	Sleight of Sword	4	42			-1
+ability	1659	Daken	4	46			-1
+ability	1660	Superior	4	46			-1
+ability	1661	Magic Acc. Bonus	4	46			-1
+ability	1662	Magic Eva. Bonus	4	47			-1
+ability	1663	Smite	4	40			-1
+ability	1665	Damage Limit+	4	40			-1
+ability	1666	Animus Solace	4	46			-1
+ability	1667	Animus Misery	4	46			-1
+ability	1668	Con Anima	4	46			-1
+ability	1669	Con Brio	4	46			-1
+ability	1670	WS Damage Boost	4	46			-1
+ability	1671	Max. HP Boost  II	4	46			-1
+ability	1672	Shield Barrier	4	46			-1
+ability	1673	Tandem Strike	4	44			-1
+ability	1674	Tandem Blow	4	42			-1
+ability	1793	Foot Kick	20	46			1000
+ability	1794	Dust Cloud	20	43			800
+ability	1795	Whirl Claws	20	46			1800
+ability	1796	Lamb Chop	20	46			1300
+ability	1797	Rage	20	46			800
+ability	1798	Sheep Charge	20	46			800
+ability	1799	Sheep Bleat	20	46			500
+ability	1800	Sheep Song	20	46			1500
+ability	1801	Rage	20	46			800
+ability	1802	Ram Charge	20	46			1000
+ability	1803	Rumble	20	43			800
+ability	1804	Great Bleat	20	46			9999
+ability	1805	Petribreath	20	43			2000
+ability	1806	Roar	20	46			1000
+ability	1807	Razor Fang	20	46			1500
+ability	1808	Claw Cyclone	20	46			1800
+ability	1809	Sandblast	20	47			600
+ability	1810	Sandpit	20	41			600
+ability	1811	Venom Spray	20	45			800
+ability	1812	Mandibular Bite	20	46			1200
+ability	1813	Sonic Wave	20	42			1000
+ability	1814	Stomping	20	46			1000
+ability	1815	Cold Stare	20	46			800
+ability	1816	Whistle	20	46			600
+ability	1817	Berserk	20	46			800
+ability	1818	Healing Breeze	20	46			2000
+ability	1819	Vicious Claw	20	46			1300
+ability	1820	Stone Throw	20	46			1200
+ability	1821	Spinning Claw	20	46			1800
+ability	1822	Claw Storm	20	46			1500
+ability	1823	Blank Gaze	20	46			1000
+ability	1824	Eye Scratch	20	46			1000
+ability	1825	Magic Fruit	20	46			1500
+ability	1826	Drill Branch	20	46			1200
+ability	1827	Pinecone Bomb	20	46			1200
+ability	1828	Leafstorm	20	46			1000
+ability	1829	Entangle	20	46			1000
+ability	1830	Head Butt	20	46			1000
+ability	1831	Dream Flower	20	46			1200
+ability	1832	Wild Oats	20	46			500
+ability	1833	Photosynthesis	20	46			1500
+ability	1834	Leaf Dagger	20	46			800
+ability	1835	Scream	20	46			500
+ability	1836	Frogkick	20	46			1000
+ability	1837	Spore	20	47			800
+ability	1838	Queasyshroom	20	47			1000
+ability	1839	Numbshroom	20	47			1200
+ability	1840	Shakeshroom	20	47			1000
+ability	1841	Silence Gas	20	47			1500
+ability	1842	Dark Spore	20	47			1200
+ability	1843	Impale	20	46			1000
+ability	1844	Vampiric Lash	20	46			1000
+ability	1845	Somersault	20	46			1300
+ability	1846	Bad Breath	20	43			2000
+ability	1847	Sweet Breath	20	47			1500
+ability	1848	Needleshot	20	46			1000
+ability	1849	1000 Needles	20	46			1300
+ability	1850	Wild Carrot	20	46			1000
+ability	1851	Photosynthesis	20	46			1500
+ability	1852	Random Kiss	20	46			1000
+ability	1853	Absorbing Kiss	20	46			2000
+ability	1854	Deep Kiss	20	46			1800
+ability	1855	Sharp Sting	20	46			1000
+ability	1856	Pollen	20	46			1500
+ability	1857	Final Sting	20	46			2000
+ability	1858	Power Attack	20	46			1000
+ability	1859	Hi-Freq Field	20	46			1000
+ability	1860	Rhino Attack	20	46			1200
+ability	1861	Rhino Guard	20	46			800
+ability	1862	Spoil	20	46			800
+ability	1863	Sticky Thread	20	46			1000
+ability	1864	Poison Breath	20	45			1200
+ability	1865	Cocoon	20	46			800
+ability	1866	Numbing Breath	20	41			1500
+ability	1867	Cold Breath	20	41			1200
+ability	1868	Mandible Bite	20	46			1000
+ability	1869	Poison Sting	20	46			800
+ability	1870	Death Scissors	20	46			2000
+ability	1871	Wild Rage	20	46			1300
+ability	1872	Earth Pounder	20	43			1200
+ability	1873	Sharp Strike	20	46			800
+ability	1874	Double Claw	20	46			1000
+ability	1875	Grapple	20	46			1500
+ability	1876	Filamented Hold	20	43			1000
+ability	1877	Spinning Top	20	46			1200
+ability	1878	Tail Blow	20	46			1000
+ability	1879	Fireball	20	40			1000
+ability	1880	Blockhead	20	46			1500
+ability	1881	Brain Crush	20	46			1200
+ability	1882	Baleful Gaze	20	46			1000
+ability	1883	Plaguebreath	20	45			1500
+ability	1884	Infrasonics	20	46			800
+ability	1885	Secretion	20	46			500
+ability	1886	Ripper Fang	20	46			1000
+ability	1887	Foul Breath	20	40			1500
+ability	1888	Frost Breath	20	41			1500
+ability	1889	Thunderbolt	20	44			1500
+ability	1890	Chomp Rush	20	46			1000
+ability	1891	Scythe Tail	20	46			1200
+ability	1892	Tail Roll	20	46			1000
+ability	1893	Tusk	20	46			2000
+ability	1894	Scutum	20	46			800
+ability	1895	Bone Crunch	20	46			1000
+ability	1896	Awful Eye	20	46			800
+ability	1897	Heavy Bellow	20	46			1000
+ability	1898	Ultrasonics	20	46			750
+ability	1899	Sonic Boom	20	46			750
+ability	1900	Blood Drain	20	46			1000
+ability	1901	Jet Stream	20	46			1000
+ability	1902	Blind Vortex	20	46			1000
+ability	1903	Giga Scream	20	46			1000
+ability	1904	Dread Dive	20	46			1000
+ability	1905	Feather Barrier	20	42			500
+ability	1906	Stormwind	20	42			1500
+ability	1907	Hammer Beak	20	46			1000
+ability	1908	Poison Pick	20	46			1000
+ability	1909	Sound Vacuum	20	46			800
+ability	1910	Sound Blast	20	46			800
+ability	1911	Baleful Gaze	20	43			1300
+ability	1912	Suction	20	46			1000
+ability	1913	Acid Mist	20	45			1200
+ability	1914	Sand Breath	20	43			1200
+ability	1915	Drainkiss	20	46			1000
+ability	1916	Regeneration	20	46			600
+ability	1917	TP Drainkiss	20	46			700
+ability	1918	MP Drainkiss	20	46			1000
+ability	1919	Brain Drain	20	47			1500
+ability	1920	Fluid Spread	20	46			1000
+ability	1921	Fluid Toss	20	46			800
+ability	1922	Digest	20	46			1000
+ability	1923	Soporific	20	47			1500
+ability	1924	Palsy Pollen	20	41			800
+ability	1925	Gloeosuccus	20	43			1000
+ability	1926	Death Ray	20	46			1000
+ability	1927	Hex Eye	20	46			1000
+ability	1928	Petro Gaze	20	46			1300
+ability	1929	Catharsis	20	46			1000
+ability	1930	Bubble Shower	20	45			1500
+ability	1931	Bubble Curtain	20	45			800
+ability	1932	Big Scissors	20	46			800
+ability	1933	Scissor Guard	20	46			800
+ability	1934	Metallic Body	20	46			800
+ability	1935	Intimidate	20	46			750
+ability	1936	Aqua Ball	20	45			1000
+ability	1937	Splash Breath	20	45			1200
+ability	1938	Screwdriver	20	46			800
+ability	1939	Water Wall	20	46			800
+ability	1940	Water Shield	20	46			800
+ability	1941	Tentacle	20	46			1000
+ability	1942	Ink Jet	20	47			1200
+ability	1943	Hard Membrane	20	46			800
+ability	1944	Cross Attack	20	46			1500
+ability	1945	Regeneration	20	46			1000
+ability	1946	Maelstrom	20	45			1200
+ability	1947	Whirlwind	20	42			1200
+ability	1948	Petri. Breath	20	43			800
+ability	1949	Frenzied Rage	20	46			800
+ability	1950	Pounce	20	46			1200
+ability	1951	Charged Whisker	20	44			1500
+ability	1952	Rampant Gnaw	20	46			1500
+ability	1953	Big Horn	20	46			1000
+ability	1954	Snort	20	42			1000
+ability	1955	Rapid Dance	20	46			800
+ability	1956	Lowing	20	46			1000
+ability	1957	Gas Shell	20	45			600
+ability	1958	Venom Shell	20	45			1200
+ability	1959	Palsynyxis	20	46			1000
+ability	1960	Painful Whip	20	46			1000
+ability	1961	Suctorial Tentacle	20	45			600
+ability	1962	Toxic Spit	20	45			1200
+ability	1963	Geist Wall	20	47			1200
+ability	1964	Numbing Noise	20	44			1000
+ability	1965	Nimble Snap	20	46			1500
+ability	1966	Cyclotail	20	46			1300
+ability	1967	Back Heel	20	46			1200
+ability	1968	Jettatura	20	46			2000
+ability	1969	Nihility Song	20	47			1300
+ability	1970	Choke Breath	20	46			1000
+ability	1971	Fantod	20	46			2000
+ability	1972	Blow	20	46			1000
+ability	1973	Beatdown	20	46			1000
+ability	1974	Uppercut	20	46			1500
+ability	1975	Blank Gaze	20	46			1200
+ability	1976	Antiphase	20	46			1000
+ability	1977	Snowball	20	41			1000
+ability	1978	Helldive	20	46			800
+ability	1979	Wing Cutter	20	42			800
+ability	1980	Wild Horn	20	46			1000
+ability	1981	Thunderbolt	20	44			2000
+ability	1982	Shock Wave	20	42			1000
+ability	1983	Flame Armor	20	46			800
+ability	1984	Howl	20	46			1000
+ability	1985	Meteor	20	46			3000
+ability	1986	Recoil Dive	20	46			1250
+ability	1987	Blaster	20	46			1000
+ability	1988	Chaotic Eye	20	46			800
+ability	1989	Cursed Sphere	20	46			1000
+ability	1990	Venom	20	45			700
+ability	1991	Snow Cloud	20	41			1000
+ability	1992	Sprout Spin	20	46			1200
+ability	1993	Slumber Powder	20	47			1000
+ability	1994	Sprout Smack	20	46			1000
+ability	1995	Venom Breath	20	41			800
+ability	1996	Critical Bite	20	46			1300
+ability	1997	Venom Sting	20	46			1000
+ability	1998	Stasis	20	46			1000
+ability	1999	Venom Storm	20	46			1000
+ability	2000	Earthbreaker	20	43			1500
+ability	2001	Evasion	20	46			800
+ability	2002	Deadly Hold	20	46			1000
+ability	2003	Tail Swing	20	46			1000
+ability	2004	Tail Smash	20	46			1000
+ability	2005	Heat Breath	20	40			1000
+ability	2006	Riddle	20	40			1000
+ability	2007	Great Sandstorm	20	42			1000
+ability	2008	Great Whirlwind	20	42			1200
+ability	2009	Tortoise Song	20	46			1500
+ability	2010	Head Butt	20	46			1000
+ability	2011	Tortoise Stomp	20	46			1200
+ability	2012	Harden Shell	20	46			800
+ability	2013	Earth Breath	20	43			1000
+ability	2014	Aqua Breath	20	45			1000
+ability	2015	Sickle Slash	20	46			1200
+ability	2016	Acid Spray	20	45			800
+ability	2017	Spider Web	20	43			1000
+ability	2018	Arbor Storm	20	46			1000
+ability	2019	10,000 Needles	20	46			9999
+ability	2020	Subsonics	20	46			750
+ability	2021	Marrow Drain	20	46			1000
+ability	2022	Slipstream	20	46			750
+ability	2023	Turbulence	20	42			1000
+ability	2024	Broad. Barrage	20	46			800
+ability	2025	Blind. Barrage	20	46			800
+ability	2026	Damnation Dive	20	46			1500
+ability	2027	Mucus Spread	20	46			750
+ability	2028	Epoxy Spread	20	46			750
+ability	2029	Debilitating Drone	20	46			1000
+ability	2030	Hoof Volley	20	46			2000
+ability	2031	Con. Transfer	20	46			2000
+ability	2032	Toxic Pick	20	46			1500
+ability	2033	Crossthrash	20	46			1800
+ability	2034	Knife Edge Circle	20	46			1300
+ability	2035	Train Fall	20	46			2000
+ability	2036	Viscid Secretion	20	43			1200
+ability	2037	Wild Ginseng	20	46			1200
+ability	2038	Hungry Crunch	20	46			1800
+ability	2039	Mighty Snort	20	42			1200
+ability	2040	Soul Accretion	20	46			1300
+ability	2041	Miasmic Breath	20	46			1800
+ability	2042	Putrid Breath	20	46			1500
+ability	2043	2,000 Needles	20	46			1900
+ability	2044	4,000 Needles	20	46			2500
+ability	2045	Predatory Glare	20	46			1000
+ability	2046	Vile Belch	20	46			1500
+ability	2047	Hypnic Lamp	20	46			1000

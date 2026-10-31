@@ -50,8 +50,12 @@ end
 -- the shop's list is showing her own bag (Shop » Sell), not the shopkeeper's goods
 -- (Sell was the choice, or, e.g. after a reload, the item under the cursor is the one in her bag at that slot)
 -- Shop » Buy: the shop window listing the shopkeeper's wares (the item under the cursor is one of them)
+-- Bazaar » Set Prices opens the same shop window over her own bag: not a shop visit
+local function bazaar() return require('ui.cmdmenu').opener.shop == 'bazaar'; end
+
 local function buying(fname)
     if (fname ~= 'shop' and fname ~= 'itemctrl' and fname ~= 'shopbuy') or gamewin.window('shop') == nil then return false; end
+    if bazaar() then return false; end
     if #goods == 0 then return false; end
     if require('ui.cmdmenu').last_choice.shopmain == 'Buy' then return true; end
     local id = gamewin.cursor_item();
@@ -84,6 +88,7 @@ local function selling(fname)
     if (fname ~= 'shop' and fname ~= 'itemctrl' and fname ~= 'shopsell') or gamewin.window('shop') == nil then
         return false;
     end
+    if bazaar() then return false; end
     local last = require('ui.cmdmenu').last_choice.shopmain;
     if last == 'Sell' then return true; end
     if last == 'Buy' then return false; end
@@ -115,8 +120,18 @@ local function from_action_menu()
     local o = require('ui.cmdmenu').opener.inventor;
     return o == 'playermo' or o == 'battlemo';
 end
+-- Synthesis » Crystal Synthesis: the game's list holds only her crystals, to choose one
+local function choosing_crystal()
+    return require('ui.cmdmenu').opener.inventor == 'cmbmenu';
+end
+-- then an ingredient for a slot of the synthesis grid (window "tskill<n>", one per crystal)
+local function choosing_ingredient()
+    return (require('ui.cmdmenu').opener.inventor or ''):match('^tskill') ~= nil;
+end
 
-local function items_of(bag, usable_only)
+local view_first = nil;      -- the first row shown (kept between frames so the view scrolls like the game's)
+
+local function items_of(bag, usable_only)        -- usable_only: true, or 'crystal' (crystals only)
     local inv = AshitaCore:GetMemoryManager():GetInventory();
     local rm = AshitaCore:GetResourceManager();
     local out = {};
@@ -125,7 +140,10 @@ local function items_of(bag, usable_only)
         local it = inv:GetContainerItem(bag, i);
         if it and it.Id ~= 0 and it.Id ~= 65535 then
             local r = rm:GetItemById(it.Id);
-            if r and (not usable_only or bit.band(r.Flags or 0, USABLE) ~= 0) then out[#out + 1] = { id = it.Id, index = i, count = it.Count, res = r, equipped = (it.Flags == 5) }; end
+            -- (the game's usable list: items flagged usable, and crystals, type 8, which it lists too)
+            local usable = bit.band(r and r.Flags or 0, USABLE) ~= 0 or (r and r.Type == 8);
+            if usable_only == 'crystal' then usable = r and r.Type == 8; end
+            if r and (not usable_only or usable) then out[#out + 1] = { id = it.Id, index = i, count = it.Count, res = r, equipped = (it.Flags == 5) }; end
         end
     end
     return out, n;
@@ -173,13 +191,15 @@ function panel.render()
         return;
     end
     inv_slot = gamewin.slot(shopping and 'shop' or 'inventor');
-    local usable = not shopping and from_action_menu();
+    local crystal = not shopping and choosing_crystal();
+    local usable = not shopping and (from_action_menu() or crystal);
+    local filter = crystal and 'crystal' or usable;
     if usable then
         -- only while the game's row count agrees with ours (else the game draws its own list)
         local cls = inv_slot and mem.u32(inv_slot);
         -- (this list keeps its item count at the class's +0x1C: 0 with nothing usable, 1 with one item)
         local rows = cls and mem.u16(cls + 0x1C);
-        local n = #items_of(0, true);
+        local n = #items_of(0, filter);
         if rows == nil or rows ~= n then
             if hider:active() then hider:restore(); end
             return;
@@ -205,7 +225,7 @@ function panel.render()
         end
     end
     if usable then shown_bag = 0; end
-    local list, cap = items_of(shown_bag, usable);
+    local list, cap = items_of(shown_bag, filter);
     local at = nil;
     if buy then
         list = {};
@@ -221,15 +241,18 @@ function panel.render()
         -- (the shop's list numbers its rows its own way: the item itself is what counts)
         for i, c in ipairs(list) do if c.id == cid then at = i; break; end end
     end
-    -- no item info shown (e.g. choosing items for a trade): the list window's own cursor (class +0x24, 1-based)
-    if cid == nil then
+    -- The list window's own cursor: the row on screen (class +0x24, 1-based) plus how far the list has scrolled
+    -- (+0x1A). It is the game's own answer, so it wins over the item info box (which lags behind, and isn't shown at
+    -- all in some lists); not in a shop, whose list numbers its rows its own way.
+    if not shopping then
         local cls = inv_slot and mem.u32(inv_slot);
-        local n = cls and mem.u16(cls + 0x24);
-        if n and n >= 1 and n <= #list then at = n; end
+        local row, top = cls and mem.u16(cls + 0x24), cls and mem.u16(cls + 0x1A);
+        local n = row and top and row + top;
+        if n and row >= 1 and n <= #list then at = n; end
     end
 
     -- opened from the action menu: the same ring as the menu, in its place
-    if usable and require('ui.cmdmenu').action_spot() then
+    if usable and not crystal and require('ui.cmdmenu').action_spot() then
         if fresh or not ring_since then ring_since = require('core.now')(); end
         local items = {};
         for i, c in ipairs(list) do
@@ -259,7 +282,9 @@ function panel.render()
     draw.nine('win_title', x + 4, y + 4, W - 8, 30, 10, tw, th);
     draw.image('title_swash', x + 8, y + 4);
     local title = ui.label('itp_title', 'name', { font_height = 22 });
-    local heading = usable and 'Items' or BAG_NAMES[shown_bag] or 'Items';
+    local ingredient = not shopping and not usable and choosing_ingredient();
+    local heading = crystal and 'Choose a Crystal' or ingredient and 'Choose an Ingredient' or usable and 'Items'
+                    or BAG_NAMES[shown_bag] or 'Items';
     if shopping then
         if fresh or shopkeeper == nil then shopkeeper = nearest_npc() or false; end
         if sell then heading = shopkeeper and ('Sell to ' .. shopkeeper) or 'Sell';
@@ -287,11 +312,16 @@ function panel.render()
     end
 
     local sw, sh = layout.size('row_sel');
-    local first = 0;
-    if at and at > ROWS then first = at - ROWS; end
+    -- the view only scrolls when the cursor leaves it (as the game's lists do), not with every move
+    local first = view_first or 0;
+    if at then
+        if at <= first then first = at - 1; elseif at > first + ROWS then first = at - ROWS; end
+    end
+    first = math.max(0, math.min(first, math.max(0, #list - ROWS)));
+    view_first = first;
     if #list == 0 then
         local none = ui.label('itp_none', 'small', { font_height = 17, font_color = 0xFFB8C0D8 });
-        text.draw(none, usable and 'No usable items.' or 'Empty.', x + 34, y + 76, 'baseline');
+        text.draw(none, crystal and 'No crystals.' or usable and 'No usable items.' or 'Empty.', x + 34, y + 76, 'baseline');
     end
     for r = 1, math.min(ROWS, #list - first) do
         local i = r + first;
@@ -382,7 +412,14 @@ function panel.render()
                        offer = cur and (sell and offers[cur.index] or cur.price) or nil,
                        qty = qc and mem.u8(qc + 0x23) or nil, qty_max = qc and mem.u8(qc + 0x22) or nil };
     end
-    if not usable then
+    if crystal then
+        local hint = ui.label('itp_hint', 'small', { font_height = 14, font_color = 0xFFB8C0D8 });
+        text.draw(hint, 'Confirm: synthesize with this crystal', x + 22, y + H - 10, 'baseline');
+    end
+    if not usable and ingredient then
+        local hint = ui.label('itp_hint', 'small', { font_height = 14, font_color = 0xFFB8C0D8 });
+        text.draw(hint, 'Confirm: put it in the synthesis', x + 22, y + H - 10, 'baseline');
+    elseif not usable then
         local hint = ui.label('itp_hint', 'small', { font_height = 14, font_color = 0xFFB8C0D8 });
         local choosing = sell and gamewin.window('itemctrl') ~= nil;
         text.draw(hint, buy and 'Confirm: buy' or choosing and 'Up / Down: how many    Left: all    Confirm: sell' or sell and 'Confirm: offer it to the shopkeeper' or '+ : Sort  (Auto / Manual / Recycle Bin)',

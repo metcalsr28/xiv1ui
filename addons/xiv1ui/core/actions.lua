@@ -11,11 +11,15 @@ local actions = {};
 local ok_icons, ICONS = pcall(require, 'core.action_icons');
 if not ok_icons then ICONS = {}; end
 
---- The painted icon for an action name (a spell, ability, weapon skill or command), or nil.
-function actions.icon_for(name)
-    if ICONS[name] then return ICONS[name]; end
+ICONS.ma, ICONS.ja, ICONS.cmd = ICONS.ma or {}, ICONS.ja or {}, ICONS.cmd or {};
+
+--- The painted icon for an action name (a spell, ability, weapon skill or command), or nil. kind ('ma', 'ja',
+-- 'cmd') picks between a spell and an ability of the same name; without it, spells first.
+function actions.icon_for(name, kind)
+    if kind then return ICONS[kind][name]; end
+    if ICONS.ma[name] or ICONS.ja[name] or ICONS.cmd[name] then return ICONS.ma[name] or ICONS.ja[name] or ICONS.cmd[name]; end
     local s = AshitaCore:GetResourceManager():GetSpellByName(name or '', 0);
-    if s and s.Type == 8 then return ICONS['*Trust']; end
+    if s and s.Type == 8 then return ICONS.ma['*Trust']; end
     return nil;
 end
 
@@ -45,9 +49,10 @@ local function ability_timer(timer_id)
 end
 
 --- Short glyph text for a disc: initials of the first word(s) and a trailing tier numeral.
+local NIN_TIER = { Ichi = 'I', Ni = 'II', San = 'III' };
 function actions.glyph(name)
-    local tier = name:match('%s([IVX]+)$') or '';
-    local base = name:gsub('%s[IVX]+$', '');
+    local tier = name:match('%s([IVX]+)$') or NIN_TIER[name:match(':%s*(%a+)$') or ''] or '';
+    local base = name:gsub('%s[IVX]+$', ''):gsub(':%s*%a+$', '');
     local words = {};
     for w in base:gmatch('[%a\']+') do words[#words + 1] = w; end
     local g;
@@ -76,7 +81,7 @@ function actions.resolve(b)
         info.cast = s.CastTime / 4;           -- resource times are in quarter seconds
         info.recast = s.RecastDelay / 4;
         info.glyph, info.tier = actions.glyph(b.name);
-        info.icon = ICONS[b.name] or (s.Type == 8 and ICONS['*Trust']) or nil;
+        info.icon = ICONS.ma[b.name] or (s.Type == 8 and ICONS.ma['*Trust']) or nil;
         info.cost, info.cost_kind = s.ManaCost, 'MP';
         info.usable = party:GetMemberMP(0) >= s.ManaCost;
         info.timer = mm():GetRecast():GetSpellTimer(s.Index);
@@ -89,7 +94,7 @@ function actions.resolve(b)
         info.motif = 'motif_sword';
         info.kind_label = is_ws and 'Weapon Skill' or 'Ability';
         info.glyph, info.tier = actions.glyph(b.name);
-        info.icon = ICONS[b.name];
+        info.icon = ICONS.ja[b.name];
         if is_ws then
             info.cost, info.cost_kind = 1000, 'TP';
             info.usable = party:GetMemberTP(0) >= 1000;
@@ -132,7 +137,7 @@ function actions.resolve(b)
         info.motif = 'motif_sword';
         info.kind_label = 'Command';
         info.glyph, info.tier = actions.glyph(b.name);
-        info.icon = ICONS[b.name];
+        info.icon = ICONS.cmd[b.name];
         info.command = b.command or b.name;
     end
     return info;
@@ -181,6 +186,55 @@ function actions.defaults(all)
         end
     end
     return out;
+end
+
+local SPELL_CATS = { 'White Magic', 'Black Magic', 'Summoning', 'Ninjutsu', 'Songs', 'Blue Magic', 'Geomancy', 'Trust' };
+local ABILITY_CATS = { [6] = 'Blood Pacts', [10] = 'Blood Pacts', [18] = 'Ready', [20] = 'Ready', [2] = 'Pet Commands' };
+actions.CATEGORIES = { 'Job Abilities', 'Pet Commands', 'Blood Pacts', 'Ready', 'Weapon Skills', 'White Magic',
+                       'Black Magic', 'Summoning', 'Ninjutsu', 'Songs', 'Blue Magic', 'Geomancy', 'Trust' };
+
+--- Everything the character can use now, by category: { [category] = { { kind, name, cost }, ... } } in the game's
+-- order. Spells count when the main or support job is high enough for them; traits (passive) are left out.
+function actions.learned()
+    local player, r = mm():GetPlayer(), res();
+    local out = {};
+    local function add(cat, b) out[cat] = out[cat] or {}; table.insert(out[cat], b); end
+    local seen = {};
+    for id = JA_BASE, 2047 do
+        local a = r:GetAbilityById(id);
+        if a and a.Name and (a.Name[1] or '') ~= '' and a.Type ~= 4 and player:HasAbility(id) and not seen[a.Name[1]] then
+            seen[a.Name[1]] = true;
+            add(ABILITY_CATS[a.Type] or 'Job Abilities', { kind = 'ja', name = a.Name[1] });
+        end
+    end
+    for id = 1, 255 do
+        local a = r:GetAbilityById(id);
+        if a and a.Name and (a.Name[1] or '') ~= '' and player:HasWeaponSkill(id) then
+            add('Weapon Skills', { kind = 'ws', name = a.Name[1] });
+        end
+    end
+    local mj, ml = player:GetMainJob(), player:GetMainJobLevel();
+    local sj, sl = player:GetSubJob(), player:GetSubJobLevel();
+    for id = 1, 1023 do
+        local sp = r:GetSpellById(id);
+        if sp and sp.Name and (sp.Name[1] or '') ~= '' and player:HasSpell(sp.Index) then
+            local a = sp.LevelRequired and sp.LevelRequired[mj + 1];
+            local b = sp.LevelRequired and sp.LevelRequired[sj + 1];
+            local ok = (a and a > 0 and a ~= 255 and a <= ml) or (b and b > 0 and b ~= 255 and b <= sl);
+            if ok then add(SPELL_CATS[sp.Type] or 'White Magic', { kind = 'ma', name = sp.Name[1], cost = sp.ManaCost }); end
+        end
+    end
+    return out;
+end
+
+-- Action icons named ai_gen_* are a category's emblem, not the action's own: the bar keeps its letters over it.
+do
+    local resolve = actions.resolve;
+    function actions.resolve(b)
+        local info = resolve(b);
+        if info and info.icon and info.icon:sub(1, 7) == 'ai_gen_' then info.generic = true; end
+        return info;
+    end
 end
 
 return actions;

@@ -44,6 +44,25 @@ function dialogue.init()
     q_obj    = text.new('small', { font_height = 20, font_color = 0xFFF8F6F0, box_width = W - 2 * PAD_X });
 end
 
+-- Configuration » General: the box's font and text size (store.data.dlg_font: a chat font id; dlg_size: px)
+-- (the choices are a size smaller than the text, as at the default 20 / 19)
+local style_key, style_fam, style_size = nil, nil, 20;
+local function style_obj(o, h)
+    o.base_family = style_fam;
+    o:set_font_family(style_fam);
+    o:set_font_height(h);
+    o.is_dirty = true;
+end
+local function apply_style()
+    local font, size = store.data.dlg_font or 'serif', store.data.dlg_size or 20;
+    local key = font .. '|' .. size;
+    if key == style_key then return; end
+    style_key, style_fam, style_size = key, require('ui.chatlog').font_family(font), size;
+    style_obj(body_obj, size);
+    style_obj(q_obj, size);
+    for _, o in pairs(row_objs) do style_obj(o, size - 1); end
+end
+
 -- The game's own event text windows (the message line "rem4line" and its frame "rem4li2"): xiv1ui's box shows their
 -- text, so they stay hidden while they're up.
 local hider = gamewin.new();
@@ -181,11 +200,13 @@ end
 
 -- A choice menu: the question, then the options with the gold cursor on the game's current choice.
 local function render_choice(m)
+    apply_style();
     if q_obj.settings.text ~= m.question then text.set(q_obj, m.question); end
     local _, qh = text.size(q_obj);
     if m.question == '' then qh = 0; end
     local shown = math.min(#m.rows, MAX_SHOWN);
     local first = math.max(1, math.min(m.cursor - math.floor(shown / 2), #m.rows - shown + 1));
+    local ROW_H = math.max(ROW_H, style_size + 12);          -- (taller rows for larger text)
     local h = PAD_Y + qh + (qh > 0 and 10 or 0) + shown * ROW_H + PAD_Y - 4;
     local x, y = layout.anchor('bottom', W, h, 0, -215, 'dialogue');
     layout.bounds('dialogue', x, y - 24, W, h + 24);
@@ -202,6 +223,7 @@ local function render_choice(m)
         if o == nil then
             o = text.new('small', { font_height = 19 });
             row_objs[i - first + 1] = o;
+            style_obj(o, style_size - 1);
         end
         local sel = (i == m.cursor);
         if sel then
@@ -235,6 +257,7 @@ function dialogue.render()
     local now = xi_now();
     if cur.expire and now > cur.expire then cur = nil; return; end
 
+    apply_style();
     if body_obj.settings.text ~= cur.body then text.set(body_obj, cur.body); end
     local _, th = text.size(body_obj);
     local h = math.max(MIN_H, th + 2 * PAD_Y + 8);

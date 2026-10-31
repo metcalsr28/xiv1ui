@@ -57,6 +57,15 @@ function minimap.render()
     local ox, oy = layout.offset('minimap');
     local cx, cy = sw - DISC / 2 - 22 + ox, 52 + DISC / 2 + oy;
     layout.bounds('minimap', cx - DISC / 2, cy - DISC / 2 - 44, DISC, DISC + 44);
+    -- a game window the player is using that opens under the map (FFXI puts its small menus, e.g. a linkshell's
+    -- or the Bazaar's, at the top right) gets the place: the map steps aside while it has focus
+    local _, focus = require('core.native').focused();
+    if focus then
+        local fx, fy, fw, fh = require('core.gamewin').rect(focus);
+        if fx and fx < cx + DISC / 2 and cx - DISC / 2 < fx + fw and fy < cy + DISC / 2 and cy - DISC / 2 - 44 < fy + fh then
+            return;
+        end
+    end
     local scale = (DISC / 2 - 14) / RANGE;
 
     -- clock cluster above the map

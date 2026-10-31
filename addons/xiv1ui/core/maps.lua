@@ -12,7 +12,7 @@
 *   - The map picture is DAT file  5312 + map id  (flags 0) or  53295 + map id  (flags & 16, later expansions),
 *     found through the game's VTABLE / FTABLE files like any other DAT. Its image chunk is named
 *     "m_<zone>_<floor key>"; the pixels are either 8-bit palettized (a BMP without the file header, bottom-up) or
-*     DXT3 at offset 0x80. XI-Pivot overlays mirror the ROM paths; config/pivot/pivot.ini names the overlay folder
+*     DXT3 at offset 0x80 (0x75 in files tagged "3TXD"). XI-Pivot overlays mirror the ROM paths; config/pivot/pivot.ini names the overlay folder
 *     (root_path) and the overlays in use ([overlays] 0=..., 1=...), later ones checked first.
 --]]
 
@@ -148,6 +148,17 @@ local function dds_header(w, h)
     return ffi.string(hdr, 128);
 end
 
+--- The full path of a DAT file id (an XI-Pivot overlay's copy first), or nil.
+function maps.dat_file(fid)
+    local rel = dat_path(fid);
+    if rel == nil then return nil; end
+    for _, base in ipairs(dat_bases()) do
+        local f = io.open(base .. rel, 'rb');
+        if f then f:close(); return base .. rel; end
+    end
+    return nil;
+end
+
 --- Build an in-memory image file (BMP or DDS) from a map DAT's contents, or nil.
 local function image_file(dat)
     if #dat < 0x80 then return nil; end
@@ -165,12 +176,14 @@ local function image_file(dat)
         ffi.cast('uint32_t*', fh + 10)[0] = 14 + 40 + 1024;
         return ffi.string(fh, 14) .. body;
     elseif flag == 0xA1 then
-        -- (some HD map packs store this tag as "3TXD" and lay the blocks out differently: not readable here, so the
-        -- caller falls back to the next source)
-        if dat:sub(0x6A, 0x6D) == '3TXD' then return nil; end
+        -- DXT3. Files with the "3TXD" tag at 0x69 (FFXI's own newer maps, and HD packs made like them) have two
+        -- more u32s after it and the blocks start at 0x75; the others start at 0x80.
+        local tagged = dat:sub(0x6A, 0x6D) == '3TXD';
+        local at = tagged and 0x75 or 0x80;
         local n = w * h;
-        if #dat < 0x80 + n then return nil; end
-        return dds_header(w, h) .. dat:sub(0x81, 0x80 + n), true;
+        if #dat < at + n then return nil; end
+        -- (the older layout stores the rows bottom-up like the BMPs; tagged files are top-down)
+        return dds_header(w, h) .. dat:sub(at + 1, at + n), true, not tagged;
     end
     return nil;
 end
@@ -211,13 +224,13 @@ function maps.texture(m)
     local fid = (bit.band(m.flags, 0x10) ~= 0 and 53295 or 5312) + m.id;
     local rel = dat_path(fid);
     if rel == nil then return nil; end
-    local img, dxt = nil, nil;
+    local img, dxt, flipped = nil, nil, nil;
     for _, base in ipairs(dat_bases()) do
         local f = io.open(base .. rel, 'rb');
         if f then
             local dat = f:read('*a');
             f:close();
-            img, dxt = image_file(dat);
+            img, dxt, flipped = image_file(dat);
             if img then break; end
         end
     end
@@ -225,7 +238,7 @@ function maps.texture(m)
     local buf = ffi.new('uint8_t[?]', #img);
     ffi.copy(buf, img, #img);
     local e = draw.texture_mem('map:' .. key, buf, #img, true);
-    if e then e.flipped = dxt; textures[key] = e; end   -- DXT pixels are stored bottom-up like the BMPs
+    if e then e.flipped = flipped == true; textures[key] = e; end
     return e;
 end
 

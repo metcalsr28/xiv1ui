@@ -39,8 +39,12 @@ Configuration » Reset UI positions (or `/xiv1ui layout reset`) puts them back.
 outline, background opacity, timestamps, repeated lines collapsed with a count, and battle text in its own log or in
 General. Drag the grip at a log's top-right corner to resize the logs.
 
+**Your spells and abilities on the bar** (Main Menu » Macros » Abilities & Spells): everything you've learned, by
+category (Left / Right), with "New" on what isn't on a bar yet; Enter places it on any slot. Newly learned actions
+also go onto bar 1 by themselves while it has room.
+
 **HUD sizes** (Configuration » HUD): the action bar group, target frame, party list, minimap and buttons can each be
-made smaller or larger (70–150%), e.g. a smaller action bar to make room for a bigger chat.
+made smaller or larger (60–160%), e.g. a smaller action bar to make room for a bigger chat.
 
 **UI scale** (Configuration, or `/xiv1ui scale 125`): 80–150%. Text is re-rendered at the new size, so it stays sharp.
 At larger sizes the chat log may reach under the action bar; drag it aside.
@@ -83,7 +87,7 @@ Optional extras that make it better:
 - **Nameplate plugin** (ships with most Ashita installs, `/load nameplate`): lets xiv1ui switch off FFXI's own name
   plates and draw its own. Without it, the game's name plates stay.
 - **HD area maps** through XI-Pivot (Remapster on HorizonXI): the minimap uses an enabled overlay's map when it can
-  read it, and FFXI's own maps otherwise. (CatsEyeXI's Combined Maps pack uses a format it can't read yet.)
+  read it, and FFXI's own maps otherwise. 
 - **HXIUIBegone** (HorizonXI): also hides the second chat window and the alliance lists, which xiv1ui doesn't yet.
 
 ## Credits and licences

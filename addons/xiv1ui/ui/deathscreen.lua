@@ -9,6 +9,9 @@
 * named from their help texts: the game has two, "...return to your current home point" and "...return to your
 * camp" (Campaign / Besieged areas); a Raise comes as the game's own separate prompt. Clicking a button chooses it
 * (the game's cursor is moved to it and it is confirmed with the same key presses as the keyboard).
+*
+* Configuration » General » Knocked Out screen: Minimal draws the same things in a small panel instead (no
+* darkened screen, no band).
 --]]
 
 local draw    = require('core.draw');
@@ -148,12 +151,13 @@ function death.render()
         shown_since, buttons, hover = nil, {}, nil;
         return;
     end
-    hider:hide({ 'dead', 'comyn' });
+    hider:hide({ 'dead', 'comyn', 'helpwind', 'titlewin' });      -- (+ the game's help bar across the top)
     local now = xi_now();
     shown_since = shown_since or now;
     local t = math.min(1, (now - shown_since) / 1.2);
     local ease = 1 - (1 - t) ^ 3;
     local sw, sh = layout.screen();
+    if store.data.death_minimal == true then return death.render_minimal(ease, now, sw, sh); end
 
     -- the whole screen darkens toward the edges
     local vw, vh = layout.size('death_vignette');
@@ -212,6 +216,49 @@ function death.render()
     local si = sel_index(opts);
     for i, o in ipairs(opts) do
         button(i, cx - bw2 / 2, by + BH + 24 + (i - 1) * (bh2 + 14), bw2, bh2, o.label, o.sel, ease, now, si, 0xC8, 0xD0);
+    end
+end
+
+-- The minimal style: a small panel a little below the middle of the screen with the same contents.
+function death.render_minimal(ease, now, sw, sh)
+    local W = 400;
+    local q = question();
+    local opts = q and {} or options();
+    local nbtn = q and 1 or #opts;
+    local BH2 = 36;
+    local H = 118 + nbtn * (BH2 + 10) + (q and 34 or 0);
+    local x, y = (sw - W) / 2, math.floor(sh * 0.56);
+    local pw, ph = layout.size('win_body');
+    draw.nine('win_body', x, y, W, H, 12, pw, ph, draw.alpha(0xFFFFFFFF, ease));
+    local cx = x + W / 2;
+    local title = centred('death_title_m', 'name', 30, 0xFFF2C8C0);
+    title:set_opacity(ease);
+    text.draw(title, 'Knocked Out', cx, y + 40, 'baseline');
+    local sub = centred('death_sub_m', 'small', 17, 0xFFC8B8B0);
+    sub:set_opacity(ease);
+    text.draw(sub, killer and ('Defeated by ' .. killer .. '.') or 'You have been defeated.', cx, y + 64, 'baseline');
+    local left = time_left();
+    if left then
+        local secs = math.floor(left);
+        local tm = centred('death_time_m', 'small', 15, 0xFFE8D8C8);
+        tm:set_opacity(ease);
+        text.draw(tm, string.format('Raise possible for %d:%02d', math.floor(secs / 60), secs % 60), cx, y + 86, 'baseline');
+    end
+    buttons = {};
+    local by = y + 100;
+    if q then
+        local qt = centred('death_q_m', 'label', 19, 0xFFF4ECE0);
+        qt:set_opacity(ease);
+        text.draw(qt, q.text, cx, by + 22, 'baseline');
+        local BW = 150;
+        for i, label in ipairs({ 'Yes', 'No' }) do
+            button(i, cx - BW - 8 + (i - 1) * (BW + 16), by + 34, BW, BH2, label, q.cursor == i, ease, now, q.cursor, 0xCB, 0xCD);
+        end
+        return;
+    end
+    local si = sel_index(opts);
+    for i, o in ipairs(opts) do
+        button(i, cx - 150, by + (i - 1) * (BH2 + 10), 300, BH2, o.label, o.sel, ease, now, si, 0xC8, 0xD0);
     end
 end
 

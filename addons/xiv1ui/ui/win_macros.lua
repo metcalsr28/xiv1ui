@@ -10,6 +10,8 @@
 *     Show name      toggles
 *     Place on bar   a map of every bar (Green / Red, bars 1–3, slots 1–10) with what's on them: choose a slot,
 *                    Enter places the macro there (e.g. "Green 3, slot 2")
+* Abilities & Spells: everything the character has learned, by category (Left / Right), with New on what isn't
+* on a bar yet; Enter places the action on a bar with the same map as a macro.
 * The last row, Edit Action Bars, shows the same map of every bar: choose a slot, Enter picks one of your macros to
 * put there, Delete / Backspace (or RB on the controller) clears it, Esc goes back.
 *     Delete         press Enter twice
@@ -30,8 +32,11 @@ local ICONS = {};
 for _, n in ipairs(MACRO_ICONS) do ICONS[#ICONS + 1] = n; end
 do
     local seen, extra = {}, {};
-    for _, tex in pairs(require('core.action_icons')) do
-        if not seen[tex] then seen[tex] = true; extra[#extra + 1] = tex; end
+    for _, group in pairs(require('core.action_icons')) do
+        for _, tex in pairs(group) do
+            -- (not the category emblems, ai_gen_*: they stand for no one action)
+            if not seen[tex] and tex:sub(1, 7) ~= 'ai_gen_' then seen[tex] = true; extra[#extra + 1] = tex; end
+        end
     end
     table.sort(extra);
     for _, t in ipairs(extra) do ICONS[#ICONS + 1] = t; end
@@ -79,8 +84,29 @@ local function selected_id(w)
     return w.sel > 1 and list[w.sel - 1] or nil;
 end
 
--- the last list row opens the action bar editor
-local function books_row(w) return w.sel == #ids() + 2; end
+-- the last two list rows open the abilities & spells list and the action bar editor
+local function acts_row(w) return w.sel == #ids() + 2; end
+local function books_row(w) return w.sel == #ids() + 3; end
+
+-- Abilities & Spells: the categories that have something in them, and the list of one
+local function act_cats(w)
+    local out = {};
+    for _, c in ipairs(require('core.actions').CATEGORIES) do
+        if w.acts.data[c] and #w.acts.data[c] > 0 then out[#out + 1] = c; end
+    end
+    return out;
+end
+local function is_new(b)
+    local hb = require('ui.hotbar');
+    return not hb.offered(b.name) and not hb.on_any_bar(b.name);
+end
+local function open_acts(w)
+    w.acts = { data = require('core.actions').learned(), cat = 1, sel = 1, first = 0 };
+    -- start on the first category with something new in it
+    for i, c in ipairs(act_cats(w)) do
+        for _, b in ipairs(w.acts.data[c]) do if is_new(b) then w.acts.cat = i; return; end end
+    end
+end
 
 local function edit_text(initial, apply)
     ti.begin(initial, function (s) if s ~= nil then apply(s); store.save(); end end);
@@ -128,13 +154,14 @@ win.draw = function (w, x, y)
         local m = get(id);
         items[#items + 1] = { label = m.name, indent = 34 };
     end
+    items[#items + 1] = { label = 'Abilities & Spells', color = 0xFF9BD0F0 };
     items[#items + 1] = { label = 'Edit Action Bars', color = 0xFF9BE08C };
     if w.sel > #items then w.sel = #items; end
     if w.sel - 1 < w.first then w.first = w.sel - 1; end
     if w.sel > w.first + LIST_ROWS then w.first = w.sel - LIST_ROWS; end
     ui.header('mcr_list', 'Macros', x + 24, y + 62, 250);
     w.rows = ui.list(w, 'mcrlist', items, w.sel, x + 40, y + 76, 240, 32, LIST_ROWS, w.first,
-                     w.focus == 'list' and not (w.bars or w.place));
+                     w.focus == 'list' and not (w.bars or w.place or w.acts));
     -- small icons in the list
     for _, r in ipairs(w.rows) do
         local i = r[5];
@@ -147,13 +174,55 @@ win.draw = function (w, x, y)
     local id = selected_id(w);
     local m = get(id);
     local dx = x + 320;
-    ui.header('mcr_detail', m and m.name or (books_row(w) and 'Action Bars' or 'New Macro'), dx, y + 62, w.w - 350);
+    ui.header('mcr_detail', m and m.name or (books_row(w) and 'Action Bars')
+              or (acts_row(w) and 'Abilities & Spells') or 'New Macro', dx, y + 62, w.w - 350);
     if m == nil then
+        w.frows = {};
+        if w.acts and not w.place then
+            -- the list of what she has learned, one category at a time
+            local a = w.acts;
+            local cats = act_cats(w);
+            if #cats == 0 then
+                local none = ui.label('mcr_actnone', 'small', { font_height = 17, font_color = 0xFFB8C0D8 });
+                text.draw(none, 'Nothing learned yet.', dx + 4, y + 110, 'baseline');
+                return;
+            end
+            a.cat = math.max(1, math.min(a.cat, #cats));
+            local list = a.data[cats[a.cat]];
+            a.sel = math.max(1, math.min(a.sel, #list));
+            local ROWS = 11;
+            if a.sel - 1 < a.first then a.first = a.sel - 1; end
+            if a.sel > a.first + ROWS then a.first = a.sel - ROWS; end
+            local ct = ui.label('mcr_actcat', 'label', { font_height = 19 });
+            text.draw(ct, cats[a.cat], dx + 34, y + 104, 'baseline');
+            draw.image('dlg_arrow', dx + 4, y + 88, { rot = -math.pi / 2 });
+            draw.image('dlg_arrow', dx + w.w - 400, y + 88, { rot = math.pi / 2 });
+            local cn = ui.label('mcr_actn', 'small', { font_height = 14, font_color = 0xFFB8C0D8,
+                                                       font_alignment = text.align.Right });
+            text.draw(cn, string.format('%d / %d   %d of %d', a.cat, #cats, a.sel, #list), dx + w.w - 410, y + 103,
+                      'baseline');
+            local items = {};
+            for i, b in ipairs(list) do
+                items[i] = { label = b.name, indent = 34, right = is_new(b) and 'New' or (b.cost and b.cost > 0 and
+                             (b.cost .. ' MP')) or nil };
+            end
+            w.arows = ui.list(w, 'mcracts', items, a.sel, dx + 4, y + 118, w.w - 360, 32, ROWS, a.first, true);
+            for _, r in ipairs(w.arows) do
+                local info = require('core.actions').resolve(list[r[5]]);
+                if info then
+                    draw.image(info.disc, r[1] + 4, r[2] + 2, { scale = 26 / 44 });
+                    if info.icon then draw.image(info.icon, r[1] + 4, r[2] + 2, { scale = 26 / 44 }); end
+                end
+            end
+            local hint = ui.label('mcr_acth', 'small', { font_height = 14, font_color = 0xFFB8C0D8 });
+            text.draw(hint, 'Enter: place on a bar   Left / Right: category   Esc: back', dx + 4, y + w.h - 24, 'baseline');
+            return;
+        end
         local hint = ui.label('mcr_hint0', 'small', { font_height = 17, font_color = 0xFFB8C0D8 });
         text.draw(hint, books_row(w) and 'Enter: see every bar, put your macros on them or clear slots'
+                                      or acts_row(w) and 'Enter: the abilities and spells you have, to put on your bars'
                                       or 'Enter: create a new macro', dx + 4, y + 110, 'baseline');
-        w.frows = {};
-        if not w.bars then return; end
+        if not (w.bars or w.place) then return; end
     end
     if m then
     -- preview: the macro as it looks on the bar
@@ -236,8 +305,8 @@ win.draw = function (w, x, y)
         draw.nine('win_body', gx, gy, gw, gh, 12, bw, bh);
         draw.nine('win_body', gx, gy, gw, gh, 12, bw, bh);
         local t = ui.label('mcr_placet', 'label', { font_height = 18 });
-        text.draw(t, w.place and ('Place "' .. (m and m.name or '') .. '" on a bar') or 'Action bars', gx + 16, gy + 28,
-                  'baseline');
+        local what = w.place and (w.place.binding and w.place.binding.name or (m and m.name)) or '';
+        text.draw(t, w.place and ('Place "' .. what .. '" on a bar') or 'Action bars', gx + 16, gy + 28, 'baseline');
         w.pcells = {};
         for r = 1, nrows do
             local page, lay = math.floor((r - 1) / 2) + 1, (r - 1) % 2 + 1;
@@ -290,7 +359,14 @@ end
 local function place_here(w)
     local id = selected_id(w);
     local m = get(id);
-    if m and w.place then
+    if w.place and w.place.binding then
+        -- an ability or spell from Abilities & Spells
+        local b = w.place.binding;
+        local page, lay = math.floor((w.place.r - 1) / 2) + 1, (w.place.r - 1) % 2 + 1;
+        require('ui.hotbar').assign_to(lay, page, w.place.c, { kind = b.kind, name = b.name });
+        require('ui.hotbar').mark_offered(b.name);
+        store.save();
+    elseif m and w.place then
         local page, lay = math.floor((w.place.r - 1) / 2) + 1, (w.place.r - 1) % 2 + 1;
         require('ui.hotbar').assign_to(lay, page, w.place.c, { kind = 'macro', ref = id, name = m.name });
     end
@@ -338,7 +414,25 @@ win.key = function (w, vk)
         elseif vk == ui.VK.ESCAPE then w.place = nil; end
         return true;
     end
-    local nlist = #ids() + 2;
+    local nlist = #ids() + 3;
+    if w.acts then
+        local a = w.acts;
+        local cats = act_cats(w);
+        local list = cats[a.cat] and a.data[cats[a.cat]] or {};
+        if vk == ui.VK.UP then a.sel = (a.sel - 2) % math.max(1, #list) + 1;
+        elseif vk == ui.VK.DOWN then a.sel = a.sel % math.max(1, #list) + 1;
+        elseif vk == ui.VK.PRIOR then a.sel = math.max(1, a.sel - 11);
+        elseif vk == ui.VK.NEXT then a.sel = math.min(#list, a.sel + 11);
+        elseif vk == ui.VK.LEFT then a.cat = (a.cat - 2) % math.max(1, #cats) + 1; a.sel, a.first = 1, 0;
+        elseif vk == ui.VK.RIGHT or vk == ui.VK.TAB then a.cat = a.cat % math.max(1, #cats) + 1; a.sel, a.first = 1, 0;
+        elseif vk == ui.VK.RETURN then
+            if list[a.sel] then
+                local lay = require('ui.layers').current();
+                w.place = { r = (store.data.hotbar.page - 1) * 2 + (lay or 1), c = 1, binding = list[a.sel] };
+            end
+        elseif vk == ui.VK.ESCAPE then w.acts = nil; end
+        return true;
+    end
     if w.grid then
         local n = #ICONS;
         if vk == ui.VK.LEFT then w.grid = (w.grid - 2) % n + 1;
@@ -356,6 +450,10 @@ win.key = function (w, vk)
         if vk == ui.VK.UP then w.sel = (w.sel - 2) % nlist + 1;
         elseif vk == ui.VK.DOWN then w.sel = w.sel % nlist + 1;
         elseif vk == ui.VK.RETURN or vk == ui.VK.RIGHT then
+            if acts_row(w) then
+                if vk == ui.VK.RETURN then open_acts(w); end
+                return true;
+            end
             if books_row(w) then
                 if vk == ui.VK.RETURN then
                     local lay = require('ui.layers').current();
@@ -365,7 +463,7 @@ win.key = function (w, vk)
             end
             if w.sel == 1 then
                 new_macro();
-                w.sel = nlist;
+                w.sel = #ids() + 1;
             end
             w.focus, w.field = 'fields', 1;
         elseif vk == ui.VK.ESCAPE then return false; end
@@ -404,6 +502,12 @@ win.click = function (w, mx, my, button)
         end
         return true;
     end
+    if w.acts and not w.place then
+        for _, r in ipairs(w.arows or {}) do
+            if ui.hit(r, mx, my) then w.acts.sel = r[5]; win.key(w, ui.VK.RETURN); return true; end
+        end
+        return true;
+    end
     if w.place then
         for _, c in ipairs(w.pcells or {}) do
             if ui.hit(c, mx, my) then w.place.r, w.place.c = c[5], c[6]; place_here(w); return true; end
@@ -424,7 +528,7 @@ win.click = function (w, mx, my, button)
     for _, r in ipairs(w.rows) do
         if ui.hit(r, mx, my) then
             w.sel, w.focus = r[5], 'list';
-            if r[5] == 1 or books_row(w) then win.key(w, ui.VK.RETURN); end
+            if r[5] == 1 or books_row(w) or acts_row(w) then win.key(w, ui.VK.RETURN); end
             return true;
         end
     end
@@ -447,6 +551,10 @@ function M.command(args)
 end
 
 win.wheel = function (w, delta)
+    if w.acts and not w.place then
+        win.key(w, delta > 0 and ui.VK.UP or ui.VK.DOWN);
+        return;
+    end
     if w.grid then
         local n = #ICONS;
         w.grid = math.max(1, math.min(n, w.grid + (delta > 0 and -GRID_COLS or GRID_COLS)));

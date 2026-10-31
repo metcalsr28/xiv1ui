@@ -7,7 +7,7 @@
 
 addon.name    = 'xiv1ui';
 addon.author  = 'xiv1ui project';
-addon.version = '0.2.1';
+addon.version = '0.3.0';
 addon.desc    = 'FINAL FANTASY XIV 1.0 style interface.';
 addon.link    = '';
 
@@ -49,6 +49,9 @@ local MODULES = {
     'itempanel',
     'listpanel',
     'roe',              -- Records of Eminence / currency figures from the server's packets
+    'currencies',       -- Status » Currencies / Currencies 2 (after cmdmenu, over the menus)
+    'keyitems',         -- Commands » Key Items, a category's list (after cmdmenu)
+    'quests',           -- Commands » Quests » Current / Completed Quests (after cmdmenu)
     'mainmenu',
     'micromenu',
     'minimap',
@@ -110,6 +113,7 @@ end);
 ashita.events.register('unload', 'xiv1ui_unload', function ()
     native.restore();
     pcall(require('ui.lobby').release);
+    pcall(require('ui.zoning').release);
     for _, m in ipairs(modules) do
         if m.release then
             local ok, err = pcall(m.release);      -- a failing cleanup must never stop xiv1ui unloading / reloading
@@ -130,6 +134,8 @@ ashita.events.register('d3d_beginscene', 'xiv1ui_beginscene', function ()
     if not ok then print('[xiv1ui] ' .. tostring(err)); end
     ok, err = pcall(require('ui.chatlog').early);
     if not ok then print('[xiv1ui] ' .. tostring(err)); end
+    ok, err = pcall(require('ui.zoning').early);
+    if not ok then print('[xiv1ui] ' .. tostring(err)); end
     ok, err = pcall(require('core.gamewin').early);
     if not ok then print('[xiv1ui] ' .. tostring(err)); end
 end);
@@ -144,6 +150,15 @@ ashita.events.register('d3d_present', 'xiv1ui_present', function ()
         draw.set_scale(store.data.ui_scale);
         if not draw.begin_frame() then return; end
         local ok, err = pcall(loading and lobby.render_loading or lobby.render);
+        if not ok then print('[xiv1ui] ' .. tostring(err)); end
+        draw.end_frame();
+        return;
+    end
+    -- between areas: the game's "Downloading data..." bar is hidden (ui/zoning.lua) and xiv1ui's loading mark drawn
+    if require('ui.zoning').active() then
+        draw.set_scale(store.data.ui_scale);
+        if not draw.begin_frame() then return; end
+        local ok, err = pcall(lobby.render_loading, true);
         if not ok then print('[xiv1ui] ' .. tostring(err)); end
         draw.end_frame();
         return;
@@ -163,7 +178,8 @@ ashita.events.register('d3d_present', 'xiv1ui_present', function ()
     if not draw.begin_frame() then return; end
     local dev_hidden = store.data.dev_hidden or {};
     -- during an event (cutscene, NPC conversation) only the parts that belong to it are drawn
-    local in_event = require('core.event').active();
+    -- (and while Region Info's full-screen maps are up, "cnqframe": their own panels sit where the HUD is)
+    local in_event = require('core.event').active() or require('core.gamewin').window('cnqframe') ~= nil;
     for _, m in ipairs(modules) do
         if m.render and not dev_hidden[m.name or ''] and (not in_event or EVENT_PARTS[m.name]) then
             local k = part_k(m.name);

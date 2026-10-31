@@ -47,7 +47,8 @@ local function chat_flag(label, key)
 end
 
 -- HUD part sizes live in store.data.part_scale (read by xiv1ui.lua)
-local PART_SIZES = { 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.35, 1.5 };
+local PART_SIZES = {};
+for v = 60, 160, 5 do PART_SIZES[#PART_SIZES + 1] = v / 100; end         -- 60% to 160% in 5% steps
 local function part(label, key)
     return stepper(label, PART_SIZES,
         function () return rawget(store.data.part_scale or {}, key) or 1; end,
@@ -65,6 +66,10 @@ local function channel(label, ch)
                  store.save();
              end };
 end
+
+-- the action bar group's sideways position: 10 px steps, 600 either way
+local OFFSETS = {};
+for v = -600, 600, 10 do OFFSETS[#OFFSETS + 1] = v; end
 
 local function font_values()
     local out = {};
@@ -87,6 +92,13 @@ local TABS = {
             function (v) return v == 0 and 'Off' or (v .. ' px'); end),
         flag('Names over characters in the HUD font', 'nameplates', true),
         flag('Popup help when hovering actions and buttons', 'popup_help', true),
+        stepper('Dialogue box font', font_values(), function () return store.data.dlg_font or 'serif'; end,
+            function (v) store.data.dlg_font = v; end, font_label),
+        stepper('Dialogue box text size', { 16, 17, 18, 19, 20, 22, 24, 26, 28 },
+            function () return store.data.dlg_size or 20; end, function (v) store.data.dlg_size = v; end,
+            function (v) return v .. ' px'; end),
+        stepper('Knocked Out screen', { false, true }, function () return store.data.death_minimal == true; end,
+            function (v) store.data.death_minimal = v; end, function (v) return v and 'Minimal' or 'Full'; end),
         flag('Hide the game\'s own panels that xiv1ui replaces', 'hide_native', true),
         flag('Area map in the minimap', 'minimap_hd', true),
         flag('Configuration button in the bottom-right buttons', 'config_button', true),
@@ -123,8 +135,7 @@ local TABS = {
         part('Party list', 'party'),
         part('Minimap', 'minimap'),
         part('Bottom-right buttons', 'buttons'),
-        stepper('Action bar group position (left / right)', { -400, -300, -200, -150, -100, -50, 0, 50, 100, 150, 200,
-                                                               250, 300, 400, 500 },
+        stepper('Action bar group position (left / right)', OFFSETS,
             function () return rawget(store.data.part_offset or {}, 'bars') or 0; end,
             function (v) store.data.part_offset = store.data.part_offset or {}; rawset(store.data.part_offset, 'bars', v); end,
             function (v) return v == 0 and 'Centre' or string.format('%+d', v); end),
