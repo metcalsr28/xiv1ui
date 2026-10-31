@@ -165,6 +165,9 @@ local function image_file(dat)
         ffi.cast('uint32_t*', fh + 10)[0] = 14 + 40 + 1024;
         return ffi.string(fh, 14) .. body;
     elseif flag == 0xA1 then
+        -- (some HD map packs store this tag as "3TXD" and lay the blocks out differently: not readable here, so the
+        -- caller falls back to the next source)
+        if dat:sub(0x6A, 0x6D) == '3TXD' then return nil; end
         local n = w * h;
         if #dat < 0x80 + n then return nil; end
         return dds_header(w, h) .. dat:sub(0x81, 0x80 + n), true;
@@ -178,13 +181,16 @@ function maps.export(m, out_base)
     local fid = (bit.band(m.flags, 0x10) ~= 0 and 53295 or 5312) + m.id;
     local rel = dat_path(fid);
     if rel == nil then return nil; end
-    local dat = nil;
+    local img, dxt = nil, nil;
     for _, base in ipairs(dat_bases()) do
         local f = io.open(base .. rel, 'rb');
-        if f then dat = f:read('*a'); f:close(); break; end
+        if f then
+            local dat = f:read('*a');
+            f:close();
+            img, dxt = image_file(dat);
+            if img then break; end
+        end
     end
-    if dat == nil then return nil; end
-    local img, dxt = image_file(dat);
     if img == nil then return nil; end
     local path = out_base .. (dxt and '.dds' or '.bmp');
     local f = io.open(path, 'wb');
@@ -205,13 +211,16 @@ function maps.texture(m)
     local fid = (bit.band(m.flags, 0x10) ~= 0 and 53295 or 5312) + m.id;
     local rel = dat_path(fid);
     if rel == nil then return nil; end
-    local dat = nil;
+    local img, dxt = nil, nil;
     for _, base in ipairs(dat_bases()) do
         local f = io.open(base .. rel, 'rb');
-        if f then dat = f:read('*a'); f:close(); break; end
+        if f then
+            local dat = f:read('*a');
+            f:close();
+            img, dxt = image_file(dat);
+            if img then break; end
+        end
     end
-    if dat == nil then return nil; end
-    local img, dxt = image_file(dat);
     if img == nil then return nil; end
     local buf = ffi.new('uint8_t[?]', #img);
     ffi.copy(buf, img, #img);

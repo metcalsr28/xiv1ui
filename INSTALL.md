@@ -43,8 +43,9 @@ these will show up on top of it. In the CatsEyeXI launcher's addon settings (or 
 
 Keep your server's own plugins (on CatsEyeXI: `cexidats` and `cexislots`).
 
-**Recommended:** HD area maps. In the CatsEyeXI launcher, enable the **Combined Maps** mod. The minimap uses
-whichever map pack XI-Pivot has enabled, and FFXI's own maps otherwise.
+**HD area maps:** the minimap reads HD maps from XI-Pivot overlays in the Remapster format (HorizonXI ships one).
+The CatsEyeXI launcher's **Combined Maps** mod uses a format xiv1ui can't read yet; with it enabled, the minimap
+uses FFXI's own maps instead (the game's Map screen still gets the HD maps).
 
 ## 4. Play
 

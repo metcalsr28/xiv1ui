@@ -25,12 +25,13 @@ local cmd = {};
 -- The action menu (playermo; battlemo in combat): its row objects are a fixed template (10 rows, in a different
 -- order), not what the game shows. What it shows is the list of command ids in its class object ([slot] + 0x1C,
 -- u16s up to a 0), and the cursor is the window's +0x4C (1-based). Labels come from ACTION_IDS, and ids not in that
--- table are learned from the game's help line the first time the cursor is on them (store.data.action_ids).
+-- table are learned from the game's help line the first time the cursor is on them (store.data.action_ids); until
+-- then such an entry shows as "…" (the menu stays xiv1ui's).
 local MENUS = {};
 local ACTION_MENUS = { playermo = true, battlemo = true };
 local ACTION_IDS = { [1] = 'Attack', [3] = 'Disengage', [5] = 'Chat', [7] = 'Abilities', [8] = 'Magic', [9] = 'Items',
-                     [10] = 'Check', [11] = 'Check', [18] = 'Switch Target', [19] = 'Trade', [25] = 'Trust',
-                     [27] = 'Request' };
+                     [10] = 'Check', [11] = 'Check', [12] = 'Treasure', [18] = 'Switch Target', [19] = 'Trade',
+                     [25] = 'Trust', [27] = 'Request' };
 local TITLES = {
     menuwind = 'Commands', socialme = 'Commands', commenu = 'Communication', statcom2 = 'Status',
     mgcmenu = 'Magic Spells', cmbmenu = 'Synthesis', abimenu = 'Abilities', prty1 = 'Party', searchma = 'Search',
@@ -236,8 +237,7 @@ local function action_rows(name, obj)
     local rows = {};
     for i, id in ipairs(ids) do
         local h = learned[tostring(id)];
-        rows[i] = ACTION_IDS[id] or (h and label_for(h));
-        if rows[i] == nil then return nil; end
+        rows[i] = ACTION_IDS[id] or (h and label_for(h)) or '\u{2026}';
     end
     return rows, cursor;
 end

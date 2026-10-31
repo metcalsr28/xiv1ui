@@ -75,8 +75,8 @@ clock, connection info and the engaged HP/MP/TP box. Everything comes back when 
 Optional extras that make it better:
 - **Nameplate plugin** (ships with most Ashita installs, `/load nameplate`): lets xiv1ui switch off FFXI's own name
   plates and draw its own. Without it, the game's name plates stay.
-- **HD area maps** through XI-Pivot (Remapster on HorizonXI, the Combined Maps pack in the CatsEyeXI launcher): the
-  minimap uses whichever overlay XI-Pivot has enabled, and FFXI's own maps otherwise.
+- **HD area maps** through XI-Pivot (Remapster on HorizonXI): the minimap uses an enabled overlay's map when it can
+  read it, and FFXI's own maps otherwise. (CatsEyeXI's Combined Maps pack uses a format it can't read yet.)
 - **HXIUIBegone** (HorizonXI): also hides the second chat window and the alliance lists, which xiv1ui doesn't yet.
 
 ## Credits and licences
