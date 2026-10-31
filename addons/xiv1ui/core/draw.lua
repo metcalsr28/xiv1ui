@@ -28,6 +28,19 @@ function draw.screen_k()
     return math.max(0.5, math.min(4, h / draw.DESIGN_H));
 end
 
+--- Size of one HUD part relative to the rest (Configuration » HUD: action bar, target, party list ...). While a part
+-- draws, draw.scale includes its factor; layout.screen() then reports the screen in that part's units, so anchors
+-- still land on the same screen edges. draw.part is that factor (1 outside a scaled part).
+draw.part = 1;
+function draw.push_part(k)
+    draw.part = k;
+    draw.scale = draw.screen_k() * draw.user_scale * k;
+end
+function draw.pop_part()
+    draw.part = 1;
+    draw.scale = draw.screen_k() * draw.user_scale;
+end
+
 --- Set the player's UI scale (clamped to the offered range) for the next frame.
 function draw.set_scale(s)
     s = tonumber(s) or 1;

@@ -5,6 +5,10 @@
 * pink, shout orange, echo purple, system blue). The windows fade out after 60 s without new text and come back
 * when something arrives or the mouse is over them. The mouse wheel scrolls a log; clicking a log opens the chat input.
 *
+* Customisable (Configuration » Chat; store.data.chat): font, text size, line spacing, outline, background opacity,
+* timestamps, repeated lines collapsed into one ("× 3"), battle text in its own log or merged into General. The logs
+* are resized by dragging the grip at a log's top-right corner (width for both, height for that log).
+*
 * Text is read from the game as it arrives ('text_in'); nothing is blocked, so the game's own log keeps working
 * underneath (it is hidden through HXIUIBegone when that addon is loaded).
 *
@@ -24,12 +28,47 @@ local hider = require('core.gamewin').new();
 
 local KEEP     = 200;         -- lines kept per log
 local AUTOHIDE = 60;          -- seconds
-local LOG_W    = 400;         -- larger chat text (Configuration » Chat text size) wraps more and adds height
-local LOG_MIN  = 280;         -- narrowest the logs get to make room for the action bar (narrow screens, large UI scale)
+local LOG_W    = 400;         -- default width; the player can resize the logs (store.data.chat.w)
+local LOG_MIN  = 280;         -- narrowest the default-width logs get to make room for the action bar
+local W_MIN, W_MAX, H_MIN, H_MAX = 240, 1400, 70, 900;    -- resize limits (HUD units)
 local log_w    = LOG_W;       -- the logs' width this frame (see fit_width)
 local BASE_SIZE = 16;
 local size = BASE_SIZE;
 local LINE_PAD = 2;
+
+-- Fonts offered for the chat (all bundled, OFL, except Arial). Japanese text still switches to the Japanese font.
+chatlog.FONTS = {
+    { id = 'serif',   label = 'XIV1UI Serif' },
+    { id = 'sans',    label = 'PT Sans',    family = 'PT Sans' },
+    { id = 'ptserif', label = 'PT Serif',   family = 'PT Serif' },
+    { id = 'arial',   label = 'Arial',      family = 'Arial' },
+};
+
+-- The chat settings, with defaults filled in.
+local function cfg()
+    local st = require('core.store').data;
+    local t = st.chat or {};
+    -- (saved tables carry Ashita's table helpers, e.g. :size() and :merge(): read the values raw)
+    local function c(k) return rawget(t, k); end
+    return {
+        font = c('font') or 'serif',
+        size = c('size') or rawget(st, 'chat_size') or BASE_SIZE,
+        w = c('w') or 0, h1 = c('h1') or 0, h2 = c('h2') or 0,  -- 0 = default size
+        bg = c('bg') or 0.85,                                    -- background opacity
+        outline = c('outline') or 2,
+        spacing = c('spacing') or LINE_PAD,
+        collapse = c('collapse') ~= false,
+        stamps = c('stamps') == true,
+        merge = c('merge') == true,                              -- battle text in the General log
+        hide = c('hide') or {},                                  -- channels left out of the logs: hide[channel] = true
+    };
+end
+chatlog.cfg = cfg;
+
+local function font_family(id)
+    for _, f in ipairs(chatlog.FONTS) do if f.id == id then return f.family or text.SERIF; end end
+    return text.SERIF;
+end
 
 -- channel -> colour (ARGB)
 local COLORS = {
@@ -82,14 +121,38 @@ local function clean(s)
     return (u:gsub('\1', '\226\128\156'):gsub('\2', '\226\128\157'));
 end
 
+-- A log line: { obj = text object, raw = the message, color, count (repeats collapsed into it), stamp }.
+local style_key = nil;        -- font|size|outline the line objects were made with
+local function new_obj(c, color)
+    local obj = text.new('small', { font_height = c.size, font_color = color, box_width = log_w - 28,
+                                    outline_width = c.outline, font_family = font_family(c.font) });
+    obj.base_family = font_family(c.font);
+    return obj;
+end
+local function line_text(ln, c)
+    local t = ln.raw;
+    if ln.count > 1 then t = t .. '  \u{00D7}' .. ln.count; end
+    if c.stamps then t = '[' .. ln.stamp .. '] ' .. t; end
+    return t;
+end
+
 local function add_line(log, str, color)
-    local obj = text.new('small', { font_height = size, font_color = color, box_width = log_w - 28, outline_width = 2 });
-    text.set(obj, str);
+    local c = cfg();
     local lines = log.lines;
-    lines[#lines + 1] = obj;
+    local last = lines[#lines];
+    last_text = xi_now();
+    if c.collapse and last and last.raw == str and last.color == color then
+        last.count = last.count + 1;
+        last.stamp = os.date('%H:%M');
+        text.set(last.obj, line_text(last, c));
+        return;
+    end
+    local ln = { raw = str, color = color, count = 1, stamp = os.date('%H:%M') };
+    ln.obj = new_obj(c, color);
+    text.set(ln.obj, line_text(ln, c));
+    lines[#lines + 1] = ln;
     if #lines > KEEP then table.remove(lines, 1); end
     if log.scroll > 0 then log.scroll = log.scroll + 1; end      -- keep the view still while scrolled back
-    last_text = xi_now();
 end
 
 function chatlog.text_in(e)
@@ -108,7 +171,11 @@ function chatlog.text_in(e)
         local t, key = h(s);
         if t then add_line(logs[1], t, COLORS[key] or COLORS.system); return; end
     end
-    if ch == 'battle' then
+    local c = cfg();
+    if c.hide[ch] then return; end
+    if ch == 'battle' and c.merge then
+        add_line(logs[1], s, COLORS.battle);
+    elseif ch == 'battle' then
         add_line(logs[2], s, COLORS.battle);
     else
         add_line(logs[1], s, COLORS[ch] or COLORS.system);
@@ -119,17 +186,20 @@ end
 local INPUT_H = 30;           -- the input line, inside the bottom of Log 1 while typing
 local typing = false;
 
+local grip_hover = nil;       -- the log whose resize grip is under the pointer
 local function draw_log(i, x, y_bottom, alpha)
     local log = logs[i];
+    local c = cfg();
     local h = log.height;
     local y = y_bottom - h;
     rects[i] = { x, y - 22, log_w, h + 22 };
+    log.grip = { x + log_w - 18, y - (log.wash and 0 or 2), 18, 18 };
     if log.wash then
         if #log.lines == 0 then return y - 22; end     -- nothing to show: no wash either
         -- the Battle log: no box; a dark wash behind the lines (drawn below, once their height is known)
     else
         local pw, ph = layout.size('log_panel');
-        draw.image('log_panel', x, y, { scale = { log_w / pw, h / ph }, color = draw.alpha(0xFFFFFFFF, alpha) });
+        draw.image('log_panel', x, y, { scale = { log_w / pw, h / ph }, color = draw.alpha(0xFFFFFFFF, alpha * c.bg) });
         draw.image('log_tab_active', x + 6, y - 21, { color = draw.alpha(0xFFFFFFFF, alpha) });
         if not log.tab_obj then log.tab_obj = text.new('label', { font_height = 15, font_alignment = text.align.Center }); end
         text.draw(log.tab_obj, log.title, x + 54, y - 5, 'baseline');
@@ -143,7 +213,7 @@ local function draw_log(i, x, y_bottom, alpha)
     local n = #log.lines - log.scroll;
     local one = log.one_line;
     if one == nil and log.lines[1] then
-        local probe = text.new('small', { font_height = size, outline_width = 2 });
+        local probe = text.new('small', { font_height = size, outline_width = c.outline, font_family = font_family(c.font) });
         text.set(probe, 'Ag');
         local _, h1 = text.size(probe);
         one = h1; log.one_line = one; log.one_size = size;
@@ -153,23 +223,23 @@ local function draw_log(i, x, y_bottom, alpha)
     if log.wash then
         local top, m = cy, n;
         while m >= 1 do
-            local _, bh = text.size(log.lines[m]);
+            local _, bh = text.size(log.lines[m].obj);
             local lh = bh - trim;
             if top - lh < y + 4 then break; end
-            top = top - lh - LINE_PAD;
+            top = top - lh - c.spacing;
             m = m - 1;
         end
         local ww, wh = layout.size('log_wash');
         local wy = top - 10;
         draw.image('log_wash', 0, wy, { scale = { (x + log_w + 160) / ww, (y_bottom - wy + 6) / wh },
-                                        color = draw.alpha(0xFFFFFFFF, alpha) });
+                                        color = draw.alpha(0xFFFFFFFF, alpha * c.bg) });
     end
     while n >= 1 do
-        local obj = log.lines[n];
+        local obj = log.lines[n].obj;
         local _, bh = text.size(obj);
         local lh = bh - trim;
         if cy - lh < y + 4 then break; end
-        cy = cy - lh - LINE_PAD;
+        cy = cy - lh - c.spacing;
         obj:set_opacity(alpha);
         text.render(obj, x + 12, cy - trim * 0.67);
         n = n - 1;
@@ -178,19 +248,33 @@ local function draw_log(i, x, y_bottom, alpha)
         if not log.more_obj then log.more_obj = text.new('slotkey', { font_height = 13, font_alignment = text.align.Right }); end
         text.draw(log.more_obj, string.format('▼ %d more', log.scroll), x + log_w - 10, y_bottom - 8, 'baseline');
     end
+    -- the resize grip: three short diagonal strokes at the top-right corner, shown while the pointer is on the log
+    if hover_log == i or grip_hover == i or chatlog.resizing then
+        local g = log.grip;
+        local col = draw.alpha(grip_hover == i and 0xFFF4E0A0 or 0xB0E8E4D8, alpha);
+        for k = 0, 2 do
+            local o = 4 + k * 4;
+            for d = 0, o do draw.rect(g[1] + g[3] - 4 - o + d, g[2] + 2 + d, 1, 1, col); end
+        end
+    end
     return y - 22;
 end
 
--- Follow the chat text size setting: re-render existing lines at the new size and make the logs taller to match.
-local function apply_size()
-    local want = require('core.store').data.chat_size or BASE_SIZE;
-    if want == size then return; end
-    size = want;
-    for _, log in ipairs(logs) do log.one_line = nil; end
+-- Follow the chat settings: a new font, size or outline remakes the line objects; the logs' heights follow the
+-- player's sizes (or, by default, grow with the text size).
+local function apply_style()
+    local c = cfg();
+    size = c.size;
+    logs[1].height = (c.h1 > 0) and c.h1 or math.floor(176 * size / BASE_SIZE + 0.5);
+    logs[2].height = (c.h2 > 0) and c.h2 or math.floor(150 * size / BASE_SIZE + 0.5);
+    local key = c.font .. '|' .. c.size .. '|' .. c.outline .. '|' .. tostring(c.stamps);
+    if key == style_key then return; end
+    style_key = key;
     for _, log in ipairs(logs) do
-        log.height = math.floor((log == logs[1] and 176 or 150) * size / BASE_SIZE + 0.5);
-        for _, obj in ipairs(log.lines) do
-            obj:set_font_height(size);
+        log.one_line = nil;
+        for _, ln in ipairs(log.lines) do
+            ln.obj = new_obj(c, ln.color);
+            text.set(ln.obj, line_text(ln, c));
         end
     end
 end
@@ -255,12 +339,16 @@ local function draw_input(x, y, w)
     local raw = chat:GetInputTextRaw() or '';
     local caret = math.max(0, math.min(#raw, chat:GetInputTextRawCaretPosition() or #raw));
     local h = INPUT_H;
+    if input.obj and input.style ~= style_key then input.obj = nil; input.key = nil; end
     draw.rect(x, y, w, h, 0x90000000);
     draw.rect(x, y, w, 1, 0x60C8CCE0);
     if input.obj == nil then
-        input.obj = text.new('small', { font_height = size, outline_width = 2 });
-        input.label = text.new('small', { font_height = size - 2, outline_width = 2 });
-        input.measure = text.new('small', { font_height = size, outline_width = 2 });
+        local c = cfg();
+        local fam = font_family(c.font);
+        input.obj = text.new('small', { font_height = size, outline_width = c.outline, font_family = fam });
+        input.label = text.new('small', { font_height = size - 2, outline_width = c.outline, font_family = fam });
+        input.measure = text.new('small', { font_height = size, outline_width = c.outline, font_family = fam });
+        input.style = style_key;
     end
     local name, ch, skip = channel_of(raw);
     local col = COLORS[ch] or COLORS.say;
@@ -321,21 +409,26 @@ end
 -- The logs sit at the bottom left, beside the action bar. On a narrow screen (or at a large UI scale) the bar's left
 -- end, its crest, reaches into them: the logs then get narrower (down to LOG_MIN) and their lines re-wrap.
 local function fit_width()
+    local chosen = cfg().w;
     local w = LOG_W;
-    local chat, bar = layout.widgets.chat, layout.widgets.hotbar;
-    if chat and bar and chat[2] < bar[2] + bar[4] and bar[2] < chat[2] + chat[4] and chat[1] < bar[1] then
-        w = math.max(LOG_MIN, math.min(LOG_W, math.floor(bar[1] - 12 - chat[1])));
+    if chosen > 0 then
+        w = chosen;                -- the player's width (they can move or shrink the action bar themselves)
+    else
+        local chat, bar = layout.widgets.chat, layout.widgets.hotbar;
+        if chat and bar and chat[2] < bar[2] + bar[4] and bar[2] < chat[2] + chat[4] and chat[1] < bar[1] then
+            w = math.max(LOG_MIN, math.min(LOG_W, math.floor(bar[1] - 12 - chat[1])));
+        end
     end
     if w == log_w then return; end
     log_w = w;
     for _, log in ipairs(logs) do
         log.one_line = nil;
-        for _, obj in ipairs(log.lines) do text.set_box_width(obj, log_w - 28); end
+        for _, ln in ipairs(log.lines) do text.set_box_width(ln.obj, log_w - 28); end
     end
 end
 
 function chatlog.render()
-    apply_size();
+    apply_style();
     fit_width();
     -- the chat input: the game's bar hidden, ours drawn under Log 1; the logs stay up while typing
     local open = bit.band(AshitaCore:GetChatManager():IsInputOpen() or 0, 0x10) ~= 0;
@@ -352,8 +445,47 @@ function chatlog.render()
     -- Log 1 sits just above the game's own typing box at the bottom left; Log 2 above it.
     local top = draw_log(1, 16 + ox, sh - 46 + oy, alpha);
     if open then draw_input(16 + ox + 6, sh - 46 + oy - INPUT_H - 4, log_w - 12); end
-    local top2 = draw_log(2, 16 + ox, top - 8, alpha);
+    local top2 = top;
+    if cfg().merge then rects[2] = nil; logs[2].grip = nil; else top2 = draw_log(2, 16 + ox, top - 8, alpha); end
     layout.bounds('chat', 16 + ox, top2, log_w, sh - 46 + oy - top2);
+end
+
+-- Resizing: a press on a log's grip starts it; moving changes the width (both logs) and that log's height (the
+-- logs grow upward from their bottom edge); release saves. Called before HUD dragging (xiv1ui.lua), so the grip
+-- doesn't move the whole chat.
+chatlog.resizing = nil;
+local function on_grip(e)
+    for i, log in ipairs(logs) do
+        local g = log.grip;
+        if g and rects[i] and e.x >= g[1] - 4 and e.x < g[1] + g[3] + 4 and e.y >= g[2] - 4 and e.y < g[2] + g[4] + 4 then
+            return i;
+        end
+    end
+end
+
+function chatlog.resize_mouse(e)
+    local r = chatlog.resizing;
+    if r then
+        local st = require('core.store');
+        st.data.chat = st.data.chat or {};
+        if e.message == 0x200 then
+            rawset(st.data.chat, 'w', math.floor(math.max(W_MIN, math.min(W_MAX, r.w + (e.x - r.x)))));
+            rawset(st.data.chat, r.key, math.floor(math.max(H_MIN, math.min(H_MAX, r.h - (e.y - r.y)))));
+        elseif e.message == 0x202 then
+            chatlog.resizing = nil;
+            st.save();
+        end
+        e.blocked = true;
+        return true;
+    end
+    local i = on_grip(e);
+    if e.message == 0x200 then grip_hover = i; return false; end
+    if i and e.message == 0x201 then
+        chatlog.resizing = { x = e.x, y = e.y, w = log_w, h = logs[i].height, key = (i == 1) and 'h1' or 'h2' };
+        e.blocked = true;
+        return true;
+    end
+    return false;
 end
 
 function chatlog.mouse(e)

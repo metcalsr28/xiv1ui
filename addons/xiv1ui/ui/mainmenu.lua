@@ -16,7 +16,7 @@ function mainmenu.register(name, mod) windows[name] = mod; end
 local ENTRIES = {
     { label = 'Attributes',       win = 'attributes' },
     { label = 'Gear',             win = 'gear' },
-    { label = 'Actions & Traits', win = 'actions' },
+    { label = 'Actions & Traits', win = 'actions', extra = true },     -- an "extra change" (Configuration » General)
     { label = 'Macros',           win = 'macros' },
     { label = 'Inventory',        win = 'inventory' },
     { label = 'Journal' },
@@ -56,24 +56,38 @@ menu.x = function (win)
     return sw - win.w - 18, math.floor((sh - win.h) / 2) - 60;
 end
 
+-- Entries marked extra are xiv1ui's own replacements for how the game works (not only how it looks); they show
+-- only with Configuration » Experimental: "Enable experimental options" and the entry's own switch both on.
+local function shown()
+    local out = {};
+    local d = require('core.store').data;
+    local extras = d.experimental == true and d.extras == true;
+    for _, e in ipairs(ENTRIES) do if extras or not e.extra then out[#out + 1] = e; end end
+    return out;
+end
+
 menu.draw = function (win, x, y)
     ui.header('mainmenu', 'Main Menu', x + 16, y + 30, win.w - 30);
+    local entries = shown();
+    win.h = 70 + #entries * 26;
+    if win.sel > #entries then win.sel = #entries; end
     local items = {};
-    for i, e in ipairs(ENTRIES) do items[i] = { label = e.label, disabled = not available(e) }; end
+    for i, e in ipairs(entries) do items[i] = { label = e.label, disabled = not available(e) }; end
     win.rows = ui.list(win, 'mm', items, win.sel, x + 26, y + 44, win.w - 40, 26, #items, 0, ui.top() == win);
 end
 
 menu.key = function (win, vk)
     if vk == ui.VK.ESCAPE then return false; end      -- not handled: Esc / B closes the menu
-    if vk == ui.VK.UP then win.sel = (win.sel - 2) % #ENTRIES + 1;
-    elseif vk == ui.VK.DOWN then win.sel = win.sel % #ENTRIES + 1;
-    elseif vk == ui.VK.RETURN then activate(ENTRIES[win.sel]); end
+    local entries = shown();
+    if vk == ui.VK.UP then win.sel = (win.sel - 2) % #entries + 1;
+    elseif vk == ui.VK.DOWN then win.sel = win.sel % #entries + 1;
+    elseif vk == ui.VK.RETURN then activate(entries[win.sel]); end
     return true;
 end
 
 menu.click = function (win, mx, my)
     for _, r in ipairs(win.rows) do
-        if ui.hit(r, mx, my) then win.sel = r[5]; activate(ENTRIES[r[5]]); return true; end
+        if ui.hit(r, mx, my) then win.sel = r[5]; activate(shown()[r[5]]); return true; end
     end
 end
 

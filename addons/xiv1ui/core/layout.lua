@@ -33,13 +33,20 @@ end
 -- Screen boxes of the HUD widgets this frame (for dragging): widgets[id] = { x, y, w, h }.
 layout.widgets = {};
 
+-- (boxes are kept in plain HUD units: a scaled part's box is multiplied out by its factor)
 function layout.bounds(id, x, y, w, h)
-    layout.widgets[id] = { x, y, w, h };
+    local k = require('core.draw').part;
+    layout.widgets[id] = { x * k, y * k, w * k, h * k };
 end
 
 --- Top-left corner for a w x h block placed at an anchor ('bottom', 'top', 'topleft', ...) plus an offset.
 -- With an id, the widget's saved drag offset is added too.
+-- A HUD part's sideways shift (Configuration » HUD, e.g. the action bar group moved right to make room for the chat),
+-- in plain HUD units; set by xiv1ui.lua while that part draws.
+layout.part_dx = 0;
+
 function layout.anchor(where, w, h, dx, dy, id)
+    dx = (dx or 0) + layout.part_dx / require('core.draw').part;
     if id then
         local ox, oy = layout.offset(id);
         dx, dy = (dx or 0) + ox, (dy or 0) + oy;
@@ -59,9 +66,11 @@ function layout.anchor(where, w, h, dx, dy, id)
 end
 
 -- Per-widget offsets from HUD layout editing (dragging), saved in the settings: layout.offset(id) -> dx, dy.
+-- (offsets are saved in plain HUD units; a scaled part gets them in its own units)
 function layout.offset(id)
     local o = require('core.store').data.layout[id];
-    if o then return o[1], o[2]; end
+    local k = require('core.draw').part;
+    if o then return o[1] / k, o[2] / k; end
     return 0, 0;
 end
 

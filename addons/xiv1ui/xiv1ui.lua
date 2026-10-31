@@ -53,6 +53,20 @@ local MODULES = {
     'layers',
 };
 local modules = {};
+-- HUD parts that can be resized on their own (Configuration » HUD): module -> part key in store.data.part_scale
+local PARTS = { hotbar = 'bars', gauges = 'bars', expbar = 'bars', castbar = 'bars', layers = 'bars',
+                target = 'target', status = 'target', party = 'party', minimap = 'minimap', micromenu = 'buttons' };
+local function part_dx(name)
+    local key = PARTS[name or ''];
+    local t = key and store.data.part_offset;
+    return t and tonumber(rawget(t, key)) or 0;
+end
+local function part_k(name)
+    local key = PARTS[name or ''];
+    local t = key and store.data.part_scale;
+    local k = t and tonumber(rawget(t, key)) or 1;
+    return (k > 0.4 and k < 3) and k or 1;
+end
 -- the modules still drawn during an event (everything else is the HUD, which steps aside)
 local EVENT_PARTS = { gamein = true, cinema = true, nameplates = true, dialogue = true, itemcard = true, cmdmenu = true,
                       deathscreen = true, confirm = true, mainmenu = true, layers = true, botexport = true, roe = true };
@@ -149,8 +163,17 @@ ashita.events.register('d3d_present', 'xiv1ui_present', function ()
     local in_event = require('core.event').active();
     for _, m in ipairs(modules) do
         if m.render and not dev_hidden[m.name or ''] and (not in_event or EVENT_PARTS[m.name]) then
-            local ok, err = pcall(m.render);
-            if not ok then print('[xiv1ui] ' .. tostring(err)); m.render = nil; end
+            local k = part_k(m.name);
+            if k ~= 1 then draw.push_part(k); end
+            layout.part_dx = part_dx(m.name);
+            local ok, err = xpcall(m.render, debug.traceback);
+            layout.part_dx = 0;
+            if k ~= 1 then draw.pop_part(); end
+            if not ok then
+                print('[xiv1ui] ' .. m.name .. ': ' .. tostring(err):match('^[^\n]*'));
+                _G.xiv1ui_last_error = err;          -- (with the traceback, for /xiv1ui eval)
+                m.render = nil;
+            end
         end
     end
     local ok, err = pcall(ui.render);
@@ -227,9 +250,22 @@ ashita.events.register('mouse', 'xiv1ui_mouse', function (raw)
     local lobby = require('ui.lobby');
     if lobby.active() then lobby.mouse(e); return; end
     if ui.mouse(e) then e.blocked = true; return; end
+    local okr, resized = pcall(require('ui.chatlog').resize_mouse, e);
+    if okr and resized then return; end
     if handle_drag(e) then e.blocked = true; return; end
     for _, m in ipairs(modules) do
-        if m.mouse then m.mouse(e); end
+        if m.mouse then
+            local k = part_k(m.name);
+            if k ~= 1 then
+                -- a scaled part works in its own units: hand it the pointer in them
+                draw.push_part(k);
+                local pe = setmetatable({ x = e.x / k, y = e.y / k }, { __index = raw, __newindex = raw });
+                pcall(m.mouse, pe);
+                draw.pop_part();
+            else
+                m.mouse(e);
+            end
+        end
         if e.blocked then return; end
     end
 end);

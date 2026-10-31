@@ -35,7 +35,12 @@ Main Menu windows:
 Drag any widget to move it. UI Lock (the padlock in the micro menu) freezes them.
 Configuration » Reset UI positions (or `/xiv1ui layout reset`) puts them back.
 
-**Chat text size** (Configuration): 16–22 px; the logs grow taller to match.
+**Chat** (Configuration » Chat): font (XIV1UI Serif, PT Sans, PT Serif, Arial), text size 12–28 px, line spacing,
+outline, background opacity, timestamps, repeated lines collapsed with a count, and battle text in its own log or in
+General. Drag the grip at a log's top-right corner to resize the logs.
+
+**HUD sizes** (Configuration » HUD): the action bar group, target frame, party list, minimap and buttons can each be
+made smaller or larger (70–150%), e.g. a smaller action bar to make room for a bigger chat.
 
 **UI scale** (Configuration, or `/xiv1ui scale 125`): 80–150%. Text is re-rendered at the new size, so it stays sharp.
 At larger sizes the chat log may reach under the action bar; drag it aside.
@@ -89,6 +94,8 @@ xiv1ui itself is released under the GNU General Public License v3.0 or later (`L
   Renamed "XIV1UI Serif", as the OFL requires for modified versions.
 - Japanese font: built from **Noto Serif JP** by Google (SIL Open Font License 1.1, `fonts/OFL-NotoSerifJP.txt`),
   cut down to the Shift-JIS character set and renamed "XIV1UI Serif JP".
+- Chat font choices: **PT Sans** and **PT Serif** by ParaType (SIL Open Font License 1.1, `fonts/OFL-PTSans.txt`,
+  `fonts/OFL-PTSerif.txt`), unmodified.
 - Text rendering: **gdifonts** by Thorny (MIT, `gdifonts/LICENSE`).
 - All artwork is original, drawn by `tools/make_art.py` in the style of the 1.0 interface. No Square Enix assets are
   included.

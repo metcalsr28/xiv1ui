@@ -25,6 +25,8 @@ local FONT_FILES = {
     'XIV1UI-Serif-Italic.ttf',
     'XIV1UI-SerifBold.ttf',
     'XIV1UI-SerifJP.ttf',
+    'PTSans-Regular.ttf',         -- chat font choices (OFL, unmodified)
+    'PTSerif-Regular.ttf',
 };
 local loaded = {};
 

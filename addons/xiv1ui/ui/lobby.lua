@@ -390,7 +390,17 @@ local function character_list(o, a)
     -- Select and Delete share the list window; only Select has the Options (settings) window beside it
     local deleting = gamewin.window('chfwin') == nil;
     local sw, sh = layout.screen();
-    local shown = math.max(#list, c);
+    -- only the characters there are: the game's cursor can run on into the empty slots below them (Down keeps going);
+    -- it's pushed back onto the last character
+    local shown = math.max(#list, 1);
+    if #list > 0 and c > #list then
+        local t = xi_now();
+        if t - (lobby.pushed_back or 0) > 0.2 then
+            lobby.pushed_back = t;
+            require('ui.gamein').press(0xC8);        -- Up
+        end
+        c = #list;
+    end
     local w = 380;
     local h = 46 + shown * CHAR_H + 44;
     local x, y = sw - w - 40, math.max(40, sh - 120 - h);
@@ -923,6 +933,9 @@ end
 -- Mouse: a click on a row moves the game's cursor there (Up / Down, as the keys would) and confirms.
 function lobby.mouse(e)
     if click_rows == nil then return; end
+    -- the game's own list (hidden underneath, at its own row positions) follows the pointer too: keep mouse movement
+    -- from it, or hovering one of xiv1ui's rows moves the game's cursor to whatever row of its own lies under it
+    if e.message == 0x200 or e.message == 0x20A then e.blocked = true; return; end
     local hit = nil;
     for i, r in ipairs(click_rows.rects) do
         if e.x >= r[1] and e.x < r[1] + r[3] and e.y >= r[2] and e.y < r[2] + r[4] then hit = i; end
