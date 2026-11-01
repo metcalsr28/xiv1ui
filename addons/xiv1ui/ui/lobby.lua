@@ -383,6 +383,45 @@ local function character_card(ch, a, deleting)
     end
 end
 
+-- The game's character list is hidden, not gone, and it follows the pointer by itself: its rows (two columns of 8,
+-- in the middle of the screen) moved the game's cursor to whatever row lay under the pointer, not the one xiv1ui
+-- draws there. Each frame its rows are moved under xiv1ui's: row objects found as equippanel finds the equipment
+-- grid's (list nodes from window +0x14, row = [node + 0x10], with +0x58 = itself, +0x5C = the window); in a row,
+-- +0x3A the slot (1-based), +0x2A / +0x2C its place and +0x2E / +0x30 its size (menu coordinates), +0x32..+0x38 the
+-- same as a rectangle inside the window, whose place is window +0x8C / +0x8E. Rows xiv1ui doesn't show go off-screen.
+local function list_rows(o)
+    local out, n = {}, mem.u32(o + 0x14);
+    while n and n ~= 0 and #out < 40 and mem.ok(n, 0x14) do
+        local r = mem.u32(n + 0x10);
+        if r and mem.ok(r, 0x70) and mem.u32(r + 0x58) == r and mem.u32(r + 0x5C) == o then out[#out + 1] = r; end
+        n = mem.u32(n);
+    end
+    return out;
+end
+
+local function w16(addr, v)
+    v = math.floor(v + 0.5) % 0x10000;                -- (a row's place inside its window can be negative)
+    if mem.u16(addr) ~= v then ashita.memory.write_uint16(addr, v); end
+end
+
+local function align_rows(o, rects)
+    local bx, by = mem.u16(o + 0x8C), mem.u16(o + 0x8E);
+    if bx == nil or by == nil then return; end
+    for _, r in ipairs(list_rows(o)) do
+        local slot = mem.u16(r + 0x3A);
+        local rc = slot and rects[slot];
+        local x, y, w, h;
+        if rc then
+            x, y = gamewin.from_hud(rc[1]), gamewin.from_hud(rc[2]);
+            w, h = gamewin.from_hud(rc[3]), gamewin.from_hud(rc[4]);
+        else
+            x, y, w, h = 4000, 4000, 1, 1;
+        end
+        w16(r + 0x2A, x); w16(r + 0x2C, y); w16(r + 0x2E, w); w16(r + 0x30, h);
+        w16(r + 0x32, x - bx); w16(r + 0x34, y - by); w16(r + 0x36, x - bx + w); w16(r + 0x38, y - by + h);
+    end
+end
+
 local CHAR_H = 50;
 local function character_list(o, a)
     local list = roster();
@@ -432,6 +471,7 @@ local function character_list(o, a)
         rects[i], order[i] = { x, ry, w, CHAR_H }, i;
     end
     click_rows = { rects = rects, rows = order };
+    pcall(align_rows, o, rects);
     local cnt = ui.label('lobby_char_count', 'small', { font_height = 15, font_color = 0xFFB8A880 });
     cnt:set_opacity(a);
     text.draw(cnt, string.format('%d of %d character slots used', list.count, list.slots), x + 18, y + h - 16, 'baseline');
@@ -731,6 +771,7 @@ local function question(o, a)
     end
     -- clicks: Left / Right move between the buttons here
     click_rows = { rects = rects, rows = { 1, 2 }, horizontal = true };
+    pcall(align_rows, o, rects);                         -- (the game's own Yes / No follow the pointer too)
 end
 
 -- The game's message box (window ok: one OK button). Its text isn't kept anywhere stable, so the box is restyled only

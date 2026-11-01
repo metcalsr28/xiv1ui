@@ -242,7 +242,11 @@ local function render_picker(x, y, h, slot_id)
         end
     end
     -- in the game's order, which isn't the bag's (ui/itempanel.lua in_game_order)
-    list = require('ui.itempanel').in_game_order(lcls, list);
+    do
+        local r, t = lcls and mem.u16(lcls + 0x24), lcls and mem.u16(lcls + 0x1A);
+        local pos = r and t and r >= 2 and r + t - 1 or nil;          -- (row 1 is the header)
+        list = require('ui.itempanel').in_game_order(lcls, list, pos, cid, cidx);
+    end
     local at = nil;
     for i, c in ipairs(list) do
         if c.id == cid and (cidx == nil or c.index == cidx) then at = i; end

@@ -51,10 +51,14 @@ local function glyph_text(a, max)
             -- 0 is a space inside the text; two zeros in a row end it, and so does one after the end of a sentence:
             -- records are reused, so a short option written over a longer one leaves the old tail behind
             -- ("Yes." over "None of them." reads "Yes. of them." otherwise)
+            -- (but not before a capital, a digit or a bracket: "Equ. Lv.1 - 9. (Up to 100000)" in the Sparks
+            -- exchange; an old tail starts mid-sentence)
             local n = mem.u16(a + i * 2 + 2);
             if n == nil or n == 0 then break; end
             local last = t[#t];
-            if last == '.' or last == '?' or last == '!' then break; end
+            local nc = n < 0x5F and string.char(n + 32) or '';
+            if (last == '.' or last == '?' or last == '!') and not nc:match('[%u%d%(]') then break; end
+            if last == ')' then break; end                  -- ("Brass knuckles. (50)" over "... (Up to 100000)")
             t[#t + 1] = ' ';
         else
             t[#t + 1] = string.char(c + 32);

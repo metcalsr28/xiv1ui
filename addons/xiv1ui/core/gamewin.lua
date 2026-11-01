@@ -215,6 +215,21 @@ function gamewin.rect(name)
     return to_hud(x1), to_hud(y1), to_hud(x2 - x1), to_hud(y2 - y1);
 end
 
+--- HUD units -> the game's menu coordinates (the inverse of to_hud).
+function gamewin.from_hud(v)
+    to_hud(0);
+    return v * require('core.draw').scale / ui_k;
+end
+
+--- A window's rectangle in HUD units even while it's hidden (x, y, w, h), or nil.
+function gamewin.raw_rect(name)
+    local o = gamewin.window(name);
+    if o == nil then return nil; end
+    local x1, y1, x2, y2 = mem.u16(o + 0x3A), mem.u16(o + 0x3C), mem.u16(o + 0x3E), mem.u16(o + 0x40);
+    if not (x1 and y1 and x2 and y2) or x2 <= x1 or y2 <= y1 or x2 >= 4000 or y2 >= 4000 then return nil; end
+    return to_hud(x1), to_hud(y1), to_hud(x2 - x1), to_hud(y2 - y1);
+end
+
 --- Move a panel at x, y (w x h) right of any game window it would cover. Returns the new x.
 function gamewin.clear_x(x, y, w, h, except)
     for _ = 1, 4 do

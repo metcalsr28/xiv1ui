@@ -7,7 +7,7 @@
 
 addon.name    = 'xiv1ui';
 addon.author  = 'xiv1ui project';
-addon.version = '0.3.6';
+addon.version = '0.3.7';
 addon.desc    = 'FINAL FANTASY XIV 1.0 style interface.';
 addon.link    = '';
 
@@ -23,6 +23,45 @@ local world  = require('core.world');
 local ui     = require('core.ui');
 
 local ROOT = addon.path:gsub('[\\/]?$', '\\');
+
+-- When something in xiv1ui fails: the error (with its traceback) goes to errors.log in the addon's folder, and the
+-- first failure in a while reloads xiv1ui once, which clears whatever state led to it (players shouldn't have to
+-- know /addon reload). Not more than once in 10 minutes, so a failure that comes straight back can't loop; then the
+-- failing part just stays off. Development copies (with dev/eval.lua) don't reload themselves.
+local DEV_COPY = io.open(ROOT .. 'dev\\eval.lua', 'r') ~= nil;
+local reloading = false;
+local reported = {};          -- errors already logged this load (one that repeats every frame is written once)
+local function fault(where, err)
+    err = tostring(err);
+    _G.xiv1ui_last_error = err;
+    local key = where .. (err:match('^[^\n]*') or '');
+    if reported[key] then return; end
+    reported[key] = true;
+    local f = io.open(ROOT .. 'errors.log', 'a');
+    if f then
+        f:write(string.format('%s  xiv1ui %s  %s\n%s\n\n', os.date('%Y-%m-%d %H:%M:%S'), addon.version, where, err));
+        f:close();
+    end
+    if reloading or where == 'unload' then return; end
+    local last = tonumber(store.data.auto_reload_at) or 0;
+    if (DEV_COPY and not store.data.dev_auto_reload) or os.time() - last < 600 then
+        print('[xiv1ui] ' .. where .. ': ' .. err:match('^[^\n]*'));
+        return;
+    end
+    reloading = true;
+    store.data.auto_reload_at = os.time();
+    pcall(store.save);
+    print('[xiv1ui] Something went wrong (' .. where .. '); reloading xiv1ui. Details are in addons/xiv1ui/errors.log.');
+    AshitaCore:GetChatManager():QueueCommand(-1, '/addon reload xiv1ui');
+end
+
+-- every event handler runs protected: an error in one used to make Ashita unload xiv1ui altogether
+local function on(event, name, fn)
+    ashita.events.register(event, name, function (...)
+        local ok, err = xpcall(fn, debug.traceback, ...);
+        if not ok then fault(event, err); end
+    end);
+end
 -- files an earlier in-game update couldn't replace (locked then) are swapped in before anything loads them
 pcall(function () require('core.updater').finish_pending(ROOT); end);
 
@@ -100,7 +139,7 @@ mainmenu.register('macros',  require('ui.win_macros'));
 
 local ready = false;
 
-ashita.events.register('load', 'xiv1ui_load', function ()
+on('load', 'xiv1ui_load', function ()
     ready = draw.init(ROOT);
     layout.init(ROOT);
     text.init(ROOT);
@@ -110,7 +149,7 @@ ashita.events.register('load', 'xiv1ui_load', function ()
     end
 end);
 
-ashita.events.register('unload', 'xiv1ui_unload', function ()
+on('unload', 'xiv1ui_unload', function ()
     native.restore();
     pcall(require('ui.lobby').release);
     pcall(require('ui.zoning').release);
@@ -126,21 +165,21 @@ end);
 
 -- Start of each scene: let the menu restyle hide a just-opened game menu before the game draws it.
 local frame_no = 0;
-ashita.events.register('d3d_beginscene', 'xiv1ui_beginscene', function ()
+on('d3d_beginscene', 'xiv1ui_beginscene', function ()
     if not ready then return; end
     local ok, err = pcall(require('ui.lobby').early);
-    if not ok then print('[xiv1ui] ' .. tostring(err)); end
+    if not ok then fault('lobby / loading', err); end
     ok, err = pcall(require('ui.cmdmenu').early);
-    if not ok then print('[xiv1ui] ' .. tostring(err)); end
+    if not ok then fault('lobby / loading', err); end
     ok, err = pcall(require('ui.chatlog').early);
-    if not ok then print('[xiv1ui] ' .. tostring(err)); end
+    if not ok then fault('lobby / loading', err); end
     ok, err = pcall(require('ui.zoning').early);
-    if not ok then print('[xiv1ui] ' .. tostring(err)); end
+    if not ok then fault('lobby / loading', err); end
     ok, err = pcall(require('core.gamewin').early);
-    if not ok then print('[xiv1ui] ' .. tostring(err)); end
+    if not ok then fault('lobby / loading', err); end
 end);
 
-ashita.events.register('d3d_present', 'xiv1ui_present', function ()
+on('d3d_present', 'xiv1ui_present', function ()
     frame_no = frame_no + 1;
     if not ready then return; end
     -- the lobby (title, character select, creation) has its own screens and no HUD
@@ -150,7 +189,7 @@ ashita.events.register('d3d_present', 'xiv1ui_present', function ()
         draw.set_scale(store.data.ui_scale);
         if not draw.begin_frame() then return; end
         local ok, err = pcall(loading and lobby.render_loading or lobby.render);
-        if not ok then print('[xiv1ui] ' .. tostring(err)); end
+        if not ok then fault('lobby / loading', err); end
         draw.end_frame();
         return;
     end
@@ -159,7 +198,7 @@ ashita.events.register('d3d_present', 'xiv1ui_present', function ()
         draw.set_scale(store.data.ui_scale);
         if not draw.begin_frame() then return; end
         local ok, err = pcall(lobby.render_loading, true);
-        if not ok then print('[xiv1ui] ' .. tostring(err)); end
+        if not ok then fault('lobby / loading', err); end
         draw.end_frame();
         return;
     end
@@ -189,14 +228,13 @@ ashita.events.register('d3d_present', 'xiv1ui_present', function ()
             layout.part_dx = 0;
             if k ~= 1 then draw.pop_part(); end
             if not ok then
-                print('[xiv1ui] ' .. m.name .. ': ' .. tostring(err):match('^[^\n]*'));
-                _G.xiv1ui_last_error = err;          -- (with the traceback, for debugging)
-                m.render = nil;
+                m.render = nil;                      -- (off until the reload fault() may start)
+                fault(m.name, err);
             end
         end
     end
     local ok, err = pcall(ui.render);
-    if not ok then print('[xiv1ui] ' .. tostring(err)); end
+    if not ok then fault('windows', err); end
     draw.end_frame();
     -- performance counters (read with /xiv1ui eval return xiv1ui_perf)
     local perf = _G.xiv1ui_perf or { frames = 0, cost = 0, since = xi_now() };
@@ -207,7 +245,7 @@ end);
 
 -- (controller buttons are read from the XInput state in ui/gamein.lua, not from xinput_button events)
 
-ashita.events.register('key', 'xiv1ui_key', function (e)
+on('key', 'xiv1ui_key', function (e)
     if not ready then return; end
     -- a text field being edited takes every key
     if require('core.textinput').key(e) then e.blocked = true; return; end
@@ -261,13 +299,17 @@ local function handle_drag(e)
     return false;
 end
 
-ashita.events.register('mouse', 'xiv1ui_mouse', function (raw)
+on('mouse', 'xiv1ui_mouse', function (raw)
     if not ready then return; end
     -- modules work in HUD units; reads of other fields and writes (e.blocked) go through to the real event
     local e = setmetatable({ x = raw.x / draw.scale, y = raw.y / draw.scale },
         { __index = raw, __newindex = raw });
     local lobby = require('ui.lobby');
-    if lobby.active() then lobby.mouse(e); return; end
+    if lobby.active() then
+        local ok, err = pcall(lobby.mouse, e);
+        if not ok then fault('lobby (mouse)', err); end
+        return;
+    end
     if ui.mouse(e) then e.blocked = true; return; end
     local okr, resized = pcall(require('ui.chatlog').resize_mouse, e);
     if okr and resized then return; end
@@ -290,13 +332,13 @@ ashita.events.register('mouse', 'xiv1ui_mouse', function (raw)
 end);
 
 -- DirectInput buffered keyboard events (the game reads the arrows this way too, e.g. for the camera).
-ashita.events.register('key_data', 'xiv1ui_key_data', function (e)
+on('key_data', 'xiv1ui_key_data', function (e)
     if not ready then return; end
     pcall(ui.key_data, e);
 end);
 
 -- DirectInput keyboard state, before the game reads it (the macro palette takes Ctrl/Alt from the game).
-ashita.events.register('key_state', 'xiv1ui_key_state', function (e)
+on('key_state', 'xiv1ui_key_state', function (e)
     if not ready then return; end
     -- while a text field is edited the game sees no keys at all (typing mustn't walk the character around)
     if require('core.textinput').active() then
@@ -309,54 +351,54 @@ ashita.events.register('key_state', 'xiv1ui_key_state', function (e)
     for _, m in ipairs(modules) do
         if m.key_state then
             local ok, err = pcall(m.key_state, e);
-            if not ok then print('[xiv1ui] ' .. tostring(err)); m.key_state = nil; end
+            if not ok then m.key_state = nil; fault(m.name .. ' (key_state)', err); end
         end
     end
 end);
 
 -- XInput controller state, before the game reads it (the macro palette takes LT/RT from the game).
-ashita.events.register('xinput_state', 'xiv1ui_xinput_state', function (e)
+on('xinput_state', 'xiv1ui_xinput_state', function (e)
     if not ready then return; end
     for _, m in ipairs(modules) do
         if m.xinput_state then
             local ok, err = pcall(m.xinput_state, e);
-            if not ok then print('[xiv1ui] ' .. tostring(err)); m.xinput_state = nil; end
+            if not ok then m.xinput_state = nil; fault(m.name .. ' (xinput_state)', err); end
         end
     end
 end);
 
-ashita.events.register('text_in', 'xiv1ui_text_in', function (e)
+on('text_in', 'xiv1ui_text_in', function (e)
     -- lines printed by addons: only xiv1ui's own and those the chat log was told to accept (chatlog.extend)
     if e.injected and not require('ui.chatlog').accepts_injected(e.message) then return; end
     for _, m in ipairs(modules) do
         if m.text_in then
             local ok, err = pcall(m.text_in, e);
-            if not ok then print('[xiv1ui] ' .. tostring(err)); m.text_in = nil; end
+            if not ok then m.text_in = nil; fault(m.name .. ' (text_in)', err); end
         end
     end
 end);
 
-ashita.events.register('packet_in', 'xiv1ui_packet_in', function (e)
+on('packet_in', 'xiv1ui_packet_in', function (e)
     world.on_packet(e);
     local ok, err = pcall(require('ui.worldfx').packet, e);
-    if not ok then print('[xiv1ui] ' .. tostring(err)); end
+    if not ok then fault('worldfx (packet)', err); end
     ok, err = pcall(require('ui.dialogue').packet, e);
-    if not ok then print('[xiv1ui] ' .. tostring(err)); end
+    if not ok then fault('dialogue (packet)', err); end
     -- any other module that reads the server's packets (roe, itempanel ...); worldfx and dialogue had theirs above
     for _, m in ipairs(modules) do
         if m.packet and m.name ~= 'dialogue' and m.name ~= 'worldfx' then
             ok, err = pcall(m.packet, e);
-            if not ok then print('[xiv1ui] ' .. m.name .. ': ' .. tostring(err)); m.packet = nil; end
+            if not ok then m.packet = nil; fault(m.name .. ' (packet)', err); end
         end
     end
 end);
 
-ashita.events.register('packet_out', 'xiv1ui_packet_out', function (e)
+on('packet_out', 'xiv1ui_packet_out', function (e)
     local ok, err = pcall(require('ui.dialogue').packet_out, e);
-    if not ok then print('[xiv1ui] ' .. tostring(err)); end
+    if not ok then fault('dialogue (packet_out)', err); end
 end);
 
-ashita.events.register('command', 'xiv1ui_command', function (e)
+on('command', 'xiv1ui_command', function (e)
     local args = e.command:args();
     if #args == 0 or args[1]:lower() ~= '/xiv1ui' then return; end
     e.blocked = true;

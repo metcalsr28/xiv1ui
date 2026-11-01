@@ -150,27 +150,49 @@ local function items_of(bag, usable_only)        -- usable_only: true, or 'cryst
 end
 
 -- The game's own order for the list it shows. It isn't always the bag's slot order: an item that arrived in a freed
--- slot is listed at the end, until the bag is sorted. The list class's +0x60 points at a block of item lists, each
--- 81 8-byte records from +0x70 (k * 0x288): a 0xFFFF header, then { u16 item id, u8 slot } per row. The one in use
--- holds exactly our items; returns `list` in its order, or unchanged when none does.
-local function in_game_order(cls, list)
+-- slot is listed at the end until the bag is sorted, a shop's sell list puts equipped items first, the gear list has
+-- its own. The list class's +0x60 points at a block of item lists, each 81 8-byte records from +0x70 (k * 0x288): a
+-- 0xFFFF header, then { u16 item id, u8 slot } per row. Several can hold exactly our items, in different orders
+-- (the game keeps one per purpose); then the one whose row `pos` (the game's cursor) is the item the item info box
+-- names (`cid` / `cidx`) is the one shown, and it is remembered while nothing says otherwise. Returns `list` in that
+-- order, or unchanged when no list holds our items.
+local order_k = nil;
+local function in_game_order(cls, list, pos, cid, cidx)
     local base = cls and mem.u32(cls + 0x60);
     if base == nil or #list == 0 or not mem.ok(base + 0x70, 24 * 0x288) then return list; end
     local by_slot = {};
     for _, c in ipairs(list) do by_slot[c.index] = c; end
+    local found, first, sig0, differ = {}, nil, nil, false;
     for k = 0, 23 do
         local s = base + 0x70 + k * 0x288;
         if mem.u16(s) == 0xFFFF and mem.u16(s + #list * 8) ~= 0 and (#list == 80 or mem.u16(s + (#list + 1) * 8) == 0) then
-            local out = {};
+            local out, sig = {}, {};
             for i = 1, #list do
-                local c = by_slot[mem.u8(s + i * 8 + 2)];
+                local slot = mem.u8(s + i * 8 + 2);
+                local c = by_slot[slot];
                 if c == nil or c.id ~= mem.u16(s + i * 8) then out = nil; break; end
-                out[i] = c;
+                out[i], sig[i] = c, slot;
             end
-            if out then return out; end
+            if out then
+                sig = table.concat(sig, ',');
+                found[k] = out;
+                if first == nil then first, sig0 = k, sig; elseif sig ~= sig0 then differ = true; end
+            end
         end
     end
-    return list;
+    if first == nil then return list; end
+    if not differ then order_k = first; return found[first]; end
+    -- (lists that disagree: the one the game's cursor and item box agree on)
+    if pos and cid then
+        for k = 0, 23 do
+            local o = found[k];
+            if o and o[pos] and o[pos].id == cid and (cidx == nil or o[pos].index == cidx) then
+                if not (found[order_k] and found[order_k][pos] == o[pos]) then order_k = k; end
+                break;
+            end
+        end
+    end
+    return found[order_k] or found[first];
 end
 
 -- (with `item`, the bag's item itself: its augments follow, as in the game's item box)
@@ -284,7 +306,14 @@ function panel.render()
     end
     if usable then shown_bag = 0; end
     local list, cap = items_of(shown_bag, filter);
-    if not buy then list = in_game_order(inv_slot and mem.u32(inv_slot), list); end
+    -- (the order lives in a block only the item list's class points at; a shop's sell list uses it too, in the
+    -- order it shows: equipped items first)
+    if not buy then
+        local ls = gamewin.slot('inventor');
+        local own = inv_slot and mem.u32(inv_slot);           -- (the list window: inventor, or shop when selling)
+        local row, top = own and mem.u16(own + 0x24), own and mem.u16(own + 0x1A);
+        list = in_game_order(ls and mem.u32(ls), list, row and top and row >= 1 and row + top or nil, cid, cidx);
+    end
     local at = nil;
     if buy then
         list = {};
@@ -302,8 +331,8 @@ function panel.render()
     end
     -- The list window's own cursor: the row on screen (class +0x24, 1-based) plus how far the list has scrolled
     -- (+0x1A). It is the game's own answer, so it wins over the item info box (which lags behind, and isn't shown at
-    -- all in some lists); not in a shop, whose list numbers its rows its own way.
-    if not shopping then
+    -- all in some lists). A shop's sell list keeps the same fields; its wares (Buy) are listed their own way.
+    if not buy then
         local cls = inv_slot and mem.u32(inv_slot);
         local row, top = cls and mem.u16(cls + 0x24), cls and mem.u16(cls + 0x1A);
         local n = row and top and row + top;

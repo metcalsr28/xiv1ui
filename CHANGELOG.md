@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.3.7
+
+- If something in xiv1ui fails, it now reloads itself once (and says so in the chat log) instead of leaving parts of
+  the interface gone until you restart. The error is saved to addons/xiv1ui/errors.log, which helps a lot if you
+  report a problem. It won't reload again within 10 minutes; a part that keeps failing just stays off.
+- Items: the highlight could still jump around after sorting (pressing Down sometimes moved up). The game keeps
+  several copies of the item list; xiv1ui now follows the one the game is showing.
+- Shops: the Sell list follows the game's order (equipped items first), so the highlighted item is the one sold.
+- Records of Eminence (Sparks) exchange: the equipment ranges read "Equ." and some item rows had stray text after
+  them; they read "Equ. Lv.1 - 9. (Up to 100000)" and "Cesti. (50)" now.
+- Character select: hovering a character (or Yes / No on "Log in with ...?") lights the one under the pointer. It
+  used to light the character below it.
+
 ## 0.3.6
 
 - Fix: in 0.3.5 the chat logs disappeared (until the next reload) the first time one of FFXI's own windows had
