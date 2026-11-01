@@ -170,7 +170,8 @@ local BAG_NAMES = { [0] = 'Inventory', [8] = 'Mog Wardrobe', [10] = 'Mog Wardrob
 local shown_bag = 0;         -- the bag the game's list shows
 local pending_bag = nil;     -- the bag under the Storage Options cursor when that window was last focused
 
---- The items in `bag` that fit equipment slot `slot_id` for the current job, in bag order.
+--- The items in `bag` that fit equipment slot `slot_id`, in bag order: the game lists them all, greying out the
+-- ones the current job can't use (nojob), so the rows match its cursor.
 local function candidates(slot_id, bag)
     local inv = AshitaCore:GetMemoryManager():GetInventory();
     local rm = AshitaCore:GetResourceManager();
@@ -183,10 +184,10 @@ local function candidates(slot_id, bag)
             local it = inv:GetContainerItem(bag, i);
             if it and it.Id ~= 0 and it.Id ~= 65535 then
                 local r = rm:GetItemById(it.Id);
-                if r and bit.band(r.Slots or 0, bit.lshift(1, slot_id)) ~= 0
-                   and bit.band(r.Jobs or 0, bit.lshift(1, job)) ~= 0 then
+                if r and bit.band(r.Slots or 0, bit.lshift(1, slot_id)) ~= 0 then
                     out[#out + 1] = { id = it.Id, bag = bag, index = i, res = r, equipped = (it.Flags == 5),
-                                      low = (r.Level or 0) > lvl };
+                                      low = (r.Level or 0) > lvl,
+                                      nojob = bit.band(r.Jobs or 0, bit.lshift(1, job)) == 0 };
                 end
             end
         end
@@ -264,9 +265,9 @@ local function render_picker(x, y, h, slot_id)
             draw.nine('row_sel', x + 22, ry, W - 34, PICK_ROW_H - 4, 6, sw, sh);
             draw.image('cursor_gold', x + 2, ry + (PICK_ROW_H - 26) / 2);
         end
-        draw.entry(draw.item_icon(c.id), x + 30, ry + 2, 32, 32);
+        draw.entry(draw.item_icon(c.id), x + 30, ry + 2, 32, 32, c.nojob and 0x90FFFFFF or nil);
         local o = ui.label('eqp_r' .. r, 'small', { font_height = 18 });
-        local col = c.equipped and 0xFF9BE08C or (c.low and 0xFF9098A0 or (sel and 0xFFFFFFFF or 0xFFE8E4D8));
+        local col = c.equipped and 0xFF9BE08C or ((c.low or c.nojob) and 0xFF7C786E or (sel and 0xFFFFFFFF or 0xFFE8E4D8));
         if o.settings.font_color ~= col then o:set_font_color(col); end
         text.draw(o, c.res.Name[1] or '?', x + 72, ry + 25, 'baseline');
         local lv = ui.label('eqp_l' .. r, 'small', { font_height = 15, font_alignment = text.align.Right });

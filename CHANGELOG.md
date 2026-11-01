@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.3.2
+
+- Equipment: the item list for a slot now matches the game's (items your job can't use are listed, greyed out), so
+  the highlight follows the cursor and the item you choose is the one equipped.
+- Magic and ability lists: the highlight follows the cursor through higher tiers you can't cast yet (Diaga II,
+  Protect IV ...). It used to stick on the first spell of a family, since tiers share their description.
+- Items: the first opening in a session no longer pauses for a moment (item icons are now loaded ahead of time).
+
+**Known issues**
+- Map markers are still very broken with xiv1ui. Until it's fixed, turn off Configuration » Controls » "Command
+  menu (Enter / A) in the FF style" while you set markers.
+
 ## 0.3.1
 
 - Chat: key words in colour, so the parts that matter stand out: what a /check says (too weak / easy prey ...

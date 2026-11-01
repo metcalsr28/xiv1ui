@@ -156,8 +156,17 @@ function panel.render()
         category = type_cache[help] or category;
     end
     local list = entries(category);
+    -- the entry under the game's cursor: its list window's class keeps the cursor (+0x30, 0-based, over the whole
+    -- list) and the count (+0x40); when the count agrees with ours, that's the entry. Otherwise match the help line
+    -- (which can't tell tiers apart: Diaga and Diaga II share their description).
     local at = nil;
-    for i, e in ipairs(list) do if norm(e.desc) == help then at = i; break; end end
+    local wslot = require('core.gamewin').slot(fname);
+    local wcls = wslot and mem.u32(wslot);
+    local gcur, gn = wcls and mem.u32(wcls + 0x30), wcls and mem.u32(wcls + 0x40);
+    if gcur and gn == #list and gcur < #list then at = gcur + 1; end
+    if at == nil then
+        for i, e in ipairs(list) do if norm(e.desc) == help then at = i; break; end end
+    end
 
     -- opened from the action menu: the same ring as the menu, in its place
     local cmdm_ = require('ui.cmdmenu');

@@ -164,7 +164,37 @@ local function describe(r)
     return d;
 end
 
+-- Item icons become textures the first time they're drawn, and opening a bag draws them all at once: the first
+-- opening in a session stalled for a moment. They're loaded ahead instead, two per frame, while no menu is open
+-- (the inventory first, then the other bags; new items as they arrive).
+local warm = { bag = 1, slot = 1, done = {} };
+local WARM_BAGS = { 0, 8, 10, 11, 12, 13, 14, 15, 16, 5, 6, 7, 1, 2, 4, 9 };
+local function warm_icons()
+    local _, focus = native.focused();
+    if focus ~= nil then return; end
+    local inv = AshitaCore:GetMemoryManager():GetInventory();
+    local made = 0;
+    for _ = 1, 40 do                      -- (at most 40 slots looked at a frame)
+        local bag = WARM_BAGS[warm.bag];
+        if bag == nil then warm.bag, warm.slot = 1, 1; return; end
+        local n = math.min(inv:GetContainerCountMax(bag) or 0, 80);
+        if warm.slot > n then
+            warm.bag, warm.slot = warm.bag + 1, 1;
+        else
+            local it = inv:GetContainerItem(bag, warm.slot);
+            warm.slot = warm.slot + 1;
+            if it and it.Id ~= 0 and it.Id ~= 65535 and not warm.done[it.Id] then
+                warm.done[it.Id] = true;
+                draw.item_icon(it.Id);
+                made = made + 1;
+                if made >= 2 then return; end
+            end
+        end
+    end
+end
+
 function panel.render()
+    pcall(warm_icons);
     if store.data.cmd_menu == false then if hider:active() then hider:restore(); end return; end
     local _, fname = native.focused();
     -- the list itself, or a menu opened from it (Use / Drop, Sort): the list stays up underneath
