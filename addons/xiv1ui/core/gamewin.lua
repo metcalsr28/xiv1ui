@@ -164,8 +164,9 @@ local function all_slots()
             local nm = (ashita.memory.read_string(a + 8, 8) or ''):gsub('[%z ]+$', '');
             local s = mem.u32(a + 0x20);
             -- (a name can appear more than once; only an entry whose slot is readable counts. This list is for
-            -- looking around only; gamewin.slot() keeps its own, checked lookups)
-            if nm ~= '' and s and s > 0x10000 and mem.ok(s, 4) and all[nm] == nil then all[nm] = s; end
+            -- looking around only; gamewin.slot() keeps its own, checked lookups. 0x756E656D is the next descriptor's "menu"
+            -- text, see native.find_slot)
+            if nm ~= '' and s and s > 0x10000 and s ~= 0x756E656D and mem.ok(s, 4) and all[nm] == nil then all[nm] = s; end
         end
     end
     return all;

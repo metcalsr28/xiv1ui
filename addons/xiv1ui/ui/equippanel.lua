@@ -215,7 +215,7 @@ local function render_picker(x, y, h, slot_id)
 
     local cid, cidx = cursor_item();
     -- which bag is shown: the one holding the item under the game's cursor; on the header, the last one chosen in
-    -- Storage Options if the game's item count agrees (the inventor class keeps rows incl. the header at +0x14)
+    -- Storage Options if the game's item count agrees (the inventor class keeps rows incl. the header at +0x20)
     local inv = AshitaCore:GetMemoryManager():GetInventory();
     if cid then
         for _, b in ipairs(BAGS) do
@@ -225,19 +225,38 @@ local function render_picker(x, y, h, slot_id)
         pending_bag = nil;
     elseif pending_bag then
         local cls = inventor_slot and mem.u32(inventor_slot);
-        local rows = cls and mem.u32(cls + 0x14);
+        local rows = cls and mem.u16(cls + 0x20);
         if rows and rows - 1 == #candidates(slot_id, pending_bag) then shown_bag = pending_bag; end
         pending_bag = nil;
     end
     local list = candidates(slot_id, shown_bag);
+    -- (no item under the cursor to tell: a bag whose count is the game's)
+    local lcls = inventor_slot and mem.u32(inventor_slot);
+    local lcount = lcls and mem.u16(lcls + 0x20);
+    if cid == nil and lcount and lcount - 1 ~= #list then
+        for _, b in ipairs(BAGS) do
+            local l = candidates(slot_id, b);
+            if #l == lcount - 1 then shown_bag, list = b, l; break; end
+        end
+    end
     local at = nil;
     for i, c in ipairs(list) do
         if c.id == cid and (cidx == nil or c.index == cidx) then at = i; end
     end
-    if cid and at == nil then         -- not one we listed (another bag): show it anyway, so the lit row is right
+    -- The list's own cursor wins when its row count agrees with ours: the row on screen (+0x24, 1-based, the header
+    -- is row 1) plus the scroll (+0x1A); the count, header included, is at +0x20. It doesn't depend on the item info
+    -- window, which isn't there on every client (the lit row stuck on the header).
+    local lrow, ltop = lcls and mem.u16(lcls + 0x24), lcls and mem.u16(lcls + 0x1A);
+    if lrow and ltop and lcount and lcount - 1 == #list and lrow >= 1 then
+        local n = lrow + ltop - 1;          -- 0: the header
+        if cid == nil or (list[n] and list[n].id == cid) or at == nil then
+            at = (n >= 1 and n <= #list) and n or nil;
+        end
+    elseif cid and at == nil then     -- not one we listed (another bag): show it anyway, so the lit row is right
         local r = AshitaCore:GetResourceManager():GetItemById(cid);
         if r then list[#list + 1] = { id = cid, res = r, equipped = false }; at = #list; end
     end
+    panel.lit = { list = list, at = at };     -- (for dev probes)
     -- the header row: "Storage Options" (the game's cursor is on it when no item is under it)
     local hy = y + 44;
     local sw, sh = layout.size('row_sel');

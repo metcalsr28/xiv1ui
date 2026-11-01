@@ -167,6 +167,7 @@ end
 -- Item icons become textures the first time they're drawn, and opening a bag draws them all at once: the first
 -- opening in a session stalled for a moment. They're loaded ahead instead, two per frame, while no menu is open
 -- (the inventory first, then the other bags; new items as they arrive).
+local disagree_since = nil;     -- since when the list's cursor and the item info box name different items
 local warm = { bag = 1, slot = 1, done = {} };
 local WARM_BAGS = { 0, 8, 10, 11, 12, 13, 14, 15, 16, 5, 6, 7, 1, 2, 4, 9 };
 local function warm_icons()
@@ -227,8 +228,8 @@ function panel.render()
     if usable then
         -- only while the game's row count agrees with ours (else the game draws its own list)
         local cls = inv_slot and mem.u32(inv_slot);
-        -- (this list keeps its item count at the class's +0x1C: 0 with nothing usable, 1 with one item)
-        local rows = cls and mem.u16(cls + 0x1C);
+        -- (this list keeps its item count at the class's +0x20; +0x1C is the last row on screen, scroll + 10)
+        local rows = cls and mem.u16(cls + 0x20);
         local n = #items_of(0, filter);
         if rows == nil or rows ~= n then
             if hider:active() then hider:restore(); end
@@ -278,8 +279,21 @@ function panel.render()
         local cls = inv_slot and mem.u32(inv_slot);
         local row, top = cls and mem.u16(cls + 0x24), cls and mem.u16(cls + 0x1A);
         local n = row and top and row + top;
-        if n and row >= 1 and n <= #list then at = n; end
+        if n and row >= 1 and n <= #list then
+            -- (unless the item info box has named another item for a while: then our list isn't in the game's
+            -- order, and the item itself is what counts)
+            local by_id = at;
+            if cid == nil or list[n].id == cid or by_id == nil then
+                disagree_since = nil;
+                at = n;
+            else
+                disagree_since = disagree_since or require('core.now')();
+                if require('core.now')() - disagree_since < 0.4 then at = n; end
+            end
+        end
     end
+
+    panel.lit = { list = list, at = at };     -- (for dev probes)
 
     -- opened from the action menu: the same ring as the menu, in its place
     if usable and not crystal and require('ui.cmdmenu').action_spot() then

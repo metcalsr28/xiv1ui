@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.3.4
+
+Fixes from the first GitHub issue report (thanks, hechina1777):
+- Windows: some of FFXI's windows could be mistaken for a stray copy of their name in memory on Windows (the item
+  info box, Profile, Job Levels, skills, Merits, Missions, party windows ...). It made the Equipment list's highlight
+  stick on "Storage Options", left FFXI's item card showing faintly under xiv1ui's windows, and could light the wrong
+  item in item lists.
+- Equipment: the list follows the game's own cursor, and finds which bag (inventory or a Mog Wardrobe) it shows by
+  itself.
+- Magic from the action menu (Enter / A on yourself or a target): the list is the game's: what your jobs can cast,
+  Blue Magic only when set (plus Unbridled Learning's spells), in the game's order. It used to show one magic type
+  and guess which from the help text, so the highlight could jump several spells, flicker or land on another spell
+  (Metallic Body and Stoneskin share their description).
+- Blue Magic: spells that aren't set are greyed out, as in the game.
+- Items from the action menu: shown in xiv1ui's style again with more than 10 usable items (FFXI's own list showed
+  instead).
+- Item lists: if the game's cursor and the item info box ever disagree, the item itself wins.
+- Damage numbers: several at once on one target (multiple attacks in a round, multi-hit weapon skills, a party
+  hitting together) come one after another and stack upward, instead of appearing together in one spot.
+
 ## 0.3.3
 
 - Magic lists follow FFXI's own sort order. If you sorted a list (numpad + in the list: Sort » Auto / Manual), the

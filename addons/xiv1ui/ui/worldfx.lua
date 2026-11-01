@@ -39,12 +39,24 @@ end
 
 function worldfx.debug_pops() return #pops; end
 
+-- Several numbers for one target at once (a round of double / triple attacks, a multi-hit weapon skill, the party
+-- hitting together) come one after another, a beat apart, and each new one lifts those already up by a line, so they
+-- stack instead of piling up in one spot. A backlog is squeezed so nothing waits more than
+-- about three quarters of a second.
+local GAP, MAX_WAIT = 0.25, 0.75;
+local next_at = {};       -- target index -> when its next number may start
 local function pop(idx, str, color, height)
     local o = get_obj();
     o:set_font_color(color);
     o:set_font_height(height);
     o:set_text(str);
-    pops[#pops + 1] = { obj = o, idx = idx, t0 = xi_now(), dx = math.random(-18, 18) };
+    local now = xi_now();
+    local t0 = math.max(now, next_at[idx] or 0);
+    local wait = t0 - now;
+    if wait > MAX_WAIT then t0, wait = now + MAX_WAIT, MAX_WAIT; end
+    next_at[idx] = t0 + GAP * math.max(0.3, 1 - wait / MAX_WAIT);
+    local k = math.floor(wait / GAP + 0.5);           -- its place in the run: 0, 1, 2 ...
+    pops[#pops + 1] = { obj = o, idx = idx, t0 = t0, dx = (k % 2 == 0 and -1 or 1) * 14 + math.random(-6, 6), lift = 0 };
 end
 
 worldfx.pop = function (...) return pop(...); end
@@ -109,10 +121,17 @@ function worldfx.render()
         if age > LIFE then
             pool[#pool + 1] = p.obj;
             table.remove(pops, i);
-        else
+        elseif age >= 0 then
+            -- lifted a line for each newer number on the same target that has appeared since
+            local above = 0;
+            for _, q in ipairs(pops) do
+                if q.idx == p.idx and q.t0 > p.t0 and q.t0 <= now then above = above + 1; end
+            end
+            p.lift = p.lift + (above * 36 - p.lift) * math.min(1, (now - (p.drawn or now)) * 14);
+            p.drawn = now;
             local sx, sy, vis = project.on_model(p.idx, 0.9, 0, 1.8);
             if sx and vis then
-                local rise = 40 * math.min(1, age / 0.5) + 10 * age;
+                local rise = 36 * math.min(1, age / GAP) + 14 * age + p.lift;
                 local alpha = age < LIFE - 0.4 and 1 or (LIFE - age) / 0.4;
                 p.obj:set_opacity(alpha);
                 text.draw(p.obj, p.obj.settings.text, sx + p.dx, sy - rise, 'baseline');

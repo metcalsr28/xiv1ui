@@ -41,7 +41,9 @@ local function find_slot(name)
         local a = ashita.memory.find('FFXiMain.dll', 0, hex, 0, n);
         if a == nil or a == 0 then break; end
         local slot = mem.u32(a + 0x20);
-        if mem.u32(a + 0x10) == 0 and mem.u32(a + 0x1C) == 0 and slot and mem.ok(slot, 4) then
+        -- (a descriptor directly followed by another one reads that one's "menu" text as its slot, 0x756E656D: not
+        -- mapped under Wine, but on Windows system DLLs can live there and it would pass as readable)
+        if mem.u32(a + 0x10) == 0 and mem.u32(a + 0x1C) == 0 and slot and slot ~= 0x756E656D and mem.ok(slot, 4) then
             slot_cache[name] = slot;
             return slot;
         end

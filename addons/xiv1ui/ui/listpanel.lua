@@ -50,7 +50,7 @@ local ABILITY_LISTS = {
     ['Pet Commands']  = { from = 512, to = 1023, type = 2 },
     ['Job Traits']    = { from = 1536, to = 2047, type = 4 },
 };
-local type_cache = {};       -- help line -> spell type name (or false)
+local blu_set = nil;        -- Blue Magic set for battle: spell id -> true (see panel.packet)
 
 -- The spells the player knows, in the order the game lists them (its Sort » Auto / Manual reorders them, e.g. Trust
 -- by role): a block of the known-spell bits (0x80 bytes), then that many u16 spell ids at +0x80 and their count at
@@ -107,15 +107,37 @@ local function entries(category)
                         local a, b = sp.LevelRequired[job + 1], sp.LevelRequired[sjob + 1];
                         need = (a and a > 0 and a <= lvl) or (b and b > 0 and b <= slvl);
                     end);
-                    out[#out + 1] = { name = sp.Name[1], desc = sp.Description and sp.Description[1] or '',
-                                      sub = (sp.ManaCost or 0) > 0 and (sp.ManaCost .. ' MP') or nil,
-                                      dim = (need == false) };
+                    -- (Unbridled Learning's spells, 736-753, can't be set: the game always lists them)
+                    local unset = sp.Type == 6 and blu_set ~= nil and not blu_set[id] and (id < 736 or id > 753);
+                    -- the action menu's Magic: only what the current jobs can cast (Blue Magic: what's set), and no
+                    -- Trust (it has its own entry there)
+                    local castable = need ~= false and not unset and sp.Type ~= 8;
+                    if ty ~= nil or castable then
+                        out[#out + 1] = { name = sp.Name[1], desc = sp.Description and sp.Description[1] or '',
+                                          sub = (sp.ManaCost or 0) > 0 and (sp.ManaCost .. ' MP') or nil,
+                                          dim = (need == false) or unset };
+                    end
                 end
             end
         end
     end
     cache.key, cache.list, cache.t = category, out, now;
     return out;
+end
+
+-- Blue Magic set for battle (the game lists every learned spell and greys the rest): from the job data the server
+-- sends (0x044 for BLU, main job or sub: spell id - 512 for each of the 20 slots at +0x08)
+function panel.packet(e)
+    if e.id ~= 0x044 or e.data == nil or #e.data < 0x1C then return; end
+    local d = e.data;
+    if d:byte(0x04 + 1) ~= 16 then return; end
+    local set = {};
+    for i = 0, 19 do
+        local v = d:byte(0x08 + i + 1);
+        if v > 0 then set[512 + v] = true; end
+    end
+    blu_set = set;
+    cache.key = nil;
 end
 
 function panel.release() hider:restore(); end
@@ -150,7 +172,7 @@ function panel.render()
     -- which list: the entry chosen in the menu it was opened from (Commands » Abilities / Magic, or the action menu)
     local cmdm = require('ui.cmdmenu');
     local from = cmdm.last_menu == 'abiselec' and last.abiselec or last.abimenu;
-    local category = fname == 'ability' and (from or 'Job Abilities') or ((cmdm.last_menu == 'magselec' and last.magselec) or (ACTION[cmdm.last_menu] and (last[cmdm.last_menu] == 'Trust' and 'Trust' or 'White Magic')) or last.mgcmenu or 'White Magic');
+    local category = fname == 'ability' and (from or 'Job Abilities') or ((cmdm.last_menu == 'magselec' and last.magselec) or (ACTION[cmdm.last_menu] and (last[cmdm.last_menu] == 'Trust' and 'Trust' or 'Magic')) or last.mgcmenu or 'White Magic');
     if fname == 'ability' and not ABILITY_LISTS[category] then
         -- other lists in the ability window (Ranged Attack ...) aren't built yet: the game draws its own
         if hider:active() then hider:restore(); end
@@ -159,22 +181,6 @@ function panel.render()
     hider:hide({ fname, 'helpwind', 'titlewin', 'abisortw', 'mgcsortw', 'subwindo' });
 
     local help = norm(panel.help_line());
-    -- a spell list: the type of the spell under the cursor wins (the action menu's Magic has no type choice before it)
-    if fname == 'magic' and help ~= '' then
-        if type_cache[help] == nil then
-            type_cache[help] = false;
-            local rm = AshitaCore:GetResourceManager();
-            local pl = AshitaCore:GetMemoryManager():GetPlayer();
-            for id = 1, 1023 do
-                local sp = rm:GetSpellById(id);
-                if sp and sp.Description and norm(sp.Description[1]) == help and pl:HasSpell(id) then
-                    for k, v in pairs(SPELL_TYPES) do if v == sp.Type then type_cache[help] = k; end end
-                    break;
-                end
-            end
-        end
-        category = type_cache[help] or category;
-    end
     local list = entries(category);
     -- the entry under the game's cursor: its list window's class keeps the cursor (+0x30, 0-based, over the whole
     -- list) and the count (+0x40); when the count agrees with ours, that's the entry. Otherwise match the help line
@@ -191,6 +197,7 @@ function panel.render()
         at = gcur + 1;
     end
     at = at or by_help;
+    panel.lit = { list = list, at = at };     -- (for dev probes)
     -- the description shown: the entry's, unless the game's help line says something else ("Select a spell or song
     -- to move." while sorting by hand)
     local shown = (help ~= '' and by_help == nil) and help or nil;
