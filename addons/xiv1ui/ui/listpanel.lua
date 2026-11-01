@@ -6,7 +6,7 @@
 * The list rows carry no text, so xiv1ui builds the list from game data (what the player has learned, from the
 * resource manager) and finds the entry under the game's cursor from the help bar: the help window's class object
 * points to the current help line at +0x68, which is the entry's description. Matching it against the resources'
-* descriptions names the lit entry exactly, whatever order the game lists things in.
+* descriptions names the lit entry; spells are listed in the game's own order (its Sort » Auto / Manual).
 --]]
 
 local mem     = require('core.mem');
@@ -52,6 +52,24 @@ local ABILITY_LISTS = {
 };
 local type_cache = {};       -- help line -> spell type name (or false)
 
+-- The spells the player knows, in the order the game lists them (its Sort » Auto / Manual reorders them, e.g. Trust
+-- by role): a block of the known-spell bits (0x80 bytes), then that many u16 spell ids at +0x80 and their count at
+-- +0x880. The game's code reads it as `mov eax, [ptr]; xor edi, edi; mov ebx, [eax+0x880]`.
+local order_ptr = nil;
+local function spell_order()
+    if order_ptr == nil then
+        local a = ashita.memory.find('FFXiMain.dll', 0, 'A1????????33FF8B9880080000', 1, 0);
+        order_ptr = (a and a ~= 0) and mem.u32(a) or false;
+    end
+    local s = order_ptr and mem.u32(order_ptr);
+    if not s or not mem.ok(s, 0x884) then return nil; end
+    local n = mem.u32(s + 0x880);
+    if not n or n > 1024 then return nil; end
+    local ids = {};
+    for i = 0, n - 1 do ids[#ids + 1] = ashita.memory.read_uint16(s + 0x80 + i * 2); end
+    return ids;
+end
+
 --- The entries the game lists for a category: { name, desc, sub (right-hand text), dim }.
 local function entries(category)
     local now = os.time();
@@ -77,7 +95,9 @@ local function entries(category)
         end
     else
         local ty = SPELL_TYPES[category];
-        for id = 1, 1023 do
+        local ids = spell_order();
+        if ids == nil then ids = {}; for id = 1, 1023 do ids[id] = id; end end
+        for _, id in ipairs(ids) do
             local ok, has = pcall(function () return pl:HasSpell(id); end);
             if ok and has then
                 local sp = rm:GetSpellById(id);
@@ -163,10 +183,17 @@ function panel.render()
     local wslot = require('core.gamewin').slot(fname);
     local wcls = wslot and mem.u32(wslot);
     local gcur, gn = wcls and mem.u32(wcls + 0x30), wcls and mem.u32(wcls + 0x40);
-    if gcur and gn == #list and gcur < #list then at = gcur + 1; end
-    if at == nil then
-        for i, e in ipairs(list) do if norm(e.desc) == help then at = i; break; end end
+    -- (unless the help line is another entry's description: then ours is in another order than the game's)
+    local by_help = nil;
+    for i, e in ipairs(list) do if norm(e.desc) == help then by_help = i; break; end end
+    if gcur and gn == #list and gcur < #list
+        and (by_help == nil or norm(list[gcur + 1].desc) == help) then
+        at = gcur + 1;
     end
+    at = at or by_help;
+    -- the description shown: the entry's, unless the game's help line says something else ("Select a spell or song
+    -- to move." while sorting by hand)
+    local shown = (help ~= '' and by_help == nil) and help or nil;
 
     -- opened from the action menu: the same ring as the menu, in its place
     local cmdm_ = require('ui.cmdmenu');
@@ -175,7 +202,7 @@ function panel.render()
         local items = {};
         for i, e in ipairs(list) do items[i] = { label = e.name, sub = e.sub, dim = e.dim }; end
         if #items == 0 then items[1] = { label = fname == 'magic' and 'No spells learned' or 'None available', dim = true }; end
-        local d = at and list[at].desc or help;
+        local d = shown or (at and list[at].desc) or help;
         last_ring = { 'list:' .. category, items, at, ring_since };
         cmdm_.ring('list:' .. category, items, at, ring_since, require('ui.cmdmenu').choosing(), ((d or ''):gsub('\n', ' ')));
         return;
@@ -231,7 +258,7 @@ function panel.render()
 
     local dy = y + 46 + ROWS * ROW_H + 4;
     draw.image('name_rule', x + 16, dy, { scale = { (W - 32) / 300, 1 } });
-    local d = at and list[at].desc or help;
+    local d = shown or (at and list[at].desc) or help;
     if d ~= '' then
         desc_obj = desc_obj or text.new('small', { font_height = 16, font_color = 0xFFE8E4D8, box_width = W - 44 });
         d = d:gsub('\n', ' ');

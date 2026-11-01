@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.3
+
+- Magic lists follow FFXI's own sort order. If you sorted a list (numpad + in the list: Sort » Auto / Manual), the
+  highlighted entry could name a different spell than the one cast, most visibly with Trust (choosing one Trust
+  summoned another). Sorting by hand also shows the game's "Select a spell or song to move" prompts.
+
 ## 0.3.2
 
 - Equipment: the item list for a slot now matches the game's (items your job can't use are listed, greyed out), so
