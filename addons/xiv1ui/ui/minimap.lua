@@ -53,6 +53,8 @@ function minimap.render()
     local me = mm:GetParty():GetMemberTargetIndex(0);
     if me == 0 then return; end
 
+    -- (not over the full-screen area map)
+    if require('core.gamewin').window('mapframe') ~= nil then return; end
     local sw = layout.screen();
     local ox, oy = layout.offset('minimap');
     local cx, cy = sw - DISC / 2 - 22 + ox, 52 + DISC / 2 + oy;

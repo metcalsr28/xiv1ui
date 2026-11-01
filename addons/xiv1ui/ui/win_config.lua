@@ -112,6 +112,7 @@ local TABS = {
         stepper('Text outline', { 0, 1, 2, 3 }, chat_get('outline'), chat_put('outline'),
             function (v) return ({ [0] = 'None', 'Thin', 'Normal', 'Heavy' })[v] or tostring(v); end),
         stepper('Background', { 0, 0.25, 0.5, 0.65, 0.85, 1 }, chat_get('bg'), chat_put('bg'), pct),
+        chat_flag('Key words in colour (damage, critical hits, /check ...)', 'colors'),
         chat_flag('Repeated lines shown once, with a count', 'collapse'),
         chat_flag('Timestamps', 'stamps'),
         chat_flag('Battle text in the General log (one log)', 'merge'),

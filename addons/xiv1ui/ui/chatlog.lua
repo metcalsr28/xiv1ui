@@ -22,6 +22,7 @@ local draw    = require('core.draw');
 local text    = require('core.text');
 local layout  = require('core.layout');
 local gdi_enc = require('gdifonts.encoding');
+local rich    = require('core.richtext');
 
 local chatlog = { replaces = { 'chat1', 'chat2' } };
 local hider = require('core.gamewin').new();
@@ -61,6 +62,7 @@ local function cfg()
         stamps = c('stamps') == true,
         merge = c('merge') == true,                              -- battle text in the General log
         hide = c('hide') or {},                                  -- channels left out of the logs: hide[channel] = true
+        colors = c('colors') ~= false,                           -- key words in colour (ui/chatcolor.lua)
     };
 end
 chatlog.cfg = cfg;
@@ -94,6 +96,7 @@ local logs = {
     { title = 'General', lines = {}, scroll = 0, height = 176 },
     { title = 'Battle',  lines = {}, scroll = 0, height = 150, wash = true },
 };
+function chatlog.logs_for_dev() return logs; end
 local last_text = 0;
 local hover_log = nil;
 local rects = {};
@@ -137,6 +140,36 @@ local function line_text(ln, c)
     return t;
 end
 
+-- A line's text object, or, when some of its words are lit (ui/chatcolor.lua), a rich text laid out from pieces
+-- (core/richtext.lua): make / refresh it, measure it, draw it.
+local function make_line(ln, c)
+    local pieces = c.colors and require('ui.chatcolor').pieces(ln.raw, ln.color) or nil;
+    if pieces then
+        ln.obj = nil;
+        ln.rich = rich.new({ font_family = font_family(c.font), font_height = c.size, outline_width = c.outline });
+        if c.stamps then table.insert(pieces, 1, { '[' .. ln.stamp .. '] ', ln.color }); end
+        if ln.count > 1 then pieces[#pieces + 1] = { '  \u{00D7}' .. ln.count, ln.color }; end
+        rich.set(ln.rich, pieces);
+        rich.set_width(ln.rich, log_w - 28);
+    else
+        ln.rich = nil;
+        ln.obj = new_obj(c, ln.color);
+        text.set(ln.obj, line_text(ln, c));
+    end
+end
+local function line_size(ln)
+    if ln.rich then return rich.size(ln.rich); end
+    return text.size(ln.obj);
+end
+local function line_render(ln, x, y, alpha)
+    if ln.rich then rich.render(ln.rich, x, y, alpha); return; end
+    ln.obj:set_opacity(alpha);
+    text.render(ln.obj, x, y);
+end
+local function line_width(ln, w)
+    if ln.rich then rich.set_width(ln.rich, w); else text.set_box_width(ln.obj, w); end
+end
+
 local function add_line(log, str, color)
     local c = cfg();
     local lines = log.lines;
@@ -145,12 +178,11 @@ local function add_line(log, str, color)
     if c.collapse and last and last.raw == str and last.color == color then
         last.count = last.count + 1;
         last.stamp = os.date('%H:%M');
-        text.set(last.obj, line_text(last, c));
+        make_line(last, c);
         return;
     end
     local ln = { raw = str, color = color, count = 1, stamp = os.date('%H:%M') };
-    ln.obj = new_obj(c, color);
-    text.set(ln.obj, line_text(ln, c));
+    make_line(ln, c);
     lines[#lines + 1] = ln;
     if #lines > KEEP then table.remove(lines, 1); end
     if log.scroll > 0 then log.scroll = log.scroll + 1; end      -- keep the view still while scrolled back
@@ -224,7 +256,7 @@ local function draw_log(i, x, y_bottom, alpha)
     if log.wash then
         local top, m = cy, n;
         while m >= 1 do
-            local _, bh = text.size(log.lines[m].obj);
+            local _, bh = line_size(log.lines[m]);
             local lh = bh - trim;
             if top - lh < y + 4 then break; end
             top = top - lh - c.spacing;
@@ -236,13 +268,12 @@ local function draw_log(i, x, y_bottom, alpha)
                                         color = draw.alpha(0xFFFFFFFF, alpha * c.bg) });
     end
     while n >= 1 do
-        local obj = log.lines[n].obj;
-        local _, bh = text.size(obj);
+        local ln = log.lines[n];
+        local _, bh = line_size(ln);
         local lh = bh - trim;
         if cy - lh < y + 4 then break; end
         cy = cy - lh - c.spacing;
-        obj:set_opacity(alpha);
-        text.render(obj, x + 12, cy - trim * 0.67);
+        line_render(ln, x + 12, cy - trim * 0.67, alpha);
         n = n - 1;
     end
     if log.scroll > 0 then
@@ -268,15 +299,12 @@ local function apply_style()
     size = c.size;
     logs[1].height = (c.h1 > 0) and c.h1 or math.floor(176 * size / BASE_SIZE + 0.5);
     logs[2].height = (c.h2 > 0) and c.h2 or math.floor(150 * size / BASE_SIZE + 0.5);
-    local key = c.font .. '|' .. c.size .. '|' .. c.outline .. '|' .. tostring(c.stamps);
+    local key = c.font .. '|' .. c.size .. '|' .. c.outline .. '|' .. tostring(c.stamps) .. '|' .. tostring(c.colors);
     if key == style_key then return; end
     style_key = key;
     for _, log in ipairs(logs) do
         log.one_line = nil;
-        for _, ln in ipairs(log.lines) do
-            ln.obj = new_obj(c, ln.color);
-            text.set(ln.obj, line_text(ln, c));
-        end
+        for _, ln in ipairs(log.lines) do make_line(ln, c); end
     end
 end
 
@@ -424,7 +452,7 @@ local function fit_width()
     log_w = w;
     for _, log in ipairs(logs) do
         log.one_line = nil;
-        for _, ln in ipairs(log.lines) do text.set_box_width(ln.obj, log_w - 28); end
+        for _, ln in ipairs(log.lines) do line_width(ln, log_w - 28); end
     end
 end
 

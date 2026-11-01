@@ -40,7 +40,7 @@ local TITLES = {
     ut_menu = 'Unity', mapv3 = 'Markers', quest00 = 'Quests', shopmain = 'Shop', shopsell = 'Sell?', shopbuy = 'Buy?',
     faqsub = 'Help Desk', link1 = 'Linkshell', maplist = 'Change Map', bazaar = 'Bazaar',
     evitem01 = 'Examine?', scanlist = 'Wide Scan', mount = 'Mount',
-    flistmai = 'Friend List', searchjo = 'Search: Job', searchna = 'Search: Country', searchra = 'Search: Race',
+    myroom = 'Moogle', storage = 'Storage', mapv2 = 'Marker', flistmai = 'Friend List', searchjo = 'Search: Job', searchna = 'Search: Country', searchra = 'Search: Race',
     searchle = 'Search: Rank', comgenre = 'Comment',
 };
 -- menus whose buttons have no help text (labelled from ORDER by position only)
@@ -66,16 +66,21 @@ local ORDER = {
                  'Friend', 'Linkshell', 'Linkshell 2', 'Ballista', 'Monstrosity', 'Comment', 'Edit Comment' },
     region   = { 'Conquest', 'Besieged', 'Campaign', 'Colonization' },
     map0     = { 'Markers', 'Wide Scan', 'Change Map' },
+    mapv2    = { 'Mark', 'Markers', 'Change Name' },
     mogcont  = { 'Mog Safe', 'Mog Safe 2', 'Storage', 'Mog Locker', 'Mog Satchel', 'Mog Sack', 'Mog Case',
                  'Mog Wardrobe', 'Mog Wardrobe 2', 'Mog Wardrobe 3', 'Mog Wardrobe 4', 'Mog Wardrobe 5',
                  'Mog Wardrobe 6', 'Mog Wardrobe 7', 'Mog Wardrobe 8' },
     mcrmenu  = { 'Edit Macros', 'Edit Equip Sets' },
+    storage  = { 'Mog Safe', 'Mog Safe 2', 'Storage', 'Mog Locker', 'Mog Satchel', 'Mog Sack', 'Mog Case',
+                 'Mog Wardrobe', 'Mog Wardrobe 2', 'Mog Wardrobe 3', 'Mog Wardrobe 4', 'Mog Wardrobe 5',
+                 'Mog Wardrobe 6', 'Mog Wardrobe 7', 'Mog Wardrobe 8' },
     iuse     = { 'Use', 'Drop' },
     shopmain = { 'Buy', 'Sell' },
     shopsell = { 'Sell', 'Cancel' },
     shopbuy  = { 'Buy', 'Cancel' },
     bazaar   = { 'Set Prices', 'Edit Comment' },
     flistmai = { 'Friends', 'Messages', 'Online Status' },
+    myroom   = { 'Storage', 'Delivery Box', 'Change Jobs', 'Gardening', 'Layout', 'Open Mog House', 'Remodel' },
     searchjo = { 'Warrior', 'Monk', 'White Mage', 'Black Mage', 'Red Mage', 'Thief', 'Paladin', 'Dark Knight',
                  'Beastmaster', 'Bard', 'Ranger', 'Samurai', 'Ninja', 'Dragoon', 'Summoner', 'Blue Mage', 'Corsair',
                  'Puppetmaster', 'Dancer', 'Scholar', 'Geomancer', 'Rune Fencer' },
@@ -407,8 +412,10 @@ function cmd.read()
         return { obj = obj, rows = labels, helps = helps, cursor = c, name = name, style = 'list' };
     end
     if name == 'mapv3' then
-        -- Map » Markers: ten marker slots. Each row's label is a text object the class points to (+0x18, one per
-        -- row; the text buffer at [+4]); empty slots have no text. Left / Right switch the marker colour.
+        -- Map » Markers: ten marker slots in one of two colour sets (Left / Right switch: the map's class object,
+        -- mapframe +0x106, 0 pink, 1 green). A slot's name is a text object the class points to (+0x18, one per
+        -- row; the text buffer at [+4]); unnamed slots show as Marker n. Confirm opens Mark / Markers / Change Name
+        -- for the slot (mapv2).
         local slot = slot_of(name);
         local cls = slot and mem.u32(slot);
         local c = mem.u32(obj + 0x4C);
@@ -418,11 +425,18 @@ function cmd.read()
             local t = mem.u32(cls + 0x18 + r * 4);
             local buf = t and mem.u32(t + 4);
             local txt = (buf and mem.ok(buf, 4)) and (ashita.memory.read_string(buf, 32) or ''):match('^[^%z]*') or '';
-            rows[r + 1] = (txt ~= '' and txt:match('^[%w%p ]+$')) and txt or '(empty)';
+            rows[r + 1] = (txt ~= '' and txt:match('^[%w%p ]+$')) and txt or ('Marker ' .. (r + 1));
         end
+        local fs = slot_of('mapframe');
+        local fc = fs and mem.u32(fs);
+        local set = fc and mem.u16(fc + 0x106) or 0;
         local helps = {};
-        for i = 1, 10 do helps[i] = 'Left / Right: marker colour.  Confirm: show this marker on the map.'; end
-        return { obj = obj, rows = rows, helps = helps, cursor = c, name = name, style = 'list' };
+        for i = 1, 10 do
+            helps[i] = 'Confirm: show, place or remove, or rename this marker.  Left / Right: '
+                       .. (set == 1 and 'pink' or 'green') .. ' markers.';
+        end
+        return { obj = obj, rows = rows, helps = helps, cursor = c, name = name, style = 'list',
+                 title = set == 1 and 'Markers (Green)' or 'Markers (Pink)' };
     end
     if ix then
         local slot = slot_of(name);
@@ -447,19 +461,30 @@ function cmd.read()
         local ry = mem.u16(r + 0x2C) or -1;
         if (h ~= '' or NOHELP[name]) and n and not seen[n] and ry > fy1 and ry <= fy2 then
             seen[n] = true;
-            list[#list + 1] = { y = ry, label = label_for(h), help = h, sel = (r == cur) };
+            -- (a row the game greys out, e.g. Remodel or a bag not unlocked yet, has +0x48 = 1)
+            list[#list + 1] = { y = ry, label = label_for(h), help = h, sel = (r == cur), off = mem.u8(r + 0x48) == 1 };
         end
     end
     table.sort(list, function (a, b) return a.y < b.y; end);
-    local rows, helps = {}, {};
+    local rows, helps, offs = {}, {}, {};
     -- known menus: the label for the button at that slot (buttons are 16 px apart, the first 6 px below the frame top)
     local order = ORDER[name];
+    -- In the Mog House the game turns the Commands menu's Map into Mog House (the Moogle's menu; its help text still
+    -- says "View map"). FFXI's target keeps a Mog House callback, non-zero only there.
+    local in_mog = name == 'menuwind' and (AshitaCore:GetMemoryManager():GetTarget():GetMyroomCallback() or 0) ~= 0;
+    if in_mog then
+        order = {};
+        for i, l in ipairs(ORDER.menuwind) do order[i] = l; end
+        order[12] = 'Mog House';
+    end
     if order then
         -- by slot; slots without a row object (e.g. Search » Master Level) still get their label
         local last = 0;
         for _, it in ipairs(list) do
             local slot = math.floor((it.y - fy1 - 6) / 16 + 0.5) + 1 - (SLOT_SKIP[name] or 0);
             rows[slot], helps[slot] = order[slot] or it.label, (HELPS[name] and HELPS[name][slot]) or it.help;
+            if in_mog and slot == 12 then helps[slot] = "Open your moogle's menu."; end
+            offs[slot] = it.off;
             if it.sel then cursor = slot; end
             if slot > last then last = slot; end
         end
@@ -468,12 +493,13 @@ function cmd.read()
         end
     else
         for i, it in ipairs(list) do
-            rows[i], helps[i] = it.label, it.help;
+            rows[i], helps[i], offs[i] = it.label, it.help, it.off;
             if it.sel then cursor = i; end
         end
     end
     if #rows == 0 then return nil; end
-    return { obj = obj, rows = rows, helps = helps, cursor = cursor, name = name, style = MENUS[name], page = PAGES[name] };
+    return { obj = obj, rows = rows, helps = helps, offs = offs, cursor = cursor, name = name, style = MENUS[name],
+             page = PAGES[name] };
 end
 
 -- Hiding the game's drawing of a menu: the window's visibility bytes (+0x69/+0x6A: frame) and finger (+0x78), and
@@ -582,7 +608,7 @@ local function render_list(m, now, depth, dim)
     draw.image('title_swash', x + 8, y + 4, { color = col });
     local title = ui.label('cmdlist_title' .. depth, 'name', { font_height = 22 });
     title:set_opacity(t);
-    text.draw(title, TITLES[m.name] or '', x + 40, y + 27, 'baseline');
+    text.draw(title, m.title or TITLES[m.name] or '', x + 40, y + 27, 'baseline');
     -- page arrows: Left / Right switch pages in the game
     if m.page then
         local pg = ui.label('cmdlist_page' .. depth, 'slotkey', { font_height = 15, font_alignment = text.align.Center });
@@ -608,7 +634,8 @@ local function render_list(m, now, depth, dim)
             if not dim then draw.image('cursor_gold', x + 2, ry + 2, { color = col }); end
         end
         local o = ui.label('cmdlist_row' .. depth .. '_' .. r, 'small', { font_height = 19 });
-        o:set_font_color(sel and 0xFFFFFFFF or 0xFFD8D4C8);
+        local off = m.offs and m.offs[i];
+        o:set_font_color(off and (sel and 0xFFA8A49A or 0xFF7C786E) or (sel and 0xFFFFFFFF or 0xFFD8D4C8));
         o:set_opacity(t);
         text.draw(o, label, x + 34, ry + ROW_H - 9, 'baseline');
         local v = m.values and m.values[i];
@@ -704,8 +731,9 @@ local function helpbar_hide(on)
 end
 
 -- windows the game opens alongside some menus, hidden while xiv1ui draws them (Mount: the ability list's sort
--- tabs and the "Next" recast box)
-local EXTRA_HIDE = { mount = { 'abisortw', 'subwindo' } };
+-- tabs and the "Next" recast box; a marker's Mark / Markers / Change Name: the game's marker slots, which xiv1ui's
+-- Markers list shows once a slot is being chosen)
+local EXTRA_HIDE = { mount = { 'abisortw', 'subwindo' }, mapv2 = { 'mapv3' } };
 local extra_hider = require('core.gamewin').new();
 local function extras(name)
     local list = name and EXTRA_HIDE[name];
@@ -961,6 +989,16 @@ function cmd.render()
                 for j = #stack, i, -1 do stack[j] = nil; end
                 break;
             end
+        end
+        -- the full-screen map has focus again (a marker was just placed, or the map was clicked): the menus step
+        -- aside, and the game's own row of marker slots shows (it alone shows which markers are placed)
+        if focused_name() == 'mapframe' then
+            for obj in pairs(shown_obj) do
+                if cache[obj] and cache[obj].name == 'mapv3' then restore_menu(obj); end
+            end
+            helpbar_hide(false);
+            last_obj = nil;
+            return;
         end
         if live and last_m and last_m.style == 'list' and focused_name() == last_m.name then
             -- the game draws that window; the menus under it stay xiv1ui's (dimmed, titles only)

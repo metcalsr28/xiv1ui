@@ -27,6 +27,18 @@ function world.target_index()
     return t:GetTargetIndex(slot) or 0;
 end
 
+--- A target that is a model with no entity behind it (the Mog House door, "Door: Back to Town"): its name and
+-- world position x, height, y (the actor keeps them at +0x34), or nil. Only while no entity is targeted.
+function world.target_actor()
+    local t = mm():GetTarget();
+    if (t:GetTargetIndex(0) or 0) ~= 0 or t:GetIsActive() ~= 1 then return nil; end
+    local a = t:GetActorPointer();
+    local name = t:GetWindowName();
+    if a == nil or a == 0 or name == nil or name == '' or not require('core.mem').ok(a + 0x34, 12) then return nil; end
+    local f = require('ffi').cast('float*', a + 0x34);
+    return name, f[0], f[1], f[2];
+end
+
 function world.locked()
     return mm():GetTarget():GetLockedOnFlags() ~= 0;
 end

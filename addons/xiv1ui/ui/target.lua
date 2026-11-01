@@ -29,16 +29,17 @@ function target.render()
     local now = xi_now();
     local dt = math.min(0.1, now - last_t);
     last_t = now;
-    if idx == 0 then last_idx = 0; return; end
+    local actor_name = (idx == 0) and world.target_actor() or nil;
+    if idx == 0 and not actor_name then last_idx = 0; return; end
 
     local ent = AshitaCore:GetMemoryManager():GetEntity();
-    local name = require('core.npcnames').resolve(ent:GetName(idx), ent:GetServerId(idx));
+    local name = actor_name or require('core.npcnames').resolve(ent:GetName(idx), ent:GetServerId(idx));
     if name == nil or name == '' then return; end
     local hp = (ent:GetHPPercent(idx) or 0) / 100;
     if idx ~= last_idx then shown_hp = hp; last_idx = idx; end
     shown_hp = shown_hp + (hp - shown_hp) * math.min(1, dt * 8);
 
-    local kind = world.kind(idx);
+    local kind = actor_name and 'npc' or world.kind(idx);
     local tw, th = layout.size('tube_track_long');
     local W = tw + 60;
     local x, y = layout.anchor('top', W, 0, 0, 40, 'target');
@@ -51,7 +52,8 @@ function target.render()
         draw.image(engaged and 'aggro_active' or 'aggro_passive', x + 10, y + 2);
         text.draw(level_obj, '??', x + 26, y + 34, 'baseline');      -- FFXI doesn't reveal mob levels
     end
-    if name_obj.settings.font_color ~= world.name_color(idx) then name_obj:set_font_color(world.name_color(idx)); end
+    local ncol = actor_name and 0xFFF4F0E6 or world.name_color(idx);
+    if name_obj.settings.font_color ~= ncol then name_obj:set_font_color(ncol); end
     text.draw(name_obj, name, nx, y + 26, 'baseline');
     draw.image('name_rule', nx - 6, y + 28);
     text.draw(label_obj, 'Target', x + W - 52, y + 24, 'baseline');

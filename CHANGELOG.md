@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.3.1
+
+- Chat: key words in colour, so the parts that matter stand out: what a /check says (too weak / easy prey ...
+  incredibly tough, high or low evasion and defense), critical hits, damage (gold dealt by your party, red taken
+  by it), healing, misses, resisted spells, what a monster readies or casts, experience, levels, skill-ups and items
+  obtained. Configuration » Chat » "Key words in colour" turns it off.
+- The Mog House door gets the target ring and its name in the target frame when you target it.
+- The Moogle's menu in your Mog House and its Storage list are restyled; options you can't use yet (Remodel, bags
+  not unlocked) are greyed out, in every restyled menu, as in the game.
+- The minimap no longer draws over the full-screen map.
+- In your Mog House the Commands menu's last entry reads "Mog House" (it opens the Moogle's menu), as the game's does,
+  instead of "Map".
+
+**Known issues**
+- Map markers are very broken: placing, removing and choosing markers (Commands » Map » Markers, or clicking the
+  map) doesn't work properly with xiv1ui. Until it's fixed, turn off Configuration » Controls » "Command menu
+  (Enter / A) in the FF style" while you set markers; the game's own menus then work as usual.
+
 ## 0.3.0
 
 **Icons for everything**

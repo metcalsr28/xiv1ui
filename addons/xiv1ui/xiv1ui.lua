@@ -7,7 +7,7 @@
 
 addon.name    = 'xiv1ui';
 addon.author  = 'xiv1ui project';
-addon.version = '0.3.0';
+addon.version = '0.3.1';
 addon.desc    = 'FINAL FANTASY XIV 1.0 style interface.';
 addon.link    = '';
 

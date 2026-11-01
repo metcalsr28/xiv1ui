@@ -83,7 +83,13 @@ function worldfx.render()
 
     -- target cursor
     local idx = world.target_index();
-    if idx ~= 0 then
+    local name_a, ax, ah, ay = nil, nil, nil, nil;
+    if idx == 0 then name_a, ax, ah, ay = world.target_actor(); end
+    if name_a then
+        -- a target with no entity (the Mog House door): the ring at FFXI's own arrow height above it
+        local sx, sy, vis = project.point(ax, ah - 0.4, ay);
+        if sx and vis then draw.image('target_ring', sx - 36, sy - 36, { rot = now * 0.6, color = 0xE0FFFFFF }); end
+    elseif idx ~= 0 then
         -- middle of the model, where it's drawn; objects without a model (doors) at FFXI's own arrow height
         local door = bit.band(AshitaCore:GetMemoryManager():GetEntity():GetSpawnFlags(idx) or 0, 0x20) ~= 0;
         local sx, sy, vis = project.on_model(idx, 0.55, 0, door and 0.4 or 1.2);
