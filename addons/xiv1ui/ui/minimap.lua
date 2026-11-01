@@ -5,8 +5,8 @@
 * dots, enemies in their claim colours, and an orange "N" tab on the rim. North is up.
 * Where the game has a map for the area, the disc shows it (the Remapster HD map HorizonXI ships, or FFXI's own),
 * centred on you and north up; the view covers the same stretch of map in every zone, so towns show closer than
-* fields, as on the game's Map screen. Zones with several floors fall back to the parchment until xiv1ui knows the
-* floor (core/maps.lua). Configuration » "Area map in the minimap" turns the map off.
+* fields, as on the game's Map screen. In zones with several floors, the floor under you (core/maps.lua).
+* Configuration » "Area map in the minimap" turns the map off.
 * Clock: day and moon orbs with the Vana'diel weekday and time.
 * Replaces the game's compass and clock (through HXIUIBegone).
 --]]
@@ -82,7 +82,7 @@ function minimap.render()
     draw.image('minimap_disc', cx - DISC / 2, cy - DISC / 2);
     local px, py = ent:GetLocalPositionX(me), ent:GetLocalPositionY(me);
     local zone_id = mm:GetParty():GetMemberZone(0);
-    local m = store.data.minimap_hd ~= false and maps.single(zone_id) or nil;
+    local m = store.data.minimap_hd ~= false and maps.current(zone_id, px, ent:GetLocalPositionZ(me), py) or nil;
     local tex = m and maps.texture(m);
     local range = RANGE;
     if tex then

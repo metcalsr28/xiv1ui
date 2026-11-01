@@ -478,7 +478,8 @@ function chatlog.render()
     local chat = layout.widgets.chat;
     if not open and chat then
         local _, focus = require('core.native').focused();
-        local fx, fy, fw, fh = focus and require('core.gamewin').rect(focus);
+        local fx, fy, fw, fh;
+        if focus then fx, fy, fw, fh = require('core.gamewin').rect(focus); end
         if fx and fx < chat[1] + chat[3] and chat[1] < fx + fw and fy < chat[2] + chat[4] and chat[2] < fy + fh then
             return;
         end

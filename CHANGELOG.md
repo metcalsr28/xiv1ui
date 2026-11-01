@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.6
+
+- Fix: in 0.3.5 the chat logs disappeared (until the next reload) the first time one of FFXI's own windows had
+  focus.
+- Minimap: areas with several floors show the floor you're on (Ru'Avitau, Ru'Hmet, the Adoulin gates and caverns,
+  Ra'Kaznar Inner Court ...), as the game's Map screen picks it.
+- Augments: an item's augments are listed with its description (Items, Equipment and the gear list), worded as the
+  game words them.
+- Equipment: the gear list follows the game's own order, so the highlight is on the item the game's cursor is on.
+
 ## 0.3.5
 
 Fixes from the second GitHub issue report (thanks again, hechina1777) and from Reddit:
@@ -24,7 +34,7 @@ Fixes from the second GitHub issue report (thanks again, hechina1777) and from R
 
 **Known issues**
 - Areas with several floors (Ru'Avitau, Ru'Hmet, the Adoulin gates and caverns, Ra'Kaznar Inner Court ...) still
-  show a blank minimap.
+  show a blank minimap (fixed in 0.3.6).
 
 ## 0.3.4
 

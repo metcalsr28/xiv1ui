@@ -143,7 +143,7 @@ local function items_of(bag, usable_only)        -- usable_only: true, or 'cryst
             -- (the game's usable list: items flagged usable, and crystals, type 8, which it lists too)
             local usable = bit.band(r and r.Flags or 0, USABLE) ~= 0 or (r and r.Type == 8);
             if usable_only == 'crystal' then usable = r and r.Type == 8; end
-            if r and (not usable_only or usable) then out[#out + 1] = { id = it.Id, index = i, count = it.Count, res = r, equipped = (it.Flags == 5) }; end
+            if r and (not usable_only or usable) then out[#out + 1] = { id = it.Id, index = i, bag = bag, count = it.Count, res = r, equipped = (it.Flags == 5) }; end
         end
     end
     return out, n;
@@ -173,8 +173,11 @@ local function in_game_order(cls, list)
     return list;
 end
 
-local function describe(r)
+-- (with `item`, the bag's item itself: its augments follow, as in the game's item box)
+local function describe(r, item)
     local d = (r.Description and r.Description[1] or ''):gsub('\n', '  ');
+    local aug = item and require('core.augments').text(item, r);
+    if aug then d = (d ~= '' and (d .. '\n') or '') .. aug; end
     if (r.Level or 0) > 0 or (r.Jobs or 0) ~= 0 then
         local jobs, n = {}, 0;
         for j = 1, 22 do
@@ -334,7 +337,13 @@ function panel.render()
         return;
     end
     ring_since, last_ring = nil, nil;
-    local H = 50 + ROWS * ROW_H + 140 + (shopping and 34 or 0);
+    -- the lit item's description (with its augments it can need more than the usual room: the window grows)
+    local c = at and list[at];
+    local d = c and describe(c.res, c.bag and AshitaCore:GetMemoryManager():GetInventory():GetContainerItem(c.bag, c.index)) or '';
+    desc_obj = desc_obj or text.new('small', { font_height = 16, font_color = 0xFFE8E4D8, box_width = W - 44 });
+    if desc_obj.settings.text ~= d then text.set(desc_obj, d); end
+    local extra = d ~= '' and math.max(0, select(2, text.size(desc_obj)) - 84) or 0;
+    local H = 50 + ROWS * ROW_H + 140 + extra + (shopping and 34 or 0);
     local x, y = layout.anchor('topleft', W, H, 24, 40, 'itempanel');
     -- opened from the action menu: in the menu's place, beside the character
     local ax, ay = require('ui.cmdmenu').action_spot();
@@ -425,13 +434,7 @@ function panel.render()
 
     local dy = y + 46 + ROWS * ROW_H + 4;
     draw.image('name_rule', x + 16, dy, { scale = { (W - 32) / 300, 1 } });
-    local c = at and list[at];
-    if c then
-        local d = describe(c.res);
-        desc_obj = desc_obj or text.new('small', { font_height = 16, font_color = 0xFFE8E4D8, box_width = W - 44 });
-        if desc_obj.settings.text ~= d then text.set(desc_obj, d); end
-        text.render(desc_obj, x + 22, dy + 10);
-    end
+    if c then text.render(desc_obj, x + 22, dy + 10); end
     if c and buy then
         -- can she wear it? (her main job and level against the item's)
         local pl = AshitaCore:GetMemoryManager():GetPlayer();
@@ -448,7 +451,7 @@ function panel.render()
         end
         local o = ui.label('itp_offer', 'small', { font_height = 18 });
         if o.settings.font_color ~= col then o:set_font_color(col); end
-        text.draw(o, line, x + 22, dy + 128, 'baseline');
+        text.draw(o, line, x + 22, dy + extra + 128, 'baseline');
     end
     if c and sell then
         -- what the shopkeeper offers, and (choosing how many) the amount and the total
@@ -457,16 +460,16 @@ function panel.render()
         local line = price and string.format('%s offers %d gil %s.', who, price, c.count > 1 and 'each' or 'for it')
                      or 'Confirm to ask what it fetches.';
         local o = ui.label('itp_offer', 'small', { font_height = 18, font_color = 0xFFF0D890 });
-        text.draw(o, line, x + 22, dy + 96, 'baseline');
+        text.draw(o, line, x + 22, dy + extra + 96, 'baseline');
         local qs = gamewin.slot('itemctrl');
         local qc = qs and gamewin.window('itemctrl') and mem.u32(qs);
         local n, max = qc and mem.u8(qc + 0x23), qc and mem.u8(qc + 0x22);
         if n and max and max >= 1 and n >= 1 and n <= max then
             local q = ui.label('itp_qty', 'name', { font_height = 22 });
-            text.draw(q, string.format('Sell %d of %d', n, max), x + 22, dy + 132, 'baseline');
+            text.draw(q, string.format('Sell %d of %d', n, max), x + 22, dy + extra + 132, 'baseline');
             if price then
                 local t = ui.label('itp_total', 'name', { font_height = 22, font_color = 0xFFF0D890, font_alignment = text.align.Right });
-                text.draw(t, string.format('%d gil', price * n), x + W - 22, dy + 132, 'baseline');
+                text.draw(t, string.format('%d gil', price * n), x + W - 22, dy + extra + 132, 'baseline');
             end
         end
     end
@@ -497,6 +500,7 @@ function panel.render()
 end
 
 panel.describe = describe;
+panel.in_game_order = in_game_order;
 panel.selling = selling;
 panel.buying = buying;
 

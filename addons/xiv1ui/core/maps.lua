@@ -62,6 +62,52 @@ function maps.single(zone)
     return base[1];
 end
 
+-- The floor the player stands on, in zones with several maps. The game keeps no "current floor": its Map screen
+-- asks a function that casts a ray down (then up) from a position into the zone's collision mesh and returns the
+-- floor key of the surface it hits (0 when it hits nothing). That function: FFXiMain.dll, signature below,
+-- int __thiscall (collision object, x, height, north); the object pointer is a global read through the second
+-- signature (+2). The Map screen then takes the zone's first entry with that key, else the one with key 0.
+local floor_fn, floor_obj = nil, nil;
+local floor_cache = { zone = nil, key = nil, t = 0 };
+
+local function floor_key(x, z, y)
+    if floor_fn == nil then
+        floor_fn = false;
+        local fn = ashita.memory.find('FFXiMain.dll', 0, '8B542408568D4424108BF18B4C2410508B44240C6800002041', 0, 0);
+        local pp = ashita.memory.find('FFXiMain.dll', 0, '8B0D????????565057E8????????568D4C240C57', 2, 0);
+        if fn and fn ~= 0 and pp and pp ~= 0 then
+            floor_fn = ffi.cast('int32_t (__thiscall*)(uint32_t, float, float, float)', fn);
+            floor_obj = ashita.memory.read_uint32(pp);
+        end
+    end
+    if not floor_fn then return nil; end
+    local obj = ashita.memory.read_uint32(floor_obj);
+    if obj == nil or obj == 0 then return nil; end
+    return floor_fn(obj, x, z, y);
+end
+
+--- The map for the player's position (x east, z height, y north) in a zone, or nil: the zone's only map, or in a
+-- zone with several, the one for the floor under the player (asked a few times a second; a jump or a fall that
+-- hits nothing keeps the last floor).
+function maps.current(zone, x, z, y)
+    local one = maps.single(zone);
+    if one then return one; end
+    local list = maps.of_zone(zone);
+    if list == nil then return nil; end
+    local fc = floor_cache;
+    local now = require('core.now')();
+    if fc.zone ~= zone then fc.zone, fc.key, fc.t = zone, nil, 0; end
+    if now - fc.t > 0.25 then
+        fc.t = now;
+        local k = floor_key(x, z, y);
+        if k and (k ~= 0 or fc.key == nil) then fc.key = k; end
+    end
+    if fc.key == nil then return nil; end
+    for _, m in ipairs(list) do if m.key == fc.key then return m; end end
+    for _, m in ipairs(list) do if m.key == 0 then return m; end end
+    return nil;
+end
+
 --- World x, y -> pixel on the 512-pixel map.
 function maps.to_map(m, x, y) return x * m.s - m.ox, -y * m.s - m.oy; end
 

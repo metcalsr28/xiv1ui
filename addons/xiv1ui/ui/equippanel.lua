@@ -146,7 +146,7 @@ local function equipped(slot_id)
     local bag, idx = bit.rshift(bit.band(e.Index, 0xFF00), 8), bit.band(e.Index, 0xFF);
     local it = inv:GetContainerItem(bag, idx);
     if it == nil or it.Id == 0 then return nil; end
-    return it.Id;
+    return it.Id, it;
 end
 
 -- The item the game's list cursor is on: its item info window's class object holds the item id (+0x24) and the
@@ -202,8 +202,10 @@ local SLOT_NAMES = { [0] = 'Main Weapon', 'Sub-weapon', 'Ranged Weapon', 'Ammuni
 local PICK_ROWS, PICK_ROW_H = 8, 40;
 local desc_obj = nil;
 
+local picker_dh = 0;          -- the description's height last frame (the window grows to hold it)
 local function render_picker(x, y, h, slot_id)
     local W = 440;
+    h = math.max(h, 44 + 32 + PICK_ROWS * PICK_ROW_H + 6 + 10 + picker_dh + 18);
     local bw, bh = layout.size('win_body');
     draw.nine('win_body', x, y, W, h, 12, bw, bh);
     local tw, th = layout.size('win_title');
@@ -239,6 +241,8 @@ local function render_picker(x, y, h, slot_id)
             if #l == lcount - 1 then shown_bag, list = b, l; break; end
         end
     end
+    -- in the game's order, which isn't the bag's (ui/itempanel.lua in_game_order)
+    list = require('ui.itempanel').in_game_order(lcls, list);
     local at = nil;
     for i, c in ipairs(list) do
         if c.id == cid and (cidx == nil or c.index == cidx) then at = i; end
@@ -304,19 +308,12 @@ local function render_picker(x, y, h, slot_id)
     local dy = hy + 32 + PICK_ROWS * PICK_ROW_H + 6;
     draw.image('name_rule', x + 16, dy, { scale = { (W - 32) / 300, 1 } });
     if c then
-        local d = (c.res.Description and c.res.Description[1] or ''):gsub('\n', '  ');
-        -- level and jobs, as the game's item info shows them
-        local jobs, n = {}, 0;
-        for j = 1, 22 do
-            if bit.band(c.res.Jobs or 0, bit.lshift(1, j)) ~= 0 then
-                n = n + 1;
-                jobs[#jobs + 1] = AshitaCore:GetResourceManager():GetString('jobs.names_abbr', j) or '';
-            end
-        end
-        local who = (n >= 22) and 'All Jobs' or table.concat(jobs, ' ');
-        d = string.format('Lv.%d  %s\n%s', c.res.Level or 0, who, d);
+        -- level and jobs, as the game's item info shows them, the description and the item's augments
+        local d = require('ui.itempanel').describe(c.res,
+            AshitaCore:GetMemoryManager():GetInventory():GetContainerItem(c.bag, c.index));
         desc_obj = desc_obj or text.new('small', { font_height = 16, font_color = 0xFFE8E4D8, box_width = W - 44 });
         if desc_obj.settings.text ~= d then text.set(desc_obj, d); end
+        picker_dh = select(2, text.size(desc_obj));
         text.render(desc_obj, x + 22, dy + 10);
     end
 end
@@ -360,15 +357,16 @@ function panel.render()
 
     local W = 4 * CELL + 3 * GAP + 48;
     -- the selected slot's item: its name, and under it what FFXI's item box would say (level, jobs, stats)
-    local sel_item = nil;
+    local sel_item, sel_bag_item = nil, nil;
     for _, c in ipairs(cells) do
         if c.sel then
-            local id = equipped(c.slot);
+            local id, it = equipped(c.slot);
             sel_item = id and AshitaCore:GetResourceManager():GetItemById(id) or false;
+            sel_bag_item = it;
         end
     end
     local desc = ui.label('eq_desc', 'small', { font_height = 16, font_color = 0xFFE8E4D8, box_width = W - 52 });
-    local d = (sel_item and not picking) and require('ui.itempanel').describe(sel_item) or '';
+    local d = (sel_item and not picking) and require('ui.itempanel').describe(sel_item, sel_bag_item) or '';
     if desc.settings.text ~= d then text.set(desc, d); end
     local dh = d ~= '' and select(2, text.size(desc)) + 10 or 0;
     local H = 46 + 4 * (CELL + 22) + 70 + dh;
