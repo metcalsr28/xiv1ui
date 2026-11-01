@@ -30,11 +30,11 @@ local DAYS = { 'Firesday', 'Earthsday', 'Watersday', 'Windsday', 'Iceday', 'Ligh
 local DAY_COLORS = { 0xFFFF7A5A, 0xFFE8C860, 0xFF6AA8FF, 0xFF8CE07A, 0xFFB8F0FF, 0xFFD8A0FF, 0xFFFFFFF0, 0xFF9A80C0 };
 
 function minimap.init()
-    clock_obj = text.new('label', { font_height = 17, font_color = 0xFFF4F0E6, font_alignment = text.align.Right });
-    day_obj   = text.new('small', { font_height = 14, font_color = 0xFFE8E4D8, font_alignment = text.align.Right });
-    moon_obj  = text.new('small', { font_height = 13, font_color = 0xFFC8D4F0 });
+    clock_obj = text.new('label', { font_height = 18, font_color = 0xFFF4F0E6, font_alignment = text.align.Right });
+    day_obj   = text.new('small', { font_height = 16, font_color = 0xFFE8E4D8, font_alignment = text.align.Right });
+    moon_obj  = text.new('small', { font_height = 15, font_color = 0xFFC8D4F0 });
     n_obj     = text.new('slotkey', { fixed = true, font_height = 13, font_alignment = text.align.Center, font_color = 0xFFFFFFFF });
-    zone_obj  = text.new('label', { font_height = 15, font_color = 0xFFF0DCA0, font_alignment = text.align.Center });
+    zone_obj  = text.new('label', { font_height = 16, font_color = 0xFFF0DCA0, font_alignment = text.align.Center });
 end
 
 local function vana_time() return require('core.clock').vana(); end

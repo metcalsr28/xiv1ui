@@ -7,7 +7,7 @@
 
 addon.name    = 'xiv1ui';
 addon.author  = 'xiv1ui project';
-addon.version = '0.3.4';
+addon.version = '0.3.5';
 addon.desc    = 'FINAL FANTASY XIV 1.0 style interface.';
 addon.link    = '';
 
@@ -342,9 +342,9 @@ ashita.events.register('packet_in', 'xiv1ui_packet_in', function (e)
     if not ok then print('[xiv1ui] ' .. tostring(err)); end
     ok, err = pcall(require('ui.dialogue').packet, e);
     if not ok then print('[xiv1ui] ' .. tostring(err)); end
-    -- any other module that reads the server's packets (roe, itempanel ...)
+    -- any other module that reads the server's packets (roe, itempanel ...); worldfx and dialogue had theirs above
     for _, m in ipairs(modules) do
-        if m.packet and m.name ~= 'dialogue' then
+        if m.packet and m.name ~= 'dialogue' and m.name ~= 'worldfx' then
             ok, err = pcall(m.packet, e);
             if not ok then print('[xiv1ui] ' .. m.name .. ': ' .. tostring(err)); m.packet = nil; end
         end

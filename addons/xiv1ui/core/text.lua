@@ -91,9 +91,16 @@ function text.new(style, overrides)
     local set_h = obj.set_font_height;
     obj.set_font_height = function (self, h)
         self.hud.h = h;
-        set_h(self, math.floor(math.max(h, self.hud.min) * self.hud.scale + 0.5));
+        local px = math.floor(math.max(h, self.hud.min) * self.hud.scale + 0.5);
+        self:set_outline_width(text.outline_px(self.hud.ow, px, self.hud.scale));
+        set_h(self, px);
     end
     return obj;
+end
+
+--- The outline width (pixels) for text drawn `px` pixels high at UI scale `sc` (the same at every size).
+function text.outline_px(ow, px, sc)
+    return math.floor(ow * sc + 0.5);
 end
 
 -- Configuration » Minimum text size: smaller text is drawn at this height instead (HUD units; 0 = off).
@@ -108,7 +115,7 @@ local function sync(obj)
     if hud == nil or (hud.scale == sc and hud.min == mn) then return; end
     hud.scale, hud.min = sc, mn;
     obj.settings.font_height = math.floor(math.max(hud.h, mn) * sc + 0.5);
-    obj.settings.outline_width = math.floor(hud.ow * sc + 0.5);
+    obj.settings.outline_width = text.outline_px(hud.ow, obj.settings.font_height, sc);
     obj.settings.box_width = math.floor(hud.bw * sc + 0.5);
     obj.is_dirty = true;
 end

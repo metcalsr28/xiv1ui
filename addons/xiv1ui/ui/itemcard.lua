@@ -27,11 +27,14 @@ local desc_obj = nil;
 
 function card.release() hider:restore(); end
 
+local owned_box = nil;        -- the item box a screen of OWNED was showing (it can outlive the screen for a moment)
+
 function card.render()
     local o = gamewin.window('iteminfo');
     local _, fname = native.focused();
     local mine = hider:active();
-    if store.data.cmd_menu == false or o == nil or OWNED[fname] or require('ui.itempanel').selling(fname) or require('ui.itempanel').buying(fname)
+    if OWNED[fname] then owned_box = o; elseif o == nil then owned_box = nil; end
+    if store.data.cmd_menu == false or o == nil or OWNED[fname] or o == owned_box or require('ui.itempanel').selling(fname) or require('ui.itempanel').buying(fname)
             or not (mine or (mem.u8(o + 0x69) == 1 and mem.u8(o + 0x6A) == 1)) then
         if mine then hider:restore(); end
         return;

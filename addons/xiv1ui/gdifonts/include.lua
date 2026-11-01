@@ -18,7 +18,7 @@ local d3d        = require('d3d8');
 local ffi        = require('ffi');
 local fontobject = dofile(string.gsub(libPath, 'include.lua', 'fontobject.lua'));
 local rectobject = dofile(string.gsub(libPath, 'include.lua', 'rectobject.lua'));
-local renderer   = ffi.load(string.gsub(libPath, 'include.lua', 'gdifonttexture.dll'));
+local renderer   = ffi.load(string.gsub(libPath, 'include.lua', 'gdifonttexture-clip.dll'));
 ffi.cdef[[
     typedef struct {
         int32_t  BoxHeight;

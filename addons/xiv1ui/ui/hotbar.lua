@@ -109,6 +109,51 @@ local function apply_keys(on)
     end
 end
 
+-- A name in one or two lines (split at the first space when it's long), shrunk until the wider line fits `room`.
+local function fit_name(o, label, fh, room)
+    if o.mname_for == label .. room then return; end
+    o.mname_for = label .. room;
+    o.mn1 = o.mn1 or text.new('slotkey', { font_height = 13, font_alignment = text.align.Center });
+    o.mn2 = o.mn2 or text.new('slotkey', { font_height = 13, font_alignment = text.align.Center });
+    local a, b = label:match('^(%S+)%s+(.+)$');
+    if not (a and #label > 8) then a, b = label, nil; end
+    o.mn_a, o.mn_b = a, b;
+    fh = b and fh - 1 or fh;
+    o.mn1:set_font_height(fh); o.mn2:set_font_height(fh);
+    text.set(o.mn1, a);
+    local tw = text.size(o.mn1);
+    if b then text.set(o.mn2, b); tw = math.max(tw, (text.size(o.mn2))); end
+    if tw > room then
+        fh = math.max(9, math.floor(fh * room / tw));
+        o.mn1:set_font_height(fh); o.mn2:set_font_height(fh);
+    end
+    o.mn_fh = fh;
+end
+
+-- the name across the slot (a macro's, or any action's with Configuration » "Action names on the bar")
+local function name_across(o, label, x, y)
+    fit_name(o, label, 13, RING_W - 16);
+    local cxs, cys = x + RING_W / 2, y + RING_W / 2;
+    if o.mn_b then
+        text.draw(o.mn1, o.mn_a, cxs, cys - 1, 'baseline');
+        text.draw(o.mn2, o.mn_b, cxs, cys + o.mn_fh - 1, 'baseline');
+    else
+        text.draw(o.mn1, o.mn_a, cxs, cys + o.mn_fh * 0.35, 'baseline');
+    end
+end
+
+-- the name over the slot, its last line just above the ring
+local function name_above(o, label, x, y)
+    fit_name(o, label, 15, STEP - 4);
+    local cxs = x + RING_W / 2;
+    if o.mn_b then
+        text.draw(o.mn1, o.mn_a, cxs, y - 2 - o.mn_fh, 'baseline');
+        text.draw(o.mn2, o.mn_b, cxs, y - 2, 'baseline');
+    else
+        text.draw(o.mn1, o.mn_a, cxs, y - 2, 'baseline');
+    end
+end
+
 local function fmt_timer(ticks)
     local s = math.ceil(ticks / 60);
     return string.format('%02d:%02d', math.floor(s / 60), s % 60);
@@ -244,40 +289,23 @@ function hotbar.render()
             local dim = info.usable and tint or 0xFF6A6A6A;    -- unusable: greyed
             draw.image(info.disc, x + WELL_IN, y + WELL_IN, { color = dim });
             -- (a category's emblem stays faint under the action's letters)
+            -- Configuration » "Action names on the bar": across the slot (over a faint icon, as a macro's), or above it
+            local names = store.data.bar_names or 'above';
+            local across = names == 'icon' and not info.lines and info.timer == 0;
             if info.icon then
-                draw.image(info.icon, x + WELL_IN, y + WELL_IN, { color = info.generic and (bit.band(dim, 0x00FFFFFF) + 0x50000000) or dim });
+                local faint = info.generic or across;
+                draw.image(info.icon, x + WELL_IN, y + WELL_IN, { color = faint and (bit.band(dim, 0x00FFFFFF) + 0x50000000) or dim });
             end
             local letters = not info.icon or info.generic;
-            if info.lines then
+            if names == 'above' and not (info.lines and info.show_name) then
+                name_above(o, info.label or '', x, y);
+            end
+            if across then
+                name_across(o, info.label or '', x, y);
+            elseif info.lines then
                 -- a macro: its name across the slot (or the initials if there's no icon and the name is off)
                 if info.show_name then
-                    -- the name across the slot: one or two lines (split at the first space), shrunk to fit the ring
-                    o.mn1 = o.mn1 or text.new('slotkey', { font_height = 13, font_alignment = text.align.Center });
-                    o.mn2 = o.mn2 or text.new('slotkey', { font_height = 13, font_alignment = text.align.Center });
-                    local label = info.label;
-                    if o.mname_for ~= label then
-                        o.mname_for = label;
-                        local a, b = label:match('^(%S+)%s+(.+)$');
-                        if not (a and #label > 8) then a, b = label, nil; end
-                        o.mn_a, o.mn_b = a, b;
-                        local fh = b and 12 or 13;
-                        o.mn1:set_font_height(fh); o.mn2:set_font_height(fh);
-                        text.set(o.mn1, a);
-                        local tw = text.size(o.mn1);
-                        if b then text.set(o.mn2, b); tw = math.max(tw, (text.size(o.mn2))); end
-                        if tw > RING_W - 16 then
-                            fh = math.max(8, math.floor(fh * (RING_W - 16) / tw));
-                            o.mn1:set_font_height(fh); o.mn2:set_font_height(fh);
-                        end
-                        o.mn_fh = fh;
-                    end
-                    local cxs, cys = x + RING_W / 2, y + RING_W / 2;
-                    if o.mn_b then
-                        text.draw(o.mn1, o.mn_a, cxs, cys - 1, 'baseline');
-                        text.draw(o.mn2, o.mn_b, cxs, cys + o.mn_fh - 1, 'baseline');
-                    else
-                        text.draw(o.mn1, o.mn_a, cxs, cys + o.mn_fh * 0.35, 'baseline');
-                    end
+                    name_across(o, info.label, x, y);
                 elseif letters then
                     text.draw(o.glyph, info.glyph, x + RING_W / 2, y + RING_W / 2 + 10, 'baseline');
                 end

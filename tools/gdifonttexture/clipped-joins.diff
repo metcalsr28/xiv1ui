@@ -1,0 +1,148 @@
+diff -ruN -x * src/Defines.h patched/Defines.h
+--- src/Defines.h	2026-11-01 09:12:02
++++ patched/Defines.h	2026-11-01 09:23:53
+@@ -1,7 +1,15 @@
+ #ifndef __GdiFontTxDefines__
+ #define __GdiFontTxDefines__
+ 
++#ifdef _MSC_VER
+ #include <atlbase.h>
++#else
++#include <windows.h>
++#include <math.h>
++#include <stdio.h>
++#include <wchar.h>
++#include <string.h>
++#endif
+ #include "includes/d3d8/includes/d3d8.h"
+ #include "includes/d3d8/includes/d3dx8core.h"
+ #pragma comment(lib, "includes/d3d8/lib/d3dx8.lib")
+@@ -13,8 +21,8 @@
+ {
+     int32_t BoxHeight;
+     int32_t BoxWidth;
+-    float_t FontHeight;
+-    float_t OutlineWidth;
++    float FontHeight;
++    float OutlineWidth;
+     int32_t FontFlags;
+     uint32_t FontColor;
+     uint32_t OutlineColor;
+diff -ruN -x * src/Exports.cpp patched/Exports.cpp
+--- src/Exports.cpp	2026-11-01 09:12:02
++++ patched/Exports.cpp	2026-11-01 09:13:14
+@@ -28,7 +28,7 @@
+     {
+         LOGFONT lf = {0};
+         lf.lfCharSet = DEFAULT_CHARSET;
+-        swprintf_s(lf.lfFaceName, 32, L"%S", font);
++        swprintf_s(lf.lfFaceName, 32, L"%hs", font);
+         LPARAM lParam = 0;
+         ::EnumFontFamiliesEx(GetDC(nullptr), &lf, EnumFontFamExProc, (LPARAM)&lParam, 0);
+         return lParam ? true : false;
+diff -ruN -x * src/GdiFontManager.cpp patched/GdiFontManager.cpp
+--- src/GdiFontManager.cpp	2026-11-01 09:12:02
++++ patched/GdiFontManager.cpp	2026-11-01 09:45:05
+@@ -1,4 +1,7 @@
+ #include "GdiFontManager.h"
++#ifndef MITER_LIMIT
++#define MITER_LIMIT 2.0f
++#endif
+ #include <filesystem>
+ #include <locale>
+ 
+@@ -119,6 +122,9 @@
+     {
+         pen = new Gdiplus::Pen(UINT32_TO_COLOR(data.OutlineColor), data.OutlineWidth);
+         pPath->GetBounds(&box, nullptr, pen);
++        // (after measuring: GetBounds under-measures a clipped-miter pen and the texture came out too short)
++        pen->SetLineJoin(Gdiplus::LineJoinMiterClipped);
++        pen->SetMiterLimit(MITER_LIMIT);
+     }
+     else
+     {
+@@ -248,11 +254,11 @@
+         GetEncoderClsid(L"image/png", &pngClsid);
+         auto index = 0;
+         wchar_t nameBuffer[256];
+-        swprintf_s(nameBuffer, L"%S\\font_%u.png", m_SavePath, index);
++        swprintf_s(nameBuffer, L"%hs\\font_%u.png", m_SavePath, index);
+         while (std::filesystem::exists(nameBuffer))
+         {
+             index++;
+-            swprintf_s(nameBuffer, L"%S\\font_%u.png", m_SavePath, index);
++            swprintf_s(nameBuffer, L"%hs\\font_%u.png", m_SavePath, index);
+         }
+         pRaw->Save(nameBuffer, &pngClsid, NULL);
+         delete pRaw;
+@@ -390,11 +396,11 @@
+         GetEncoderClsid(L"image/png", &pngClsid);
+         auto index = 0;
+         wchar_t nameBuffer[256];
+-        swprintf_s(nameBuffer, L"%S\\rect_%u.png", m_SavePath, index);
++        swprintf_s(nameBuffer, L"%hs\\rect_%u.png", m_SavePath, index);
+         while (std::filesystem::exists(nameBuffer))
+         {
+             index++;
+-            swprintf_s(nameBuffer, L"%S\\rect_%u.png", m_SavePath, index);
++            swprintf_s(nameBuffer, L"%hs\\rect_%u.png", m_SavePath, index);
+         }
+         pRaw->Save(nameBuffer, &pngClsid, NULL);
+         delete pRaw;
+diff -ruN -x * src/d3dx_shim.cpp patched/d3dx_shim.cpp
+--- src/d3dx_shim.cpp	1969-12-31 17:00:00
++++ patched/d3dx_shim.cpp	2026-11-01 09:13:41
+@@ -0,0 +1,44 @@
++// Minimal replacement for the one D3DX8 function used (D3DXCreateTexture),
++// because the static d3dx8.lib is not in the repository and is MSVC-only.
++// Mirrors D3DXCheckTextureRequirements' size handling for a single level.
++#include "Defines.h"
++
++static UINT NextPow2(UINT v)
++{
++    UINT p = 1;
++    while (p < v)
++        p <<= 1;
++    return p;
++}
++
++extern "C" HRESULT WINAPI D3DXCreateTexture(LPDIRECT3DDEVICE8 pDevice, UINT Width, UINT Height, UINT MipLevels, DWORD Usage,
++                                 D3DFORMAT Format, D3DPOOL Pool, LPDIRECT3DTEXTURE8* ppTexture)
++{
++    if (!pDevice || !ppTexture)
++        return D3DERR_INVALIDCALL;
++    *ppTexture = nullptr;
++    if (Width == 0)
++        Width = 1;
++    if (Height == 0)
++        Height = 1;
++
++    D3DCAPS8 caps;
++    if (SUCCEEDED(pDevice->GetDeviceCaps(&caps)))
++    {
++        if ((caps.TextureCaps & D3DPTEXTURECAPS_POW2) && !(caps.TextureCaps & D3DPTEXTURECAPS_NONPOW2CONDITIONAL))
++        {
++            Width  = NextPow2(Width);
++            Height = NextPow2(Height);
++        }
++        if (caps.TextureCaps & D3DPTEXTURECAPS_SQUAREONLY)
++        {
++            UINT m = (Width > Height) ? Width : Height;
++            Width = Height = m;
++        }
++        if (caps.MaxTextureWidth && Width > caps.MaxTextureWidth)
++            Width = caps.MaxTextureWidth;
++        if (caps.MaxTextureHeight && Height > caps.MaxTextureHeight)
++            Height = caps.MaxTextureHeight;
++    }
++    return pDevice->CreateTexture(Width, Height, MipLevels, Usage, Format, Pool, ppTexture);
++}
+diff -ruN -x * src/includes/d3d8/includes/dxfile.h patched/includes/d3d8/includes/dxfile.h
+--- src/includes/d3d8/includes/dxfile.h	2026-11-01 09:12:02
++++ patched/includes/d3d8/includes/dxfile.h	2026-11-01 09:14:07
+@@ -237,4 +237,3 @@
+ #endif
+ 
+ #endif /* _DXFILE_H_ */
+-
+\ No newline at end of file

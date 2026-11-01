@@ -1,5 +1,31 @@
 # Changelog
 
+## 0.3.5
+
+Fixes from the second GitHub issue report (thanks again, hechina1777) and from Reddit:
+- Damage numbers: each hit showed twice. Now once.
+- Items: the highlight jumped around after paging (Left / Right). The game doesn't always list items in bag order
+  (an item that arrived in a freed slot is listed last until you sort); xiv1ui now follows the game's own order.
+- Missions: Chains of Promathia, Seekers of Adoulin, Rhapsodies of Vana'diel and The Voracious Resurgence showed
+  "?" for every mission. Their names show now.
+- Exchange menus (Records of Eminence, Domain Invasion, high-tier battlefields ...): options naming an item or key
+  item came out blank or as "Equ.". Such menus are now shown in FFXI's own box, which has the full names.
+- Equipment: the selected slot's item level, jobs and stats under the grid; the item card no longer appears late,
+  after closing Equipment.
+- Mog House: the job change and area lists are no longer covered by the chat logs (the logs step aside while a
+  game window you're using overlaps them).
+- Chat: auto-translate phrases read {Phrase} (they showed "{Phrase}(" ); a message holding two lines no longer
+  draws its second line over the next one.
+- Action bar: each action's name above its slot (Configuration » HUD » "Action names on the bar": above the slot,
+  on the icon, or off).
+- Text: no more thin spikes on the sharp points of letters. The font library's outline is drawn with clipped
+  corners (gdifonts/gdifonttexture-clip.dll, built from gdifonttexture's source; see tools/gdifonttexture).
+- The clock and moon text a little larger.
+
+**Known issues**
+- Areas with several floors (Ru'Avitau, Ru'Hmet, the Adoulin gates and caverns, Ra'Kaznar Inner Court ...) still
+  show a blank minimap.
+
 ## 0.3.4
 
 Fixes from the first GitHub issue report (thanks, hechina1777):

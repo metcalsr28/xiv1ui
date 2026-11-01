@@ -149,6 +149,30 @@ local function items_of(bag, usable_only)        -- usable_only: true, or 'cryst
     return out, n;
 end
 
+-- The game's own order for the list it shows. It isn't always the bag's slot order: an item that arrived in a freed
+-- slot is listed at the end, until the bag is sorted. The list class's +0x60 points at a block of item lists, each
+-- 81 8-byte records from +0x70 (k * 0x288): a 0xFFFF header, then { u16 item id, u8 slot } per row. The one in use
+-- holds exactly our items; returns `list` in its order, or unchanged when none does.
+local function in_game_order(cls, list)
+    local base = cls and mem.u32(cls + 0x60);
+    if base == nil or #list == 0 or not mem.ok(base + 0x70, 24 * 0x288) then return list; end
+    local by_slot = {};
+    for _, c in ipairs(list) do by_slot[c.index] = c; end
+    for k = 0, 23 do
+        local s = base + 0x70 + k * 0x288;
+        if mem.u16(s) == 0xFFFF and mem.u16(s + #list * 8) ~= 0 and (#list == 80 or mem.u16(s + (#list + 1) * 8) == 0) then
+            local out = {};
+            for i = 1, #list do
+                local c = by_slot[mem.u8(s + i * 8 + 2)];
+                if c == nil or c.id ~= mem.u16(s + i * 8) then out = nil; break; end
+                out[i] = c;
+            end
+            if out then return out; end
+        end
+    end
+    return list;
+end
+
 local function describe(r)
     local d = (r.Description and r.Description[1] or ''):gsub('\n', '  ');
     if (r.Level or 0) > 0 or (r.Jobs or 0) ~= 0 then
@@ -257,6 +281,7 @@ function panel.render()
     end
     if usable then shown_bag = 0; end
     local list, cap = items_of(shown_bag, filter);
+    if not buy then list = in_game_order(inv_slot and mem.u32(inv_slot), list); end
     local at = nil;
     if buy then
         list = {};

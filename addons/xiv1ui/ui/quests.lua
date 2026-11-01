@@ -37,7 +37,7 @@ local MISSION_AREAS = {
 };
 local HEADINGS = { [0xFFFF] = 'Current', [0xFFFE] = 'Completed' };
 
--- quest (or mission) id -> { name, text } for an area
+-- quest (or mission) id -> { name, text } for an area; a mission's id is its record's place in the DAT
 local by_area = {};
 local function quest_table(area, missions)
     local key = (missions and 'm' or 'q') .. area;
@@ -47,8 +47,14 @@ local function quest_table(area, missions)
     local entries = a and require('core.dmsg').read(a[2]);
     if entries == nil then return nil; end
     local t = {};
-    for _, e in ipairs(entries) do
-        if e.ints[1] then t[e.ints[1]] = { name = e.texts[1] or '?', text = e.texts[2] or '' }; end
+    -- (a quest list names its quests by the number in their record; a mission list by the record's place in the
+    -- file: in Chains of Promathia, Seekers of Adoulin ... the two differ; the number is kept too, as a fallback for
+    -- the "To commence ..." records numbered 1000)
+    for i, e in ipairs(entries) do
+        -- ("__" in front of a name marks a chapter's later steps; FFXI indents them)
+        local q = { name = (e.texts[1] or '?'):gsub('^_+', '  '), text = e.texts[2] or '' };
+        if missions then t[i - 1] = q; end
+        if e.ints[1] and t[e.ints[1]] == nil then t[e.ints[1]] = q; end
     end
     by_area[key] = t;
     return t;

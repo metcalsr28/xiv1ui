@@ -359,7 +359,19 @@ function panel.render()
     table.sort(cells, function (a, b) if a.y ~= b.y then return a.y < b.y; end return a.x < b.x; end);
 
     local W = 4 * CELL + 3 * GAP + 48;
-    local H = 46 + 4 * (CELL + 22) + 70;
+    -- the selected slot's item: its name, and under it what FFXI's item box would say (level, jobs, stats)
+    local sel_item = nil;
+    for _, c in ipairs(cells) do
+        if c.sel then
+            local id = equipped(c.slot);
+            sel_item = id and AshitaCore:GetResourceManager():GetItemById(id) or false;
+        end
+    end
+    local desc = ui.label('eq_desc', 'small', { font_height = 16, font_color = 0xFFE8E4D8, box_width = W - 52 });
+    local d = (sel_item and not picking) and require('ui.itempanel').describe(sel_item) or '';
+    if desc.settings.text ~= d then text.set(desc, d); end
+    local dh = d ~= '' and select(2, text.size(desc)) + 10 or 0;
+    local H = 46 + 4 * (CELL + 22) + 70 + dh;
     local x, y = layout.anchor('topleft', W, H, 24, 40, 'equippanel');
     layout.bounds('equippanel', x, y, W, H);
     local bw, bh = layout.size('win_body');
@@ -393,8 +405,9 @@ function panel.render()
     end
     if sel_name then
         local n = ui.label('eq_sel', 'name', { font_height = 21 });
-        text.draw(n, sel_name, x + 26, y + H - 26, 'baseline');
+        text.draw(n, sel_name, x + 26, y + H - 26 - dh, 'baseline');
     end
+    if dh > 0 then text.draw(desc, desc.settings.text, x + 26, y + H - 14 - dh); end
     if picking and sel_slot then render_picker(x + W + 8, y, H, sel_slot); end
 end
 

@@ -30,13 +30,23 @@ local function slot_of(name)
     return slots[name] or nil;
 end
 
+-- The text at `a`, and whether it held a code xiv1ui can't draw (then the game's own box shows the menu).
 local function glyph_text(a, max)
     local t = {};
+    local odd = false;
     for i = 0, (max or 160) - 1 do
         local c = mem.u16(a + i * 2);
         if c == 0xFEFE or c == 0xFEFF then
             -- (skipped) the start / end of a highlighted name, e.g. "An [antidote]." for an item
-        elseif c == nil or c >= 0x5F then break;           -- end of text (records can hold leftovers after it)
+        elseif c == nil then break;
+        elseif c >= 0x5F and i > 0 and mem.u16(a + i * 2 - 2) == 0 then
+            break;                                         -- leftovers after the end of the text
+        elseif c >= 0x5F then
+            -- a glyph or code outside the letters xiv1ui knows, at the start or straight after a letter (leftovers
+            -- come after a space): an item or key item name the game draws its own way (blank rows, "Equ."
+            -- in Records of Eminence and Domain Invasion exchanges on retail)
+            odd = true;
+            break;
         elseif c == 0 then
             -- 0 is a space inside the text; two zeros in a row end it, and so does one after the end of a sentence:
             -- records are reused, so a short option written over a longer one leaves the old tail behind
@@ -50,7 +60,7 @@ local function glyph_text(a, max)
             t[#t + 1] = string.char(c + 32);
         end
     end
-    return (table.concat(t):gsub('^%s+', ''):gsub('%s+$', ''));
+    return (table.concat(t):gsub('^%s+', ''):gsub('%s+$', '')), odd;
 end
 
 --- The open choice menu as { question, rows = { ... }, cursor, count }, or nil.
@@ -68,7 +78,10 @@ function choice.read()
         for i = 1, count do
             if node == nil or node == 0 then break; end
             local rec = mem.u32(node + 0x10);
-            rows[i] = rec and glyph_text(rec + 4) or '';
+            local row, odd = '', false;
+            if rec then row, odd = glyph_text(rec + 4); end
+            if odd then cache = nil; return nil; end      -- (FFXI's own box shows this menu)
+            rows[i] = row;
             node = mem.u32(node);
         end
         if #rows ~= count then return nil; end

@@ -115,10 +115,10 @@ local function clean(s)
     s = s:gsub('[\30\31].', '')              -- colour codes 0x1E/0x1F + 1 byte
          :gsub('\127[1-7][\1-\9]?', '')    -- event control codes: 0x7F + digit (prompt, timing), with a delay byte
          :gsub('\127[\240-\255]', '')        -- name link markers around a player's name (0x7F 0xFC ... 0x7F 0xFB)
-         :gsub('\239\39', '{'):gsub('\239\40', '}')   -- auto-translate brackets
+         :gsub('\239\39', '{'):gsub('\239%(', '}')   -- auto-translate brackets (0xEF 0x27 / 0xEF 0x28)
          :gsub('\253......\253', '{...}')    -- unexpanded auto-translate phrase
          :gsub('\135\178', '\1'):gsub('\135\179', '\2')    -- the game's emphasis brackets (shown as quotes)
-         :gsub('\7', ' ')
+         :gsub('\7', '\n')               -- the game's line break: a new log line (chatlog.text_in)
          :gsub('%s+$', '');
     local ok, u = pcall(gdi_enc.ShiftJIS_To_UTF8, gdi_enc, s, true);
     u = ok and u or s;
@@ -188,10 +188,7 @@ local function add_line(log, str, color)
     if log.scroll > 0 then log.scroll = log.scroll + 1; end      -- keep the view still while scrolled back
 end
 
-function chatlog.text_in(e)
-    if e.message == nil or e.message == '' then return; end
-    local ch = channel(e.mode);
-    local s = clean(e.message_modified or e.message);
+local function take_line(s, ch)
     if s == '' then return; end
     -- the time the game prints when xiv1ui switches its clock off or on (core/native.lua)
     if require('core.native').quiet() then
@@ -213,6 +210,14 @@ function chatlog.text_in(e)
     else
         add_line(logs[1], s, COLORS[ch] or COLORS.system);
     end
+end
+
+function chatlog.text_in(e)
+    if e.message == nil or e.message == '' then return; end
+    local ch = channel(e.mode);
+    -- (one message can hold several lines, e.g. "X casts Y." and "X gains the effect of Z."; each is a log line,
+    -- else a coloured word's line break drew its second line over the next one)
+    for part in clean(e.message_modified or e.message):gmatch('[^\r\n]+') do take_line(part, ch); end
 end
 
 --- Draw one log window with its bottom-left corner at x, y_bottom. Returns its top y.
@@ -467,6 +472,16 @@ function chatlog.render()
     local alpha = 1;
     if hover_log == nil and idle > AUTOHIDE and require('core.store').data.chat_autohide ~= false then
         alpha = math.max(0, 1 - (idle - AUTOHIDE) / 1.5);
+    end
+    -- a game window the player is using, drawn by the game where the logs are (the Mog House's job change and
+    -- area lists, ...): the logs step aside while it has focus
+    local chat = layout.widgets.chat;
+    if not open and chat then
+        local _, focus = require('core.native').focused();
+        local fx, fy, fw, fh = focus and require('core.gamewin').rect(focus);
+        if fx and fx < chat[1] + chat[3] and chat[1] < fx + fw and fy < chat[2] + chat[4] and chat[2] < fy + fh then
+            return;
+        end
     end
     if alpha <= 0 then return; end     -- (the last rects stay: hovering or clicking a faded log still works)
     local sw, sh = layout.screen();
