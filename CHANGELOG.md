@@ -2,7 +2,7 @@
 
 ## 0.4.0
 
-- Hand-painted icons for nearly every action a player can put on the action bar: about 1,300 spells, job
+- Customized icons for nearly every action a player can put on the action bar: about 1,300 spells, job
   abilities, weapon skills, songs, ninjutsu, Blood Pacts and Blue Magic spells, each its own painting (Savage Blade,
   Knights of Round, Rudra's Storm, Meteor, the summons and their astral flows, Cocoon, Magic Fruit ...). Element
   and stat families (Bar-, En-, Boost-, storms, Etudes, Carols, helixes, Quick Draw, runes, Maneuvers, Geo-/Indi-)
