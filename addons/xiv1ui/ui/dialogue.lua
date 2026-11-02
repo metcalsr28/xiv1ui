@@ -85,9 +85,14 @@ local function clean(s)
     -- (0x87 0xB2 / 0x87 0xB3 are the game's emphasis brackets around a key word, e.g. "check": shown as quotes;
     -- 0x0B marks where a message's options start, one per line: shown as a list)
     local quote_open, quote_close = '\1', '\2';
+    if s:find('\253') then                    -- auto-translate codes, written out (as in ui/chatlog.lua)
+        local cm = AshitaCore:GetChatManager();
+        local ok, parsed = pcall(cm.ParseAutoTranslate, cm, s, true);
+        if ok and type(parsed) == 'string' then s = parsed; end
+    end
     s = s:gsub('[\30\31].', '')
          :gsub('\239\39', '{'):gsub('\239%(', '}')
-         :gsub('\253......\253', '{...}')
+         :gsub('\253[^\253]*\253', '{...}')
          :gsub('\135\178', quote_open):gsub('\135\179', quote_close)
          :gsub('\7\11', '\n\11'):gsub('\7', '\n')
          :gsub('%s+$', '');

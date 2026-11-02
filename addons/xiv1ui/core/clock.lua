@@ -6,7 +6,7 @@
 local clock = {};
 
 -- Pointer to the client's real-time structure (signature as used by several Ashita addons, e.g. tTimers).
-local ptr = ashita.memory.find('FFXiMain.dll', 0, '8B0D????????8B410C8B49108D04808D04808D04808D04C1C3', 2, 0);
+local ptr = require('core.mem').find('FFXiMain.dll', '8B0D????????8B410C8B49108D04808D04808D04808D04C1C3', 2, 0);
 
 --- Server Unix time as the client knows it (falls back to the computer's clock).
 function clock.now()

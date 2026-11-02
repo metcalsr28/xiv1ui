@@ -15,6 +15,8 @@ function layout.init(addon_path)
     if ok2 and type(icons) == 'table' then for k, v in pairs(icons) do manifest[k] = v; end end
     local ok3, ai = pcall(dofile, addon_path .. 'assets\\action_icons_manifest.lua');  -- action icons (make_action_icons.py)
     if ok3 and type(ai) == 'table' then for k, v in pairs(ai) do manifest[k] = v; end end
+    local ok4, sig = pcall(dofile, addon_path .. 'assets\\signature_icons_manifest.lua');  -- (make_signature_icons.py)
+    if ok4 and type(sig) == 'table' then for k, v in pairs(sig) do manifest[k] = v; end end
 end
 
 --- Content size of a generated texture (the PNG canvas is padded to a power of two).

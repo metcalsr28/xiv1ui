@@ -7,7 +7,7 @@
 
 addon.name    = 'xiv1ui';
 addon.author  = 'xiv1ui project';
-addon.version = '0.3.7';
+addon.version = '0.4.0';
 addon.desc    = 'FINAL FANTASY XIV 1.0 style interface.';
 addon.link    = '';
 
@@ -21,6 +21,9 @@ local native = require('core.native');
 local store  = require('core.store');
 local world  = require('core.world');
 local ui     = require('core.ui');
+local diag   = require('core.diag');
+local ffi    = require('ffi');
+pcall(ffi.cdef, 'int16_t __stdcall GetKeyState(int nVirtKey);');
 
 local ROOT = addon.path:gsub('[\\/]?$', '\\');
 
@@ -42,6 +45,7 @@ local function fault(where, err)
         f:write(string.format('%s  xiv1ui %s  %s\n%s\n\n', os.date('%Y-%m-%d %H:%M:%S'), addon.version, where, err));
         f:close();
     end
+    if diag.on() then diag.log('error', '%s: %s', where, err:match('^[^\n]*') or err); diag.flush(true); end
     if reloading or where == 'unload' then return; end
     local last = tonumber(store.data.auto_reload_at) or 0;
     if (DEV_COPY and not store.data.dev_auto_reload) or os.time() - last < 600 then
@@ -79,6 +83,7 @@ local MODULES = {
     'castbar',
     'dialogue',
     'chatlog',
+    'autotrans',        -- the auto-translate list (Tab while typing), after the chat log
     'deathscreen',      -- the knocked-out screen (under the menus)
     'itemcard',         -- after the dialogue box (sits above it)
     'confirm',          -- the game's yes / no questions
@@ -91,6 +96,7 @@ local MODULES = {
     'currencies',       -- Status » Currencies / Currencies 2 (after cmdmenu, over the menus)
     'keyitems',         -- Commands » Key Items, a category's list (after cmdmenu)
     'quests',           -- Commands » Quests » Current / Completed Quests (after cmdmenu)
+    'roelist',          -- Commands » Quests » Records of Eminence (the same window, in its RoE mode)
     'mainmenu',
     'micromenu',
     'minimap',
@@ -140,6 +146,7 @@ mainmenu.register('macros',  require('ui.win_macros'));
 local ready = false;
 
 on('load', 'xiv1ui_load', function ()
+    diag.init(ROOT, addon.version);
     ready = draw.init(ROOT);
     layout.init(ROOT);
     text.init(ROOT);
@@ -161,6 +168,7 @@ on('unload', 'xiv1ui_unload', function ()
     end
     text.release();
     draw.release();
+    diag.flush(true);
 end);
 
 -- Start of each scene: let the menu restyle hide a just-opened game menu before the game draws it.
@@ -175,6 +183,10 @@ on('d3d_beginscene', 'xiv1ui_beginscene', function ()
     if not ok then fault('lobby / loading', err); end
     ok, err = pcall(require('ui.zoning').early);
     if not ok then fault('lobby / loading', err); end
+    ok, err = pcall(require('ui.quests').early);
+    if not ok then fault('quests', err); end
+    ok, err = pcall(require('ui.roelist').early);
+    if not ok then fault('records of eminence', err); end
     ok, err = pcall(require('core.gamewin').early);
     if not ok then fault('lobby / loading', err); end
 end);
@@ -182,6 +194,7 @@ end);
 on('d3d_present', 'xiv1ui_present', function ()
     frame_no = frame_no + 1;
     if not ready then return; end
+    diag.tick();
     -- the lobby (title, character select, creation) has its own screens and no HUD
     local lobby = require('ui.lobby');
     local loading = lobby.loading();
@@ -264,6 +277,14 @@ on('key', 'xiv1ui_key', function (e)
             return;
         end
     end
+    -- Ctrl+R: reply to the last tell (the chat line opens with "/tell <name> ")
+    if e.wparam == 0x52 and bit.band(AshitaCore:GetChatManager():IsInputOpen() or 0, 0x10) == 0
+            and bit.band(ffi.C.GetKeyState(0x11), 0x8000) ~= 0 then
+        if down and not require('ui.chatlog').reply() then print('[xiv1ui] No tells to reply to yet.'); end
+        e.blocked = true;
+        return;
+    end
+    if not ui.any_open() and require('ui.chatlog').key(e, down) then e.blocked = true; return; end
     if mainmenu.key(e) or ui.key(e) then e.blocked = true; end
 end);
 
@@ -409,6 +430,15 @@ on('command', 'xiv1ui_command', function (e)
         return;
     end
     if args[2] == 'layout' and args[3] == 'reset' then layout.reset(); return; end
+    -- /xiv1ui report: the setup, errors.log and the diagnostics log in one file to attach to a bug report
+    if (args[2] or ''):lower() == 'report' then
+        if diag.report() then
+            print('[xiv1ui] Report written to addons/xiv1ui/report.txt: attach it to your bug report.');
+        else
+            print('[xiv1ui] Couldn\'t write addons/xiv1ui/report.txt.');
+        end
+        return;
+    end
     -- /xiv1ui update [now]: in-game updates from the GitHub releases (Configuration » Experimental, at your own risk)
     if (args[2] or ''):lower() == 'update' then
         require('core.updater').command(args, ROOT,

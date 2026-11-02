@@ -81,11 +81,68 @@ function draw.theme()
     return (st and st.data and st.data.theme) or 'gold';
 end
 
---- Load (once) a texture from assets/<name>.png. Returns the cache entry or nil.
+-- The signature icons (sig_*) live in one file, assets/sig_icons.pak (tools/make_signature_icons.py): b'XSIGPAK1',
+-- u32 count, count x (u16 name length, name, u32 offset, u32 size), then the PNGs. The index is read once; each icon's
+-- bytes when it's first drawn.
+local pak = nil;            -- name -> { offset, size }, or false
+local function pak_index()
+    if pak ~= nil then return pak; end
+    pak = false;
+    local f = io.open(base .. 'assets\\sig_icons.pak', 'rb');
+    if f == nil then return pak; end
+    local function u(n)
+        local s = f:read(n);
+        if s == nil or #s < n then return nil; end
+        local v = 0;
+        for i = n, 1, -1 do v = v * 256 + s:byte(i); end
+        return v;
+    end
+    if f:read(8) ~= 'XSIGPAK1' then f:close(); return pak; end
+    local idx = {};
+    for _ = 1, u(4) or 0 do
+        local len = u(2);
+        local name = len and f:read(len);
+        local off, size = u(4), u(4);
+        if not (name and off and size) then break; end
+        idx[name] = { off, size };
+    end
+    f:close();
+    pak = idx;
+    return pak;
+end
+
+local function pak_texture(name)
+    local idx = pak_index();
+    local e = idx and idx[name];
+    if e == nil then return nil; end
+    local f = io.open(base .. 'assets\\sig_icons.pak', 'rb');
+    if f == nil then return nil; end
+    f:seek('set', e[1]);
+    local bytes = f:read(e[2]);
+    f:close();
+    if bytes == nil or #bytes ~= e[2] then return nil; end
+    local out = ffi.new('IDirect3DTexture8*[1]');
+    if ffi.C.D3DXCreateTextureFromFileInMemoryEx(device, bytes, #bytes, 0xFFFFFFFF, 0xFFFFFFFF, 1, 0,
+            ffi.C.D3DFMT_A8R8G8B8, ffi.C.D3DPOOL_MANAGED, ffi.C.D3DX_DEFAULT, ffi.C.D3DX_DEFAULT, 0,
+            nil, nil, out) ~= ffi.C.S_OK then
+        return nil;
+    end
+    local tex = d3d8.gc_safe_release(ffi.cast('IDirect3DTexture8*', out[0]));
+    local ok, desc = tex:GetLevelDesc(0);
+    if ok ~= 0 then return nil; end
+    return { tex = tex, w = desc.Width, h = desc.Height };
+end
+
+--- Load (once) a texture from assets/<name>.png (a signature icon from the pack). Returns the cache entry or nil.
 function draw.texture(name)
     if THEMED[name] and draw.theme() == 'gold' then name = name .. '_gold'; end
     local t = cache[name];
     if t ~= nil then return t or nil; end
+    if name:sub(1, 4) == 'sig_' then
+        t = pak_texture(name);
+        cache[name] = t or false;
+        return t;
+    end
     local path = base .. 'assets\\' .. name .. '.png';
     local out = ffi.new('IDirect3DTexture8*[1]');
     -- D3DX_DEFAULT_NONPOW2-style sizes are not available in d3d8; keep source PNGs power-of-two.

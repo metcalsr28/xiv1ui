@@ -191,8 +191,10 @@ local function is_row_of(r, obj) return mem.ok(r, 0x70) and mem.u32(r + 0x58) ==
 -- All of a window's row objects (buttons, title, arrows): the window keeps them in a linked list at obj+0x14
 -- (node +0x00 next, +0x10 -> row). Rows can live in several memory blocks, so this list is the only reliable way.
 local function rows_of(obj)
-    local out, n = {}, mem.u32(obj + 0x14);
-    while n and n ~= 0 and #out < 120 and mem.ok(n, 0x14) do
+    local out, n, steps = {}, mem.u32(obj + 0x14), 0;
+    -- (steps bound the walk: while the game rebuilds a window, e.g. zoning, the list can loop back on itself)
+    while n and n ~= 0 and #out < 120 and steps < 400 and mem.ok(n, 0x14) do
+        steps = steps + 1;
         local r = mem.u32(n + 0x10);
         if r and is_row_of(r, obj) then out[#out + 1] = r; end
         n = mem.u32(n);
@@ -516,8 +518,11 @@ local function hide_menu(obj, name)
         local a, b, f = mem.u8(obj + 0x69), mem.u8(obj + 0x6A), mem.u8(obj + 0x78);
         if a == nil or a > 1 or b == nil or b > 1 or f == nil or f > 1 then return false; end
         shown_obj[obj] = { a, b, f, name };
-        mem.w8(obj + 0x69, 0); mem.w8(obj + 0x6A, 0); mem.w8(obj + 0x78, 0);
     end
+    -- (every frame: the game turns a parent window back on when a sub-menu opened from it closes)
+    if mem.u8(obj + 0x69) ~= 0 then mem.w8(obj + 0x69, 0); end
+    if mem.u8(obj + 0x6A) ~= 0 then mem.w8(obj + 0x6A, 0); end
+    if mem.u8(obj + 0x78) ~= 0 then mem.w8(obj + 0x78, 0); end
     for _, r in ipairs(rows_of(obj)) do
         -- (row objects are reused between menus, so a row hidden for an earlier menu counts as new here)
         local sc = ffi.cast('float*', r + 0x1C);
@@ -759,9 +764,20 @@ function cmd.early()
     end
     if focus_ptr == false then return; end
     local obj = mem.chain(focus_ptr, 0, 0);
-    if obj == nil or obj == early_obj and shown_obj[obj] then return; end
+    if obj == nil then return; end
+    if shown_obj[obj] then
+        -- (backing out of a sub-menu, the game turns its parent back on and draws it this frame: off again now.
+        -- Only while it's still the same window: zoning frees windows, and a new object can take a hidden one's
+        -- address; writing into that crashed the client)
+        if not alive(obj) then shown_obj[obj] = nil; early_obj = nil; return; end
+        if mem.u8(obj + 0x69) ~= 0 then mem.w8(obj + 0x69, 0); end
+        if mem.u8(obj + 0x6A) ~= 0 then mem.w8(obj + 0x6A, 0); end
+        if mem.u8(obj + 0x78) ~= 0 then mem.w8(obj + 0x78, 0); end
+        early_obj = obj;
+        return;
+    end
+    if obj == early_obj then return; end
     early_obj = obj;
-    if shown_obj[obj] then return; end
     local hdr = mem.u32(obj + 4);
     if hdr == nil or not mem.ok(hdr + 0x4E, 8) then return; end
     local name = (ashita.memory.read_string(hdr + 0x4E, 8) or ''):gsub('[%z ]+$', '');
@@ -777,10 +793,31 @@ local PANEL_ART_W, PANEL_ART_H = 323, 54;
 local ring = { name = nil, pos = 1, t = 0 };
 local stack_objs = {};
 
---- The ring's anchor: where the selected entry's panel starts (left end, vertical middle).
-local function ring_anchor()
-    return layout.anchor('center', 0, 0, 200, -40, 'cmdmenu');
+-- The ring stands right of the character, or left of it once the character runs over to the right of the screen
+-- (the camera lets it get there before it follows), so it never covers the character; it goes back to the right
+-- when the character is left of the middle. side = 1 (right) or -1 (left); side_t = when it last changed (the
+-- entries slide in again from there).
+local side, side_t = 1, 0;
+local old_side = 1;                  -- the side it's leaving (while side_t is recent)
+local SIDE_EDGE = 90;                -- HUD units either side of the screen's middle before the ring changes sides
+local function ring_side()
+    local me = AshitaCore:GetMemoryManager():GetParty():GetMemberTargetIndex(0);
+    local sx = me and me ~= 0 and require('core.project').on_model(me, 0.5, 0, 1.0);
+    if sx and store.data.ring_follow ~= false then
+        local mid = layout.screen() / 2;
+        if side == 1 and sx > mid + SIDE_EDGE then old_side, side, side_t = 1, -1, xi_now();
+        elseif side == -1 and sx < mid - SIDE_EDGE then old_side, side, side_t = -1, 1, xi_now(); end
+    end
+    return side;
 end
+
+--- The ring's anchor: where the selected entry's panel starts (vertical middle): its left end on the right side,
+-- its right end on the left side.
+local CROSS = 0.3;                   -- seconds the ring takes to change sides (fade out, then in)
+local function anchor_of(sd)
+    return layout.anchor('center', 0, 0, sd == -1 and -200 or 200, -40, 'cmdmenu');
+end
+local function ring_anchor() return anchor_of(side); end
 
 -- Label widths, measured once per label with one text object per font (the panels' width follows the longest).
 local measure = {};
@@ -816,50 +853,36 @@ function cmd.choosing()
     return ok and v == 1;
 end
 
---- Draw a ring of entries (the action menu, its sub-menus, and the lists opened from it).
--- key names this ring (the wheel's turn is kept per key); items = { { label, sub = right-hand text, icon = item id,
--- dim = greyed } ... }; cursor = the selected index (or nil); opened_t = when it appeared; dim = the whole ring is
--- waiting (target choice); desc = text for a box beside the selected entry. Returns the anchor x, y and panel width.
-function cmd.ring(key, items, cursor, opened_t, dim, desc)
+-- One side's ring. sd = 1 right of the character, -1 left (mirrored: the panels' right ends ride on the arc and the
+-- panel art is flipped); mul = opacity for a cross-fade; drift = HUD units it's pushed outward (away from the
+-- character) while fading.
+local function draw_side(sd, mul, drift, key, items, cursor, opened_t, dim, desc, L)
     local now = xi_now();
-    local n = #items;
-    local px, py = ring_anchor();
-    local cx = px - RING_R;
+    local px, py = anchor_of(sd);
+    px = px + sd * drift;
+    local cx = px - sd * RING_R;
     local cur = cursor or 1;
-    if ring.name ~= key then ring.name, ring.pos = key, cur; end
-    local dt = math.min(0.1, math.max(0, now - ring.t));
-    ring.t = now;
-    ring.pos = ring.pos + (cur - ring.pos) * math.min(1, dt * 16);
-    local wl, ws, icon = 0, 0, false;
-    for _, it in ipairs(items) do
-        wl = math.max(wl, width_of(it.label, 22));
-        if it.sub then ws = math.max(ws, width_of(it.sub, 16)); end
-        if it.icon then icon = true; end
-    end
-    local lx = icon and 56 or 24;                       -- label start within the panel
-    local pw = lx + wl + (ws > 0 and ws + 18 or 0) + 30;
-    local scale = { pw / PANEL_ART_W, PANEL_H / PANEL_ART_H };
-    layout.bounds('cmdmenu', px - 40, py - 120, pw + 50, 240);
-    local order = {};
-    for i = 1, n do
-        if math.abs((i - ring.pos) * RING_STEP) < 1.25 then order[#order + 1] = i; end
-    end
-    table.sort(order, function (a, b) return math.abs(a - ring.pos) > math.abs(b - ring.pos); end);
-    for _, i in ipairs(order) do
+    local pw, lx, scale = L.pw, L.lx, L.scale;
+    for _, i in ipairs(L.order) do
         local it = items[i];
         local th = (i - ring.pos) * RING_STEP;
         local t = math.max(0, math.min(1, (now - (opened_t or opened) - math.min(8, math.abs(i - cur)) * 0.025) / 0.16));
         local ease = 1 - (1 - t) ^ 3;
-        local x = cx + RING_R * math.cos(th) + (1 - ease) * 40;
+        local edge = cx + sd * (RING_R * math.cos(th) + (1 - ease) * 40);
+        local x = (sd == 1) and edge or (edge - pw);
         local y = py + RING_R * math.sin(th) - PANEL_H / 2;
         local sel = (i == cursor);
         local fade = sel and 1 or math.max(0.2, 1 - math.abs(th) / 1.25);
-        local a = ease * fade * (dim and 0.45 or 1);
+        local a = ease * fade * (dim and 0.45 or 1) * mul;
         local col = draw.alpha(0xFFFFFFFF, a);
-        draw.image(sel and 'cmd_panel_sel' or 'cmd_panel', x, y, { color = col, scale = scale });
+        if sd == 1 then
+            draw.image(sel and 'cmd_panel_sel' or 'cmd_panel', x, y, { color = col, scale = scale });
+        else
+            draw.image(sel and 'cmd_panel_sel' or 'cmd_panel', x + pw, y, { color = col, scale = { -scale[1], scale[2] } });
+        end
         if sel and not dim then
             local bob = math.sin(now * 3) * 2;
-            draw.image('crystal_shard', x - 26, y - 3 + bob, { color = col, scale = 0.8 });
+            draw.image('crystal_shard', (sd == 1) and (x - 26) or (x + pw + 4), y - 3 + bob, { color = col, scale = 0.8 });
         end
         if it.icon then draw.entry(draw.item_icon(it.icon), x + 22, y + 3, 28, 28, col); end
         -- text objects by place in the ring (a long list doesn't make one per entry)
@@ -883,23 +906,75 @@ function cmd.ring(key, items, cursor, opened_t, dim, desc)
     end
     if dim then
         -- waiting for a target: say what the keys do now
-        local hx, hy = px + pw + 16, py - 19;
+        local hx, hy = (sd == 1) and (px + pw + 16) or (px - pw - 16 - 300), py - 19;
         local bw, bh = layout.size('win_hud');
-        draw.nine('win_hud', hx, hy, 300, 60, 10, bw, bh);
+        draw.nine('win_hud', hx, hy, 300, 60, 10, bw, bh, draw.alpha(0xFFFFFFFF, mul));
         local h1 = ui.label('cmd_target_hint', 'label', { font_height = 19, font_color = 0xFFF0E6C8 });
+        h1:set_opacity(mul);
         text.draw(h1, 'Choose a target', hx + 14, hy + 24, 'baseline');
         local h2 = ui.label('cmd_target_hint2', 'small', { font_height = 16, font_color = 0xFFC8C4B8 });
+        h2:set_opacity(mul);
         text.draw(h2, 'Enter / A confirms,  Esc / B back', hx + 14, hy + 48, 'baseline');
     elseif desc and desc ~= '' then
         local bw, bh = layout.size('win_hud');
-        local dx, dy = px + pw + 16, py - PANEL_H / 2;
+        local dx, dy = (sd == 1) and (px + pw + 16) or (px - pw - 16 - 326), py - PANEL_H / 2;
         desc_obj = desc_obj or text.new('small', { font_height = 16, font_color = 0xFFE8E4D8, box_width = 300 });
         if desc_obj.settings.text ~= desc then text.set(desc_obj, desc); end
         local _, th = text.size(desc_obj);
-        draw.nine('win_hud', dx, dy, 326, th + 20, 10, bw, bh);
+        draw.nine('win_hud', dx, dy, 326, th + 20, 10, bw, bh, draw.alpha(0xFFFFFFFF, mul));
+        desc_obj:set_opacity(mul);
         text.render(desc_obj, dx + 13, dy + 9);
     end
-    return px, py, pw;
+    return px, py;
+end
+
+--- Draw a ring of entries (the action menu, its sub-menus, and the lists opened from it).
+-- key names this ring (the wheel's turn is kept per key); items = { { label, sub = right-hand text, icon = item id,
+-- dim = greyed } ... }; cursor = the selected index (or nil); opened_t = when it appeared; dim = the whole ring is
+-- waiting (target choice); desc = text for a box beside the selected entry. Returns the anchor x, y and panel width.
+-- Changing sides, the ring fades out drifting off on the old side, then fades in on the new one, each keeping its
+-- own shape (nothing is reshaped while it's seen).
+function cmd.ring(key, items, cursor, opened_t, dim, desc)
+    local now = xi_now();
+    local n = #items;
+    local sd = ring_side();
+    local cur = cursor or 1;
+    if ring.name ~= key then ring.name, ring.pos = key, cur; end
+    local dt = math.min(0.1, math.max(0, now - ring.t));
+    ring.t = now;
+    ring.pos = ring.pos + (cur - ring.pos) * math.min(1, dt * 16);
+    local wl, ws, icon = 0, 0, false;
+    for _, it in ipairs(items) do
+        wl = math.max(wl, width_of(it.label, 22));
+        if it.sub then ws = math.max(ws, width_of(it.sub, 16)); end
+        if it.icon then icon = true; end
+    end
+    local L = {};
+    L.lx = icon and 56 or 24;                         -- label start within the panel
+    L.pw = L.lx + wl + (ws > 0 and ws + 18 or 0) + 30;
+    L.scale = { L.pw / PANEL_ART_W, PANEL_H / PANEL_ART_H };
+    L.order = {};
+    for i = 1, n do
+        if math.abs((i - ring.pos) * RING_STEP) < 1.25 then L.order[#L.order + 1] = i; end
+    end
+    table.sort(L.order, function (a, b) return math.abs(a - ring.pos) > math.abs(b - ring.pos); end);
+
+    -- (one side at a time: a text object draws in one place a frame)
+    local t = (side_t > 0) and math.min(1, (now - side_t) / CROSS) or 1;
+    local px, py;
+    if t < 0.4 then
+        local u = t / 0.4;
+        local e = u * u * (3 - 2 * u);
+        px, py = draw_side(old_side, 1 - e, 24 * e, key, items, cursor, opened_t, dim, desc, L);
+        px, py = anchor_of(sd);
+    else
+        local u = (t - 0.4) / 0.6;
+        local e = u * u * (3 - 2 * u);
+        px, py = draw_side(sd, e, -24 * (1 - e), key, items, cursor, opened_t, dim, desc, L);
+    end
+    local left0 = (sd == 1) and px or (px - L.pw);    -- the selected panel's left end
+    layout.bounds('cmdmenu', left0 - 40, py - 120, L.pw + 50, 240);
+    return px, py, L.pw;
 end
 
 local function render_stack(m, now, back, dim)
@@ -918,6 +993,7 @@ local action_rows_n = nil;   -- rows of the action menu while it or a list opene
 function cmd.action_spot()
     if action_rows_n == nil then return nil; end
     local px, py = ring_anchor();
+    if side == -1 then return px - 330, py - 150; end
     return px - 30, py - 150;
 end
 

@@ -15,6 +15,7 @@ local C = {
     crit = 0xFFFFC040, dealt = 0xFFFFE08A, taken = 0xFFFF7A6A, hp = 0xFF8CF08C, mp = 0xFF8CC8FF,
     miss = 0xFF8C887C, resist = 0xFFC8A0F0, defeat = 0xFFF0D080, foe_move = 0xFFFFB060, our_move = 0xFF9BE0E0,
     exp = 0xFF9BF0A0, level = 0xFFFFD86A, skill = 0xFF8CE6F0, item = 0xFFF0D080,
+    at_open = 0xFF6EE06E, at_close = 0xFFFF6E6E,
 };
 chatcolor.COLORS = C;
 
@@ -139,6 +140,9 @@ local function spans(s)
     capture('Obtained: ', '.-', '%.', C.item);
     capture('obtains ', '.-', '%.', C.item);
     capture('You find an? ', '.-', ' on ', C.item);
+    -- auto-translate phrases: FFXI's green and red brackets
+    each('{', C.at_open);
+    each('}', C.at_close);
     return out;
 end
 

@@ -16,6 +16,7 @@ local store   = require('core.store');
 local native  = require('core.native');
 local gamewin = require('core.gamewin');
 local mem     = require('core.mem');
+local diag    = require('core.diag');
 
 local panel = {};
 
@@ -281,6 +282,8 @@ function panel.render()
         local rows = cls and mem.u16(cls + 0x20);
         local n = #items_of(0, filter);
         if rows == nil or rows ~= n then
+            if diag.on() then diag.change('items.count', 'handback', 'items (%s): game lists %s rows, xiv1ui %d',
+                tostring(fname), tostring(rows), n); end
             if hider:active() then hider:restore(); end
             return;
         end
@@ -332,10 +335,12 @@ function panel.render()
     -- The list window's own cursor: the row on screen (class +0x24, 1-based) plus how far the list has scrolled
     -- (+0x1A). It is the game's own answer, so it wins over the item info box (which lags behind, and isn't shown at
     -- all in some lists). A shop's sell list keeps the same fields; its wares (Buy) are listed their own way.
+    local game_row = nil;
     if not buy then
         local cls = inv_slot and mem.u32(inv_slot);
         local row, top = cls and mem.u16(cls + 0x24), cls and mem.u16(cls + 0x1A);
         local n = row and top and row + top;
+        game_row = n;
         if n and row >= 1 and n <= #list then
             -- (unless the item info box has named another item for a while: then our list isn't in the game's
             -- order, and the item itself is what counts)
@@ -351,6 +356,17 @@ function panel.render()
     end
 
     panel.lit = { list = list, at = at };     -- (for dev probes)
+    if diag.on() then
+        -- the lit row's item against the game's item info box (nothing under its cursor: nothing to compare)
+        local c = at and list[at];
+        diag.agree('items', cid == nil or (c ~= nil and c.id == cid and (buy or sell or c.index == cidx)), 'disagree',
+            function ()
+                return string.format('%s: xiv1ui row %s = %s (id %s, bag %s idx %s); game item id %s idx %s, game row %s; '
+                    .. '%d rows, cap %s', tostring(fname), tostring(at), c and (c.res.Name[1] or '?') or '-',
+                    c and tostring(c.id) or '-', tostring(shown_bag), c and tostring(c.index) or '-', tostring(cid),
+                    tostring(cidx), tostring(game_row), #list, tostring(cap));
+            end);
+    end
 
     -- opened from the action menu: the same ring as the menu, in its place
     if usable and not crystal and require('ui.cmdmenu').action_spot() then

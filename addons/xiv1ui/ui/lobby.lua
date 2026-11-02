@@ -139,7 +139,7 @@ end
 local list_cam = nil;
 local function find_list_cam()
     list_cam = false;
-    local at = ashita.memory.find('FFXiMain.dll', 0,
+    local at = mem.find('FFXiMain.dll',
         '8B4E28418BC1894E283D960000007C2BA1????????8D0C808D1448C1E2048BBC32AC0000003BFD740F6A018BCEE8????????893D'
         .. '????????896E285368CDCCCC3C8BCEE8????????', 0, 0);
     if at == nil or at == 0 then return; end
@@ -255,9 +255,91 @@ local click_rows = nil;       -- { rects, rows (n per rect) } of the list drawn 
 
 -- The game's title, as a wordmark (the game's own logo picture is hidden with its backdrop window, together with the
 -- server's logo some installs put there), and the copyright line.
+-- The game's own logo (Yoshitaka Amano's art and the Final Fantasy XI lettering) from the player's install: the
+-- lobby title atlas "titlwin" (1024 x 1024, DXT3 with alpha; the logo is atlas y 290-920). DAT 39541 is the one the
+-- lobby uses, but private servers often replace it with their own branding, so this reads one of the untouched
+-- copies and only when its logo matches the retail art's fingerprint (FNV-1a over the logo's blocks); otherwise
+-- the lobby keeps the drawn wordmark. Nothing of the game's art ships with xiv1ui.
+local LOGO_FIDS, LOGO_Y, LOGO_H = { 39533, 55745, 56165, 39541 }, 290, 630;
+local LOGO_PRINT = bit.tobit(0xE811E928);
+local function retail_logo(dat, flag)
+    local p, q = flag + 0x45 + 72 * 4096, flag + 0x45 + 230 * 4096 - 1;
+    if q > #dat then return false; end
+    local h = bit.tobit(0x811C9DC5);
+    for j = p, q do
+        h = bit.bxor(h, dat:byte(j));
+        h = bit.tobit(bit.lshift(h, 24) + (h % 0x100000000) * 0x193);
+    end
+    return h == LOGO_PRINT;
+end
+-- xiv1ui's gold: the art from deep bronze through gold, the lettering (the art's grey, unsaturated parts) gold-cream;
+-- the brightest parts of both stay white
+local function ramp(stops, t)
+    t = math.max(0, math.min(1, t));
+    for i = 2, #stops do
+        local a, b = stops[i - 1], stops[i];
+        if t <= b[1] then
+            local f = (b[1] > a[1]) and (t - a[1]) / (b[1] - a[1]) or 0;
+            return a[2] + (b[2] - a[2]) * f, a[3] + (b[3] - a[3]) * f, a[4] + (b[4] - a[4]) * f;
+        end
+    end
+    local l = stops[#stops];
+    return l[2], l[3], l[4];
+end
+local ART = { { 0, 24, 16, 8 }, { 0.4, 110, 72, 30 }, { 0.72, 214, 176, 98 }, { 0.9, 246, 232, 200 }, { 1, 255, 255, 255 } };
+local LETTERS = { { 0, 40, 30, 16 }, { 0.5, 170, 140, 84 }, { 0.8, 240, 226, 196 }, { 0.95, 255, 255, 255 } };
+local function gold(r, g, b)
+    local hi, lo = math.max(r, g, b), math.min(r, g, b);
+    local s = hi > 0 and (hi - lo) / hi or 0;
+    local l = (0.3 * r + 0.59 * g + 0.11 * b) / 255;
+    local k = math.min(1, s * 2.5);
+    local ar, ag, ab = ramp(ART, l * 1.1);
+    local lr, lg, lb = ramp(LETTERS, l);
+    return lr + (ar - lr) * k, lg + (ag - lg) * k, lb + (ab - lb) * k;
+end
+local logo_tex = nil;
+local function logo_texture()
+    if logo_tex == nil then
+        logo_tex = false;
+        for _, fid in ipairs(LOGO_FIDS) do
+            local t = require('core.maps').menu_image(fid, 'titlwin', retail_logo, true, gold);
+            if t then logo_tex = t; break; end
+        end
+    end
+    return logo_tex or nil;
+end
+local art_since = nil;
+local function logo_art(cx, top, w, a)
+    if require('core.store').data.lobby_art == false then return nil; end
+    local tex = logo_texture();
+    if tex == nil then return nil; end
+    local k = tex.w / 1024;                      -- (an HD atlas scales the same band)
+    local h = w * LOGO_H / 1024;
+    -- fades in and settles a moment after the lobby opens
+    if art_since == nil then art_since = xi_now(); end
+    local t = math.min(1, (xi_now() - art_since) / 1.2);
+    local e = t * t * (3 - 2 * t);
+    local gw, gh = layout.size('lobby_glow');
+    draw.image('lobby_glow', cx - w * 0.75, top + h * 0.05, { scale = { w * 1.5 / gw, h * 0.95 / gh },
+                                                              color = draw.alpha(0xFFFFFFFF, a * 0.55 * e) });
+    draw.entry_rect(tex, 0, LOGO_Y * k, 1024 * k, LOGO_H * k, cx - w / 2, top + (1 - e) * 10, w, h,
+                    draw.alpha(0xFFFFFFFF, a * e), tex.flipped);
+    return top + h;
+end
+
 local function wordmark(a)
     local sw, sh = layout.screen();
     local cx, y = sw / 2, sh * 0.24;
+    local bottom = logo_art(cx, sh * 0.03, 700, a);
+    if bottom then                              -- (the logo carries the title, ONLINE and all)
+        local c = ui.label('lobby_copy', 'small', { font_height = 15, font_alignment = text.align.Center,
+                                                    font_color = 0xFFD8D4C8, outline_width = 3, outline_color = 0xE0101018 });
+        c:set_opacity(a * 0.85);
+        local cgw, cgh = layout.size('lobby_glow');
+        draw.image('lobby_glow', cx - 160, sh - 108, { scale = { 320 / cgw, 40 / cgh }, color = draw.alpha(0xFFFFFFFF, a) });
+        text.draw(c, '\u{00A9} SQUARE ENIX', cx, sh - 82, 'baseline');
+        return;
+    end
     -- a soft shadow behind the title, so it reads over a bright sky
     local gw, gh = layout.size('lobby_glow');
     draw.image('lobby_glow', cx - 700, y - 190, { scale = { 1400 / gw, 330 / gh }, color = draw.alpha(0xFFFFFFFF, a * 0.85) });
@@ -390,8 +472,9 @@ end
 -- +0x3A the slot (1-based), +0x2A / +0x2C its place and +0x2E / +0x30 its size (menu coordinates), +0x32..+0x38 the
 -- same as a rectangle inside the window, whose place is window +0x8C / +0x8E. Rows xiv1ui doesn't show go off-screen.
 local function list_rows(o)
-    local out, n = {}, mem.u32(o + 0x14);
-    while n and n ~= 0 and #out < 40 and mem.ok(n, 0x14) do
+    local out, n, steps = {}, mem.u32(o + 0x14), 0;
+    while n and n ~= 0 and #out < 40 and steps < 400 and mem.ok(n, 0x14) do        -- (steps: see gamewin.rows)
+        steps = steps + 1;
         local r = mem.u32(n + 0x10);
         if r and mem.ok(r, 0x70) and mem.u32(r + 0x58) == r and mem.u32(r + 0x5C) == o then out[#out + 1] = r; end
         n = mem.u32(n);
@@ -941,6 +1024,13 @@ function lobby.render()
         delete_dialog(o, a);
     elseif name == 'ptc8lice' then
         agreement_screen(o, a);
+    end
+    -- whatever list xiv1ui drew this frame, the focused window's own rows go under it (the game's hidden rows follow
+    -- the pointer: the title menu, creation steps, settings ... as the character list and Yes / No do)
+    if click_rows and o then
+        local by_slot = {};
+        for i, slot in ipairs(click_rows.rows) do by_slot[slot] = click_rows.rects[i]; end
+        pcall(align_rows, o, by_slot);
     end
 end
 

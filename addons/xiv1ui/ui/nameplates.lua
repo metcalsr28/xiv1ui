@@ -23,6 +23,7 @@ local store   = require('core.store');
 local xi_now  = require('core.now');
 
 local plates = {};
+local covered = {};          -- rectangles of the game's visible windows (refreshed with the scan)
 
 local RANGE = 30;                       -- yalms: your target and party members
 local NAME_RANGE = 12;                  -- yalms: everyone else. Names aren't hidden behind walls (no way found yet to
@@ -106,7 +107,13 @@ function plates.render()
     if gw.window('mapframe') ~= nil or gw.window('cnqframe') ~= nil then fade = {}; return; end
 
     local now = xi_now();
-    if now >= next_scan then scan(); next_scan = now + 0.25; end
+    if now >= next_scan then
+        scan();
+        next_scan = now + 0.25;
+        -- the game's own windows (menus xiv1ui leaves to it, a shop's lists, ...) are drawn under the HUD: a name
+        -- over one would sit on top of it, so names stay off them
+        covered = gw.occupied();
+    end
     local dt = last_t and math.min(0.25, now - last_t) or 0;
     last_t = now;
 
@@ -150,7 +157,16 @@ function plates.render()
                 o:set_font_height(is_t and 22 or math.floor(19 - 5 * k + 0.5));
                 o:set_font_color(world.name_color(i));
                 o:set_opacity(a * (is_t and 1 or (1 - 0.55 * k)));
-                text.draw(o, name, sx, sy, 'baseline');
+                local fh = is_t and 22 or 19;
+                local hw = #name * fh * 0.3;           -- (about half the name's width; exactness doesn't matter here)
+                local hidden = false;
+                for _, r in ipairs(covered) do
+                    if sx + hw > r[1] and sx - hw < r[1] + r[3] and sy > r[2] and sy - fh < r[2] + r[4] then
+                        hidden = true;
+                        break;
+                    end
+                end
+                if not hidden then text.draw(o, name, sx, sy, 'baseline'); end
             end
         end
     end

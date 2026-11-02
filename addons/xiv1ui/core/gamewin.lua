@@ -43,8 +43,10 @@ local function is_row(r, obj) return mem.ok(r, 0x70) and mem.u32(r + 0x58) == r 
 
 --- A window's row objects (linked list at obj+0x14: node +0 next, +0x10 row).
 function gamewin.rows(obj)
-    local out, n = {}, mem.u32(obj + 0x14);
-    while n and n ~= 0 and #out < 200 and mem.ok(n, 0x14) do
+    local out, n, steps = {}, mem.u32(obj + 0x14), 0;
+    -- (steps bound the walk: while the game rebuilds a window, e.g. zoning, the list can loop back on itself)
+    while n and n ~= 0 and #out < 200 and steps < 400 and mem.ok(n, 0x14) do
+        steps = steps + 1;
         local r = mem.u32(n + 0x10);
         if r and is_row(r, obj) then out[#out + 1] = r; end
         n = mem.u32(n);
@@ -56,8 +58,11 @@ local Hider = {};
 Hider.__index = Hider;
 
 local hiders = setmetatable({}, { __mode = 'k' });
-function gamewin.new()
-    local h = setmetatable({ wins = {}, rows = {} }, Hider);
+-- opts.frame_only: +0x6A (the window's text) can be let on for a moment with hider.pass = true. Some windows stop
+-- working while it's off: the quest / Records of Eminence list (quest01) doesn't move to another level of the
+-- Objective List until it's on again, so its module lets it on while the game says a change is pending.
+function gamewin.new(opts)
+    local h = setmetatable({ wins = {}, rows = {}, keep_6a = opts and opts.frame_only }, Hider);
     hiders[h] = true;
     return h;
 end
@@ -69,6 +74,11 @@ function gamewin.early()
         for r, o in pairs(h.rows) do
             local sc = ffi.cast('float*', r + 0x1C);     -- (read only once it's known to be a live row)
             if is_row(r, o) and (sc[0] ~= 0 or sc[1] ~= 0) then sc[0], sc[1] = 0, 0; end
+        end
+        if h.keep_6a and not h.pass then
+            for name, w in pairs(h.wins) do
+                if gamewin.window(name) == w.obj and mem.u8(w.obj + 0x6A) ~= 0 then mem.w8(w.obj + 0x6A, 0); end
+            end
         end
     end
 end
@@ -89,7 +99,9 @@ function Hider:hide(names)
             end
             if w then
                 if mem.u8(o + 0x69) ~= 0 then mem.w8(o + 0x69, 0); end
-                if mem.u8(o + 0x6A) ~= 0 then mem.w8(o + 0x6A, 0); end
+                if self.keep_6a and self.pass then
+                    if mem.u8(o + 0x6A) == 0 and w.b ~= 0 then mem.w8(o + 0x6A, w.b); end
+                elseif mem.u8(o + 0x6A) ~= 0 then mem.w8(o + 0x6A, 0); end
                 if mem.u8(o + 0x78) ~= 0 then mem.w8(o + 0x78, 0); end
                 for _, r in ipairs(gamewin.rows(o)) do
                     local sc = ffi.cast('float*', r + 0x1C);

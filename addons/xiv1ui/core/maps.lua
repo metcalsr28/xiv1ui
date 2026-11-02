@@ -27,7 +27,7 @@ local entries = nil;         -- zone -> { { key, num, flags, s, ox, oy, id }, ..
 local function read_table()
     entries = {};
     -- the first entry (West Ronfaure: zone 100, key 0, map 1, flags 0, scale 1, region 1, id 1, -312, -248)
-    local a = ashita.memory.find('FFXiMain.dll', 0, '6400000100010100' .. '0100C8FE08FF', 0, 0);
+    local a = require('core.mem').find('FFXiMain.dll', '6400000100010100' .. '0100C8FE08FF', 0, 0);
     if a == nil or a == 0 then return; end
     for i = 0, 1999 do
         local e = a + i * 14;
@@ -73,8 +73,8 @@ local floor_cache = { zone = nil, key = nil, t = 0 };
 local function floor_key(x, z, y)
     if floor_fn == nil then
         floor_fn = false;
-        local fn = ashita.memory.find('FFXiMain.dll', 0, '8B542408568D4424108BF18B4C2410508B44240C6800002041', 0, 0);
-        local pp = ashita.memory.find('FFXiMain.dll', 0, '8B0D????????565057E8????????568D4C240C57', 2, 0);
+        local fn = require('core.mem').find('FFXiMain.dll', '8B542408568D4424108BF18B4C2410508B44240C6800002041', 0, 0);
+        local pp = require('core.mem').find('FFXiMain.dll', '8B0D????????565057E8????????568D4C240C57', 2, 0);
         if fn and fn ~= 0 and pp and pp ~= 0 then
             floor_fn = ffi.cast('int32_t (__thiscall*)(uint32_t, float, float, float)', fn);
             floor_obj = ashita.memory.read_uint32(pp);
@@ -285,6 +285,74 @@ function maps.texture(m)
     ffi.copy(buf, img, #img);
     local e = draw.texture_mem('map:' .. key, buf, #img, true);
     if e then e.flipped = flipped == true; textures[key] = e; end
+    return e;
+end
+
+--- A named menu picture from a DAT (an XI-Pivot overlay's copy first), e.g. the lobby's title atlas "titlwin":
+-- the image chunk "menu    <name>" (flag 0xA1, DXT3), as a texture cache entry, or nil. Read from the player's own
+-- game files: nothing of the game's art ships with xiv1ui.
+local menu_images = {};
+-- (check, if given, is called with the DAT's contents and the image's flag byte position, and must say yes;
+-- opaque makes a DXT3 image's every visible pixel fully opaque, keeping only the faintest edge soft; recolor, a
+-- function (r, g, b) -> r, g, b on 0-255, repaints a DXT3 image through its blocks' two end colours)
+local OPAQUE = nil;
+function maps.menu_image(fid, name, check, opaque, recolor)
+    local key = fid .. ':' .. name .. (opaque and ':o' or '') .. (recolor and ':c' or '');
+    local t = menu_images[key];
+    if t ~= nil then return t or nil; end
+    menu_images[key] = false;
+    local path = maps.dat_file(fid);
+    local f = path and io.open(path, 'rb');
+    if f == nil then return nil; end
+    local dat = f:read('*a');
+    f:close();
+    local i = dat:find('menu    ' .. string.format('%-8s', name), 1, true);
+    if i == nil or i < 2 then return nil; end
+    if check and not check(dat, i - 1) then return nil; end
+    local img, dxt = image_file(dat:sub(i - 0x31));     -- (image_file reads a picture whose flag byte sits at 0x30)
+    if img == nil then return nil; end
+    local buf = ffi.new('uint8_t[?]', #img);
+    ffi.copy(buf, img, #img);
+    if opaque and dxt then
+        if OPAQUE == nil then
+            -- per alpha byte (two 4-bit pixels): 0 stays clear, 1 half, anything more fully opaque
+            OPAQUE = ffi.new('uint8_t[256]');
+            local function up(n) return n == 0 and 0 or (n == 1 and 8 or 15); end
+            for b = 0, 255 do OPAQUE[b] = up(bit.band(b, 15)) + up(bit.rshift(b, 4)) * 16; end
+        end
+        for o = 128, #img - 16, 16 do               -- (after the DDS header; a block's first 8 bytes are its alpha)
+            for j = o, o + 7 do buf[j] = OPAQUE[buf[j]]; end
+        end
+    end
+    if recolor and dxt then
+        local seen = {};                            -- (RGB565 in -> out; a picture has far fewer colours than blocks)
+        local function map(v)
+            local n = seen[v];
+            if n == nil then
+                local r, g, b = recolor(bit.rshift(v, 11) * 255 / 31, bit.band(bit.rshift(v, 5), 63) * 255 / 63,
+                                        bit.band(v, 31) * 255 / 31);
+                local function q(c, m) return math.max(0, math.min(m, math.floor(c * m / 255 + 0.5))); end
+                n = q(r, 31) * 2048 + q(g, 63) * 32 + q(b, 31);
+                seen[v] = n;
+            end
+            return n;
+        end
+        for o = 128 + 8, #img - 8, 16 do
+            local c0, c1 = map(buf[o] + buf[o + 1] * 256), map(buf[o + 2] + buf[o + 3] * 256);
+            -- the first end colour must stay the greater: decoders read c0 <= c1 as the three-colour mode, whose
+            -- fourth colour is black. Swapped ends swap the indices (0 <-> 1, 2 <-> 3); equal ends use colour 0 only.
+            if c0 < c1 then
+                c0, c1 = c1, c0;
+                for j = o + 4, o + 7 do buf[j] = bit.bxor(buf[j], 0x55); end
+            elseif c0 == c1 then
+                if c1 > 0 then c1 = c1 - 1; else c0 = 1; end
+                for j = o + 4, o + 7 do buf[j] = 0; end
+            end
+            buf[o], buf[o + 1], buf[o + 2], buf[o + 3] = c0 % 256, math.floor(c0 / 256), c1 % 256, math.floor(c1 / 256);
+        end
+    end
+    local e = draw.texture_mem('menu:' .. key, buf, #img, true);
+    menu_images[key] = e or false;
     return e;
 end
 

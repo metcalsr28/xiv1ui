@@ -14,6 +14,7 @@
 
 local xi_now = require('core.now');
 local mem    = require('core.mem');
+local diag   = require('core.diag');
 
 local native = {};
 
@@ -48,6 +49,7 @@ local function find_slot(name)
             return slot;
         end
     end
+    diag.once('slot ' .. name, 'window', 'no descriptor found for "%s"', name);
     return nil;
 end
 
@@ -102,8 +104,8 @@ local function compass_hide()
     if compass ~= nil then return; end
     compass = false;
     local sig = '33C0668B81????????483DE3000000';
-    local m = ashita.memory.find('FFXiMain.dll', 0, sig, 0, 0);
-    if m == nil or m == 0 or ashita.memory.find('FFXiMain.dll', 0, sig, 0, 1) ~= 0 then return; end
+    local m = mem.find('FFXiMain.dll', sig, 0, 0);
+    if m == nil or ashita.memory.find('FFXiMain.dll', 0, sig, 0, 1) ~= 0 then return; end
     local addr = m + 0x24;
     if mem.u8(addr) ~= 1 then return; end
     if code_write(addr, 0) then compass = { addr = addr }; end
@@ -161,8 +163,7 @@ end
 local focus_ptr = nil;
 function native.focused()
     if focus_ptr == nil then
-        local p = ashita.memory.find('FFXiMain.dll', 0, '8B480C85C974??8B510885D274??3B05', 16, 0);
-        focus_ptr = (p and p ~= 0) and p or false;
+        focus_ptr = mem.find('FFXiMain.dll', '8B480C85C974??8B510885D274??3B05', 16, 0) or false;
     end
     if not focus_ptr then return nil; end
     local obj = mem.chain(focus_ptr, 0, 0);

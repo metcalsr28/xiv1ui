@@ -41,8 +41,8 @@ function augments.text(item, res)
     local t = cache[key];
     if t ~= nil then return t ~= '' and t or nil; end
     if parse == nil then
-        local p = ashita.memory.find('FFXiMain.dll', 0, '8B54240481EC????????B95A00000033', 0, 0);
-        parse = (p and p ~= 0) and ffi.cast('xiv1ui_augparse_f', p) or false;
+        local p = require('core.mem').find('FFXiMain.dll', '8B54240481EC????????B95A00000033', 0, 0);
+        parse = p and ffi.cast('xiv1ui_augparse_f', p) or false;
     end
     if not parse then return nil; end
     local d, a = ffi.new('xiv1ui_augdata_t'), ffi.new('xiv1ui_augs_t');

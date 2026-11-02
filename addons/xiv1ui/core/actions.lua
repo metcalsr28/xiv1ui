@@ -12,6 +12,14 @@ local ok_icons, ICONS = pcall(require, 'core.action_icons');
 if not ok_icons then ICONS = {}; end
 
 ICONS.ma, ICONS.ja, ICONS.cmd = ICONS.ma or {}, ICONS.ja or {}, ICONS.cmd or {};
+-- signature icons (tools/make_signature_icons.py): round paintings drawn in place of the disc and emblem
+local ok_sig, SIGNATURE = pcall(require, 'core.signature_icons');
+if not ok_sig or type(SIGNATURE) ~= 'table' then SIGNATURE = {}; end
+SIGNATURE.ma, SIGNATURE.ja = SIGNATURE.ma or {}, SIGNATURE.ja or {};
+-- a spell's family name (Cure II -> Cure, Utsusemi: Ni -> Utsusemi)
+local function family(name)
+    return (name:gsub('%s+[IVX]+$', ''):gsub(':%s*%a+$', ''));
+end
 
 --- The painted icon for an action name (a spell, ability, weapon skill or command), or nil. kind ('ma', 'ja',
 -- 'cmd') picks between a spell and an ability of the same name; without it, spells first.
@@ -82,6 +90,8 @@ function actions.resolve(b)
         info.recast = s.RecastDelay / 4;
         info.glyph, info.tier = actions.glyph(b.name);
         info.icon = ICONS.ma[b.name] or (s.Type == 8 and ICONS.ma['*Trust']) or nil;
+        local sig = SIGNATURE.ma[b.name] or SIGNATURE.ma[family(b.name)];
+        if sig then info.disc, info.icon, info.sig = sig, nil, true; end
         info.cost, info.cost_kind = s.ManaCost, 'MP';
         info.usable = party:GetMemberMP(0) >= s.ManaCost;
         info.timer = mm():GetRecast():GetSpellTimer(s.Index);
@@ -95,6 +105,8 @@ function actions.resolve(b)
         info.kind_label = is_ws and 'Weapon Skill' or 'Ability';
         info.glyph, info.tier = actions.glyph(b.name);
         info.icon = ICONS.ja[b.name];
+        local sig = SIGNATURE.ja[b.name];
+        if sig then info.disc, info.icon, info.sig = sig, nil, true; end
         if is_ws then
             info.cost, info.cost_kind = 1000, 'TP';
             info.usable = party:GetMemberTP(0) >= 1000;

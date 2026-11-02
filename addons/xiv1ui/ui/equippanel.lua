@@ -13,6 +13,7 @@
 --]]
 
 local mem    = require('core.mem');
+local diag   = require('core.diag');
 local native = require('core.native');
 local draw   = require('core.draw');
 local text   = require('core.text');
@@ -51,8 +52,10 @@ end
 local function is_row(r, obj) return mem.ok(r, 0x70) and mem.u32(r + 0x58) == r and mem.u32(r + 0x5C) == obj; end
 
 local function rows_of(obj)
-    local out, n = {}, mem.u32(obj + 0x14);
-    while n and n ~= 0 and #out < 80 and mem.ok(n, 0x14) do
+    local out, n, steps = {}, mem.u32(obj + 0x14), 0;
+    -- (steps bound the walk: while the game rebuilds a window, e.g. zoning, the list can loop back on itself)
+    while n and n ~= 0 and #out < 80 and steps < 400 and mem.ok(n, 0x14) do
+        steps = steps + 1;
         local r = mem.u32(n + 0x10);
         if r and is_row(r, obj) then out[#out + 1] = r; end
         n = mem.u32(n);
@@ -265,6 +268,21 @@ local function render_picker(x, y, h, slot_id)
         if r then list[#list + 1] = { id = cid, res = r, equipped = false }; at = #list; end
     end
     panel.lit = { list = list, at = at };     -- (for dev probes)
+    if diag.on() then
+        -- the game's count (header included) against ours, and the lit row against the item info box
+        if lcount and lcount - 1 ~= #list then
+            diag.change('equip.count', 'count', 'equipment picker (%s): game lists %d items, xiv1ui %d (bag %d)',
+                SLOT_NAMES[slot_id] or tostring(slot_id), lcount - 1, #list, shown_bag);
+        end
+        local c = at and list[at];
+        diag.agree('equip', cid == nil and at == nil or (c ~= nil and c.id == cid), 'disagree', function ()
+            return string.format('equipment picker (%s): xiv1ui row %s = %s (id %s, bag %s idx %s); game item id %s '
+                .. 'idx %s, game row %s (top %s); %d rows, game %s', SLOT_NAMES[slot_id] or tostring(slot_id),
+                tostring(at), c and (c.res.Name[1] or '?') or 'Storage Options', c and tostring(c.id) or '-',
+                c and tostring(c.bag) or '-', c and tostring(c.index) or '-', tostring(cid), tostring(cidx),
+                tostring(lrow), tostring(ltop), #list, lcount and tostring(lcount - 1) or '?');
+        end);
+    end
     -- the header row: "Storage Options" (the game's cursor is on it when no item is under it)
     local hy = y + 44;
     local sw, sh = layout.size('row_sel');
@@ -342,7 +360,11 @@ function panel.render()
             end
         end
     end
-    if #cells ~= 16 then if hidden then restore(); end return; end     -- not the layout we know: leave it alone
+    if #cells ~= 16 then         -- not the layout we know: leave it alone
+        if diag.on() then diag.change('equip.cells', 'handback', 'equipment: %d slot cells found, not 16', #cells); end
+        if hidden then restore(); end
+        return;
+    end
     -- choosing gear for a slot (focus on the game's item list): the picker opens beside the grid. Anything else
     -- (e.g. the Storage Options window): the game's screens are needed, step aside.
     local fobj, fname = native.focused();

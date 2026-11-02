@@ -4,7 +4,7 @@
 *
 * The game keeps running its list, so Left / Right still change the area and Confirm / Esc work as before. From its
 * class object: the area (+0x6C: 0 San d'Oria ... 10 Coalition), the quests listed (+0x20 -> 8-byte records, the
-* quest id first; +0x40 of them) and the cursor (+0x30, 0-based). Quest names and their client / summary text come
+* quest's place in its area's file first; +0x40 of them) and the cursor (+0x30, 0-based). Quest names and their client / summary text come
 * from FFXI's quest tables, one DAT per area (core/dmsg.lua).
 --]]
 
@@ -47,13 +47,13 @@ local function quest_table(area, missions)
     local entries = a and require('core.dmsg').read(a[2]);
     if entries == nil then return nil; end
     local t = {};
-    -- (a quest list names its quests by the number in their record; a mission list by the record's place in the
-    -- file: in Chains of Promathia, Seekers of Adoulin ... the two differ; the number is kept too, as a fallback for
-    -- the "To commence ..." records numbered 1000)
+    -- (the game's lists name a quest or mission by its record's place in the file, not by the number in the record,
+    -- which is the quest's id: in Jeuno the Gobbiebag quests are places 28-37 but ids 27-30, 74, 75 ...; the number
+    -- is kept too, as a fallback for the "To commence ..." mission records numbered 1000)
     for i, e in ipairs(entries) do
         -- ("__" in front of a name marks a chapter's later steps; FFXI indents them)
         local q = { name = (e.texts[1] or '?'):gsub('^_+', '  '), text = e.texts[2] or '' };
-        if missions then t[i - 1] = q; end
+        t[i - 1] = q;
         if e.ints[1] and t[e.ints[1]] == nil then t[e.ints[1]] = q; end
     end
     by_area[key] = t;
@@ -79,9 +79,21 @@ local function which()
     return mode, cls, f;
 end
 
-local hider = gamewin.new();
+local hider = gamewin.new({ frame_only = true });   -- (see gamewin.new)
 local opened = nil;
 function quests.release() hider:restore(); end
+
+--- At each scene start, before the game draws: a list that just opened is hidden at once (render() draws ours).
+function quests.early()
+    -- (only when render() will draw it: the same checks)
+    local mode, cls, win = which();
+    local area = cls and mem.u32(cls + 0x6C);
+    local n, list = cls and mem.u32(cls + 0x40), cls and mem.u32(cls + 0x20);
+    if mode and area and quest_table(area, mode == 'missions') and n and list and n <= 512
+       and (n == 0 or mem.ok(list, n * 8)) then
+        hider:hide({ win });
+    end
+end
 
 local ROW_H, SHOWN, W = 28, 10, 520;
 local view_first = 0;
@@ -93,7 +105,8 @@ function quests.render()
     local qt = area and quest_table(area, missions);
     local n, cur, list = cls and mem.u32(cls + 0x40), cls and mem.u32(cls + 0x30), cls and mem.u32(cls + 0x20);
     if mode == nil or qt == nil or n == nil or n > 512 or list == nil or (n > 0 and not mem.ok(list, n * 8)) then
-        if hider:active() then hider:restore(); end
+        -- (a list backed out of stays on screen a frame or more while the game closes it: hidden until then)
+        if hider:active() then hider:release_except({ 'quest01', 'miss00' }); end
         opened = nil;
         return;
     end
@@ -103,9 +116,11 @@ function quests.render()
     local rows = {};
     for i = 0, n - 1 do
         local id = mem.u16(list + i * 8);
-        -- (0xFFFB: an empty section)
+        -- (0xFFFC: no current missions, 0xFFFB: an empty section)
         rows[#rows + 1] = HEADINGS[id] and { name = HEADINGS[id] .. ':', heading = true }
-                          or id == 0xFFFB and { name = 'None.', heading = true, none = true }
+                          or id == 0xFFFC and { name = 'No current missions.', heading = true, none = true }
+                          or id == 0xFFFB and { name = missions and 'No completed missions.' or 'None.', heading = true,
+                                                none = true }
                           or qt[id] or { name = '?', text = '' };
     end
     if cur and cur < n then
@@ -124,6 +139,33 @@ function quests.render()
     local dtext = sel and (sel.text:gsub('\n ', ' '):gsub('^%s+', '')) or '';
     if desc.settings.text ~= dtext then text.set(desc, dtext); end
     local _, dh = text.size(desc);
+    -- Confirm on a quest: the game turns the same window into that quest's page (class +0x64 = 1) until Back
+    if not missions and sel and mem.u32(cls + 0x64) == 1 then
+        local body = ui.label('qst_page', 'small', { font_height = 18, font_color = 0xFFE8E4D8, box_width = W - 56 });
+        if body.settings.text ~= dtext then text.set(body, dtext); end
+        local _, bh2 = text.size(body);
+        local PH = 52 + 18 + bh2 + 40;
+        local px, py = layout.anchor('topleft', W, PH, 40, 60, 'quests');
+        local pc = draw.alpha(0xFFFFFFFF, a);
+        local bw, bh = layout.size('win_body');
+        draw.nine('win_body', px, py, W, PH, 12, bw, bh, pc);
+        local tw, th = layout.size('win_title');
+        draw.nine('win_title', px + 4, py + 4, W - 8, 30, 10, tw, th, pc);
+        draw.image('title_swash', px + 8, py + 4, { color = pc });
+        local title = ui.label('qst_title', 'name', { font_height = 22 });
+        title:set_opacity(a);
+        text.draw(title, sel.name:gsub('^%s+', ''), px + 40, py + 27, 'baseline');
+        local area_l = ui.label('qst_range', 'small', { font_height = 14, font_color = 0xFFC8C4B8,
+                                                         font_alignment = text.align.Right });
+        area_l:set_opacity(a);
+        text.draw(area_l, AREAS[area][1] .. ': ' .. mode, px + W - 20, py + 25, 'baseline');
+        body:set_opacity(a);
+        text.draw(body, dtext, px + 28, py + 52);
+        local hint = ui.label('qst_hint', 'small', { font_height = 14, font_color = 0xFFB8C0D8 });
+        hint:set_opacity(a);
+        text.draw(hint, 'Back: the list', px + 24, py + PH - 12, 'baseline');
+        return;
+    end
     local H = 52 + math.max(1, shown) * ROW_H + (sel and dh + 30 or 20) + 26;
     local x, y = layout.anchor('topleft', W, H, 40, 60, 'quests');
     local col = draw.alpha(0xFFFFFFFF, a);

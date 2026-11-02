@@ -296,7 +296,7 @@ function hotbar.render()
                 local faint = info.generic or across;
                 draw.image(info.icon, x + WELL_IN, y + WELL_IN, { color = faint and (bit.band(dim, 0x00FFFFFF) + 0x50000000) or dim });
             end
-            local letters = not info.icon or info.generic;
+            local letters = (not info.icon or info.generic) and not info.sig;   -- (a signature icon is a painting)
             if names == 'above' and not (info.lines and info.show_name) then
                 name_above(o, info.label or '', x, y);
             end

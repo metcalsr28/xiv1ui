@@ -10,6 +10,7 @@
 --]]
 
 local mem     = require('core.mem');
+local diag    = require('core.diag');
 local draw    = require('core.draw');
 local text    = require('core.text');
 local layout  = require('core.layout');
@@ -58,8 +59,8 @@ local blu_set = nil;        -- Blue Magic set for battle: spell id -> true (see 
 local order_ptr = nil;
 local function spell_order()
     if order_ptr == nil then
-        local a = ashita.memory.find('FFXiMain.dll', 0, 'A1????????33FF8B9880080000', 1, 0);
-        order_ptr = (a and a ~= 0) and mem.u32(a) or false;
+        local a = mem.find('FFXiMain.dll', 'A1????????33FF8B9880080000', 1, 0);
+        order_ptr = a and mem.u32(a) or false;
     end
     local s = order_ptr and mem.u32(order_ptr);
     if not s or not mem.ok(s, 0x884) then return nil; end
@@ -175,6 +176,7 @@ function panel.render()
     local category = fname == 'ability' and (from or 'Job Abilities') or ((cmdm.last_menu == 'magselec' and last.magselec) or (ACTION[cmdm.last_menu] and (last[cmdm.last_menu] == 'Trust' and 'Trust' or 'Magic')) or last.mgcmenu or 'White Magic');
     if fname == 'ability' and not ABILITY_LISTS[category] then
         -- other lists in the ability window (Ranged Attack ...) aren't built yet: the game draws its own
+        if diag.on() then diag.change('list.category', 'handback', 'ability list "%s" left to the game', tostring(category)); end
         if hider:active() then hider:restore(); end
         return;
     end
@@ -198,6 +200,20 @@ function panel.render()
     end
     at = at or by_help;
     panel.lit = { list = list, at = at };     -- (for dev probes)
+    if diag.on() then
+        -- the game's count against ours (else the help line decides), and the lit entry against the help line
+        -- (an empty help line, or one that's no entry's description, e.g. while sorting: nothing to compare)
+        if gn and gn ~= #list then
+            diag.change('list.count', 'count', '%s list "%s": game lists %d, xiv1ui %d', fname, category, gn, #list);
+        end
+        diag.agree('list', help == '' or by_help == nil or (at ~= nil and norm(list[at].desc) == help), 'disagree',
+            function ()
+                return string.format('%s list "%s": xiv1ui row %s = %s, help line names row %s = %s; game cursor %s, '
+                    .. 'game count %s, xiv1ui %d', fname, category, tostring(at), at and list[at].name or '-',
+                    tostring(by_help), by_help and list[by_help].name or '-', gcur and tostring(gcur + 1) or '?',
+                    tostring(gn), #list);
+            end);
+    end
     -- the description shown: the entry's, unless the game's help line says something else ("Select a spell or song
     -- to move." while sorting by hand)
     local shown = (help ~= '' and by_help == nil) and help or nil;

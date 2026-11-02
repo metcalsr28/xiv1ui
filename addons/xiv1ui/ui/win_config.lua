@@ -102,6 +102,7 @@ local TABS = {
         flag('Hide the game\'s own panels that xiv1ui replaces', 'hide_native', true),
         flag('Area map in the minimap', 'minimap_hd', true),
         flag('Configuration button in the bottom-right buttons', 'config_button', true),
+        flag('The game\'s own logo on the title screen (from your install)', 'lobby_art', true),
     } },
     { title = 'Chat', rows = {
         stepper('Font', font_values(), chat_get('font'), chat_put('font'), font_label),
@@ -121,6 +122,8 @@ local TABS = {
         channel('Show linkshell chat', 'linkshell'),
         channel('Show emotes', 'emote'),
         channel('Show NPC lines (also in the dialogue box)', 'npc'),
+        channel('Show Unity chat', 'unity'),
+        channel('Show the Assist channel', 'assist'),
         { label = 'Reset the logs\' size (drag a log\'s top-right corner to resize)', action = true,
           value = function () return ''; end,
           step = function ()
@@ -161,6 +164,8 @@ local TABS = {
         { label = 'In-game updates (/xiv1ui update) - at your own risk', needs = 'experimental',
           get = function () return store.data.updater == true; end,
           set = function (v) store.data.updater = v; store.save(); end },
+        -- (not behind the experimental switch: it only writes addons/xiv1ui/diag.log; see /xiv1ui report)
+        flag('Diagnostics log (for bug reports)', 'diag', false),
     } },
     { title = 'Controls', rows = {
         { label = 'Number keys fire the action bar (1–0, Shift+↑/↓ pages)',
@@ -171,6 +176,7 @@ local TABS = {
           set = function (v) store.data.macro.palette = v; store.save(); end },
         flag('Controller drives xiv1ui (Back+X menu, Back+A action bar)', 'pad', true),
         flag('Command menu (Enter / A) in the FF style', 'cmd_menu', true),
+        flag('Action menu moves to the other side when your character runs over to it', 'ring_follow', true),
         flag('Event choices (Yes / No, NPC options) in the FF style', 'choice_menu', true),
         flag('Status window in the FF style', 'status_panel', true),
     } },

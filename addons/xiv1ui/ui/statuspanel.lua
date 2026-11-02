@@ -44,8 +44,10 @@ local ffi = require('ffi');
 
 -- A window's row objects (its separately drawn pieces), from its row list at obj+0x14 (see ui/cmdmenu.lua).
 local function rows_of(obj)
-    local out, n = {}, mem.u32(obj + 0x14);
-    while n and n ~= 0 and #out < 120 and mem.ok(n, 0x14) do
+    local out, n, steps = {}, mem.u32(obj + 0x14), 0;
+    -- (steps bound the walk: while the game rebuilds a window, e.g. zoning, the list can loop back on itself)
+    while n and n ~= 0 and #out < 120 and steps < 400 and mem.ok(n, 0x14) do
+        steps = steps + 1;
         local r = mem.u32(n + 0x10);
         if r and mem.ok(r, 0x70) and mem.u32(r + 0x58) == r and mem.u32(r + 0x5C) == obj then out[#out + 1] = r; end
         n = mem.u32(n);

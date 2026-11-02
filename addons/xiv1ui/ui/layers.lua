@@ -67,12 +67,19 @@ local function active()
     return store.data.macro.palette and AshitaCore:GetChatManager():IsInputOpen() == 0;
 end
 
+local reply_pending = false;      -- Ctrl+R pressed: the reply is typed once Ctrl is let go (typed under a held Ctrl,
+                                 -- the game drops part of it)
+
 --- DirectInput keyboard state, before the game reads it.
 function layers.key_state(e)
     if not active() then kb_armed = nil; return; end
     local p = ffi.cast('uint8_t*', e.data_raw);
     local function held(k) return p[k] >= 0x80; end
     local ctrl = held(DIK.LCTRL) or held(DIK.RCTRL);
+    if reply_pending and not ctrl then
+        reply_pending = false;
+        if not require('ui.chatlog').reply() then print('[xiv1ui] No tells to reply to yet.'); end
+    end
     local alt  = held(DIK.LALT) or held(DIK.RALT);
     kb_armed = (ctrl and layers.GREEN) or (alt and layers.RED) or nil;
     if kb_armed == nil then prev = {}; return; end
@@ -84,6 +91,11 @@ function layers.key_state(e)
         prev[k] = d;
         p[k] = 0;
     end
+    -- Ctrl+R: reply to the last tell (with the layers off, xiv1ui.lua's key handler does it)
+    local r = ctrl and held(0x13);
+    if r and not prev[0x13] then reply_pending = true; end
+    prev[0x13] = r;
+    if ctrl then p[0x13] = 0; end
 end
 
 --- XInput controller state, before the game reads it (e.state = what the pad reported, e.state_modified = what the

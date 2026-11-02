@@ -71,4 +71,15 @@ function mem.chain(a, ...)
     return a;
 end
 
+--- ashita.memory.find(module, 0, sig, off, idx), nil when not found. A miss is noted for the diagnostics log
+-- (core/diag.lua): a signature that doesn't match another client build is a common cause of "works for me".
+function mem.find(module, sig, off, idx)
+    local a = ashita.memory.find(module, 0, sig, off or 0, idx or 0);
+    if a == nil or a == 0 then
+        pcall(function () require('core.diag').missed(module, sig, off or 0, idx or 0); end);
+        return nil;
+    end
+    return a;
+end
+
 return mem;

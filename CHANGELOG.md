@@ -1,5 +1,48 @@
 # Changelog
 
+## 0.4.0
+
+- Hand-painted icons for nearly every action a player can put on the action bar: about 1,300 spells, job
+  abilities, weapon skills, songs, ninjutsu, Blood Pacts and Blue Magic spells, each its own painting (Savage Blade,
+  Knights of Round, Rudra's Storm, Meteor, the summons and their astral flows, Cocoon, Magic Fruit ...). Element
+  and stat families (Bar-, En-, Boost-, storms, Etudes, Carols, helixes, Quick Draw, runes, Maneuvers, Geo-/Indi-)
+  come in their element's colour. Higher tiers share their painting, with the numeral on the slot.
+- The title screen shows Final Fantasy XI's own logo, Yoshitaka Amano's art, over the scenery in xiv1ui's gold,
+  read from your game install (nothing of the game's art comes with xiv1ui). On a server whose client replaces
+  the logo with its own branding, the title screen keeps xiv1ui's lettering. Configuration » General to turn it
+  off.
+- Chat tabs on the General log: General, Party, Linkshell and Tells. A tab you aren't looking at shows a dot when
+  something new arrives for it (pink for a tell).
+- A tell brings up a notice above the logs ("Tell from Aldo   Ctrl+R: reply") for a few seconds.
+- The auto-translate list (Tab while typing) in xiv1ui's style: categories, phrases, your items and key items, with
+  a scroll bar; phrases show with FFXI's green and red brackets in the logs and on the line you're typing.
+  Auto-translate phrases no longer turn into junk characters in the logs and the dialogue box.
+- Chat: Ctrl+R replies to the last tell (the chat line opens with "/tell <name> "). Page Up / Page Down scroll the
+  General log (with Shift, the Battle log). Unity and Assist chat have their own colours and can be hidden
+  (Configuration » Chat). The logs step aside for the auto-translate list (Tab while typing). Lines FFXI indents
+  (the moon phase) are no longer cut short. A linkshell's message shows in the linkshell colour.
+- The action menu (Enter / A) glides to the other side of your character when the character runs over toward it,
+  so it never covers the character (Configuration » Controls to turn it off).
+- Names over characters no longer draw on top of FFXI's own menus (the ones xiv1ui leaves to the game).
+- Records of Eminence (Commands » Quests) in xiv1ui's style: the objectives you've taken on with progress bars and
+  goals, limited-time challenges in pink, the selected one's description, your Sparks in the title. The figures
+  are kept across a reload of xiv1ui.
+- The Objective List in xiv1ui's style, from the categories down to each objective: progress or "Complete", the
+  ones you've taken on marked, and Confirm on an objective opens its page with what it asks, its rewards (Sparks,
+  EXP, Unity Accolades) and whether it can be done again.
+- Current / Completed Quests: Confirm on a quest opens its page (client and summary) instead of leaving the list
+  looking stuck; quests in some areas (Jeuno) showed the names of the quests after them. Mission lists say
+  "No current missions." / "No completed missions." as FFXI does.
+- Menus: backing out of a sub-menu no longer brings back FFXI's own window behind xiv1ui's, and the quest lists
+  no longer flash FFXI's window as they open and close.
+- Title screen: hovering a menu row lights that row (the pointer could land on the row under it).
+- A possible freeze while zoning (an unbounded walk of a window's rows) is fixed.
+- A diagnostics log for bug reports (Configuration » Experimental, off unless you turn it on): it notes, for the
+  last few minutes, which game window had focus and where xiv1ui and the game disagreed (a different item lit than
+  the game's cursor, a list left to the game). It never records chat, tells or other players' names. Type
+  /xiv1ui report to put your setup, errors.log and the log in one file, addons/xiv1ui/report.txt, to attach to
+  your report.
+
 ## 0.3.7
 
 - If something in xiv1ui fails, it now reloads itself once (and says so in the chat log) instead of leaving parts of
