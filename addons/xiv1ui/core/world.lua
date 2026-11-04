@@ -27,6 +27,15 @@ function world.target_index()
     return t:GetTargetIndex(slot) or 0;
 end
 
+--- The entity a sub-target cursor is on (choosing who a spell or command goes to: slot 0 while the main target
+-- waits in slot 1), or 0 when no sub-target cursor is up. FFXI's own arrows go with its target box, which xiv1ui
+-- hides, so this is what xiv1ui marks while the player chooses.
+function world.subtarget_index()
+    local t = mm():GetTarget();
+    if t:GetIsSubTargetActive() ~= 1 then return 0; end
+    return t:GetTargetIndex(0) or 0;
+end
+
 --- A target that is a model with no entity behind it (the Mog House door, "Door: Back to Town"): its name and
 -- world position x, height, y (the actor keeps them at +0x34), or nil. Only while no entity is targeted.
 function world.target_actor()

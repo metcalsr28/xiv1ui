@@ -114,6 +114,18 @@ function worldfx.render()
         end
     end
 
+    -- sub-target cursor (choosing who a spell goes to): a larger pale blue ring turning the other way and pulsing,
+    -- on top of the main target's ring
+    local sub = world.subtarget_index();
+    if sub ~= 0 then
+        local door = bit.band(AshitaCore:GetMemoryManager():GetEntity():GetSpawnFlags(sub) or 0, 0x20) ~= 0;
+        local sx, sy, vis = project.on_model(sub, 0.55, 0, door and 0.4 or 1.2);
+        if sx and vis then
+            local k = 1.25 + 0.08 * math.sin(now * 6);
+            draw.image('subtarget_ring', sx - 36 * k, sy - 36 * k, { scale = k, rot = -now * 1.2 });
+        end
+    end
+
     -- pop-up numbers
     for i = #pops, 1, -1 do
         local p = pops[i];

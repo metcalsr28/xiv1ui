@@ -147,6 +147,9 @@ local TABS = {
             function () return rawget(store.data.part_offset or {}, 'bars') or 0; end,
             function (v) store.data.part_offset = store.data.part_offset or {}; rawset(store.data.part_offset, 'bars', v); end,
             function (v) return v == 0 and 'Centre' or string.format('%+d', v); end),
+        flag('EXP bar: Capacity Points toward the next Job Point (level 99)', 'xp_cp', true),
+        flag('EXP bar: Exemplar Points toward the next Master Level', 'xp_ep', true),
+        flag('EXP bar: Limit Points toward the next merit (when limit mode is off)', 'xp_lp', false),
         flag('UI Lock (widgets can\'t be dragged)', 'ui_locked', false),
         { label = 'Reset UI positions', action = true, value = function () return ''; end,
           step = function () layout.reset(); end },
@@ -171,6 +174,15 @@ local TABS = {
         { label = 'Number keys fire the action bar (1–0, Shift+↑/↓ pages)',
           get = function () return store.data.hotbar.keys; end,
           set = function (v) AshitaCore:GetChatManager():QueueCommand(-1, '/xiv1ui keys ' .. (v and 'on' or 'off')); end },
+        stepper('Action bar pages (each one FFXI macro set: /copymacros)', { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 },
+                function () return require('ui.hotbar').pages(); end,
+                function (v)
+                    local hb = store.data.hotbar;
+                    hb.pages = v;
+                    if (hb.page or 1) > v then hb.page = 1; end
+                    require('ui.hotbar').bind_pages();
+                end,
+                function (v) return tostring(v); end),
         { label = 'Action bar layers on Ctrl/Alt and LT/RT (macro palettes)',
           get = function () return store.data.macro.palette == true; end,
           set = function (v) store.data.macro.palette = v; store.save(); end },

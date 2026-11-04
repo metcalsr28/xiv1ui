@@ -91,6 +91,7 @@ return {
     ['slot_shadow'] = { 60, 60 },
     ['slot_square'] = { 40, 40 },
     ['slot_well'] = { 44, 44 },
+    ['subtarget_ring'] = { 72, 72 },
     ['target_ring'] = { 72, 72 },
     ['title_swash'] = { 46, 30 },
     ['tooltip_panel'] = { 64, 64 },

@@ -55,7 +55,7 @@ function party.render()
 
     local leader = p:GetAlliancePartyLeaderServerId1();
     local myzone = p:GetMemberZone(0);
-    local tidx = world.target_index();
+    local tidx, sidx = world.target_index(), world.subtarget_index();
     rows = {};
 
     for r, i in ipairs(list) do
@@ -76,6 +76,13 @@ function party.render()
         if tidx ~= 0 and p:GetMemberTargetIndex(i) == tidx then
             local nw = text.size(o.name);
             draw.image('lock_mark', nx + nw + 4, ry + 2, { scale = 0.7 });
+        end
+        if sidx ~= 0 and p:GetMemberTargetIndex(i) == sidx then
+            -- (the sub-target cursor on this member: a small pale blue ring, after the target's shard)
+            local nw = text.size(o.name);
+            local now = require('core.now')();
+            draw.image('subtarget_ring', nx + nw + (tidx == sidx and 30 or 4), ry - 1,
+                       { scale = 0.3, rot = -now * 1.2, color = draw.alpha(0xFFFFFFFF, 0.7 + 0.3 * math.sin(now * 6)) });
         end
 
         -- HP and MP tubes side by side, values at the right ends

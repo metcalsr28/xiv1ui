@@ -7,7 +7,7 @@
 
 addon.name    = 'xiv1ui';
 addon.author  = 'xiv1ui project';
-addon.version = '0.4.0';
+addon.version = '0.4.1';
 addon.desc    = 'FINAL FANTASY XIV 1.0 style interface.';
 addon.link    = '';
 
@@ -421,6 +421,11 @@ end);
 
 on('command', 'xiv1ui_command', function (e)
     local args = e.command:args();
+    if #args > 0 and args[1]:lower() == '/copymacros' then
+        e.blocked = true;
+        require('ui.hotbar').copymacros(args);
+        return;
+    end
     if #args == 0 or args[1]:lower() ~= '/xiv1ui' then return; end
     e.blocked = true;
     -- development only, absent from releases (dev/eval.lua): /xiv1ui eval <lua>

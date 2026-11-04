@@ -25,7 +25,9 @@ local store   = require('core.store');
 local hotbar = {};
 
 local SLOTS   = 10;
-local PAGES   = 3;            -- 1.0 had three bars of ten, one shown at a time
+-- how many bar pages there are (1.0 had three; Configuration » Controls sets 1-10, 5 by default): each page is one
+-- FFXI macro set's worth, its LT (Ctrl) and RT (Alt) layers
+local function pages() return math.max(1, math.min(10, tonumber(store.data.hotbar.pages) or 5)); end
 local STEP    = 56;          -- distance between slot centres
 local RING_W  = 60;          -- slot_ring texture content size
 local WELL_IN = 8;           -- the well/disc/recast (44 px) sit this far inside the ring
@@ -178,15 +180,23 @@ function hotbar.init()
         line = text.new('small', { font_color = 0xFFF0DCA0 }),
     };
     if store.data.hotbar.keys then apply_keys(true); end
-    -- Shift+1..3: show that bar page (whether or not the number keys fire slots)
+    hotbar.bind_pages();
+end
+
+--- Shift+1..0: show that bar page (whether or not the number keys fire slots); for as many pages as there are.
+function hotbar.bind_pages()
     local cm = AshitaCore:GetChatManager();
-    for p = 1, PAGES do cm:QueueCommand(-1, string.format('/bind +%d /xiv1ui page %d', p, p)); end
+    for p = 1, 10 do
+        local k = p % 10;
+        if p <= pages() then cm:QueueCommand(-1, string.format('/bind +%d /xiv1ui page %d', k, p));
+        else cm:QueueCommand(-1, string.format('/unbind +%d', k)); end
+    end
 end
 
 function hotbar.release()
     if store.data.hotbar.keys then apply_keys(false); end
     local cm = AshitaCore:GetChatManager();
-    for p = 1, PAGES do cm:QueueCommand(-1, string.format('/unbind +%d', p)); end
+    for p = 1, pages() do cm:QueueCommand(-1, string.format('/unbind +%d', p % 10)); end
 end
 
 -- Pop-up help for the hovered slot (reference: name in white italic, class line, timings with gold labels).
@@ -256,7 +266,7 @@ function hotbar.render()
 
     local total = SLOTS * STEP;
     -- sits above the gauges (which are 40 px above the bottom edge)
-    local x0, y0 = layout.anchor('bottom', total, RING_W, 30, -128, 'hotbar');
+    local x0, y0 = layout.anchor('bottom', total, RING_W, 30, -128 - require('ui.expbar').drawn_lift(), 'hotbar');
     layout.bounds('hotbar', x0 - 70, y0 - 16, total + 74, RING_W + 30);
     local now = xi_now();
     local hover_info, hover_x;
@@ -430,7 +440,7 @@ function hotbar.binding_at(lay, page, slot)
     t = t and t[tostring(page)];
     return t and t[PREFIX[lay] .. tostring(slot)] or nil;
 end
-hotbar.PAGES = PAGES;
+hotbar.pages = pages;
 function hotbar.assigning() return pending ~= nil; end
 function hotbar.cancel_assign() pending = nil; end
 
@@ -457,22 +467,94 @@ end
 --- Flip the page (all layers together) by +1 / -1.
 function hotbar.page_step(d)
     local hb = store.data.hotbar;
-    hb.page = (hb.page - 1 + d) % PAGES + 1;
+    hb.page = (hb.page - 1 + d) % pages() + 1;
     store.save();
 end
 
---- Copy an FFXI macro set (the game's own macro files) onto this page's LT (Ctrl row) and RT (Alt row) layers.
-function hotbar.import(book, set)
-    local m = require('core.macros').load(book, set);
+-- /copymacros: the player's FFXI macros (book 1's sets, the game's own files) and the bar pages, both ways. Bar page
+-- n is set n's worth: its LT (green) layer the Ctrl row, its RT (red) layer the Alt row. Nothing is emptied: an empty
+-- FFXI macro leaves the slot as it is, and an empty slot leaves the FFXI macro as it is. (Bars are per job: the
+-- current job's.)
+local function page_of(page)
+    local hb = store.data.hotbar;
+    local j = tostring(job());
+    hb.bars[j] = hb.bars[j] or T{};
+    hb.bars[j][tostring(page)] = hb.bars[j][tostring(page)] or T{};
+    return hb.bars[j][tostring(page)];
+end
+
+--- FFXI book `book` (1 unless given), set `set` -> bar page `page`. Returns how many macros were copied.
+function hotbar.copy_from_ffxi(set, page, book)
+    local m = require('core.macros').load(book or 1, set);
+    local t, n = page_of(page), 0;
     for i = 1, 20 do
         local lay, slot = (i <= 10) and 1 or 2, (i - 1) % 10 + 1;
         local src = m[i];
         if src and #src.lines > 0 then
-            set_binding(slot, { kind = 'macro', name = src.title_utf8 ~= '' and src.title_utf8 or ('Macro ' .. i),
-                                lines = src.lines, show_name = true }, lay);
-        else
-            set_binding(slot, nil, lay);
+            -- (sjis: the lines are the game's own bytes, run and written back as they are)
+            t[PREFIX[lay] .. tostring(slot)] = { kind = 'macro', name = src.title_utf8 ~= '' and src.title_utf8 or ('Macro ' .. i),
+                                                 lines = src.lines, show_name = true, sjis = true };
+            n = n + 1;
         end
+    end
+    store.save();
+    return n;
+end
+
+--- Bar page `page` -> FFXI book 1, set `set` (its file is backed up into backup_dir first). Returns the count, or
+-- nil and why.
+function hotbar.copy_to_ffxi(page, set, backup_dir)
+    local t = page_of(page);
+    local changes, n = {}, 0;
+    for i = 1, 20 do
+        local lay, slot = (i <= 10) and 1 or 2, (i - 1) % 10 + 1;
+        local b = t[PREFIX[lay] .. tostring(slot)];
+        local info = b and actions.resolve(b);
+        if info then
+            local lines = info.lines or (info.command and { info.command }) or nil;
+            if lines and #lines > 0 then
+                changes[i] = { title = info.label or b.name or '', lines = lines, sjis = b.sjis == true };
+                n = n + 1;
+            end
+        end
+    end
+    local ok, why = require('core.macros').save(1, set, changes, backup_dir);
+    if not ok then return nil, why; end
+    return n;
+end
+
+--- /copymacros <set> <bar> | import | export
+function hotbar.copymacros(args)
+    local n = pages();
+    local what = (args[2] or ''):lower();
+    local function say(t) print('[xiv1ui] ' .. t); end
+    if what == 'import' then
+        local total = 0;
+        for p = 1, n do total = total + hotbar.copy_from_ffxi(p, p); end
+        say(string.format('Copied %d macros from book 1, sets 1-%d, onto bars 1-%d (Ctrl row: LT layer, Alt row: RT layer).',
+                          total, n, n));
+    elseif what == 'export' then
+        -- (the files as they were go to addons/xiv1ui/macro-backup/<date and time>/ first)
+        local root = addon.path .. (addon.path:match('[\\/]$') and '' or '\\') .. 'macro-backup\\';
+        local dir = root .. os.date('%Y%m%d-%H%M%S') .. '\\';
+        local mk = ashita.fs.create_dir or ashita.fs.create_directory;
+        mk(root); mk(dir);
+        local total = 0;
+        for p = 1, n do
+            local c, why = hotbar.copy_to_ffxi(p, p, dir);
+            if c == nil then say('Export stopped at bar ' .. p .. ': ' .. tostring(why) .. '.'); return; end
+            total = total + c;
+        end
+        say(string.format('Wrote %d macros from bars 1-%d into book 1, sets 1-%d. Your old macro files are in %s.',
+                          total, n, n, (dir:gsub('^.*addons\\', 'addons\\'))));
+    else
+        local set, bar = tonumber(args[2]), tonumber(args[3]);
+        if set == nil or bar == nil or set < 1 or set > 10 or bar < 1 or bar > n then
+            say(string.format('/copymacros <set> <bar>: copy set 1-10 of macro book 1 onto bar 1-%d.  /copymacros import: '
+                              .. 'sets 1-%d onto bars 1-%d.  /copymacros export: the reverse.', n, n, n));
+            return;
+        end
+        say(string.format('Copied %d macros from book 1, set %d, onto bar %d.', hotbar.copy_from_ffxi(set, bar), set, bar));
     end
 end
 
@@ -487,7 +569,7 @@ function hotbar.mouse(e)
         if e.message == 0x201 then e.blocked = true;
         elseif e.message == 0x202 then
             e.blocked = true;
-            store.data.hotbar.page = store.data.hotbar.page % PAGES + 1;
+            store.data.hotbar.page = store.data.hotbar.page % pages() + 1;
             store.save();
         end
         return;
@@ -503,9 +585,9 @@ function hotbar.command(args)
         use(tonumber(args[3]) or 0);
     elseif cmd == 'page' then
         local v = (args[3] or ''):lower();
-        if v == 'next' then hb.page = hb.page % PAGES + 1;
-        elseif v == 'prev' then hb.page = (hb.page - 2) % PAGES + 1;
-        else hb.page = math.max(1, math.min(PAGES, tonumber(v) or hb.page)); end
+        if v == 'next' then hb.page = hb.page % pages() + 1;
+        elseif v == 'prev' then hb.page = (hb.page - 2) % pages() + 1;
+        else hb.page = math.max(1, math.min(pages(), tonumber(v) or hb.page)); end
         store.save();
     elseif cmd == 'bind' then
         local slot, kind = tonumber(args[3]), (args[4] or ''):lower();
@@ -522,7 +604,7 @@ function hotbar.command(args)
         fill_defaults();
     elseif cmd == 'import' then
         local book, set = tonumber(args[3]), tonumber(args[4]);
-        if book and set then hotbar.import(book, set); end
+        if book and set then hotbar.copy_from_ffxi(set, store.data.hotbar.page, book); end
     elseif cmd == 'keys' then
         hb.keys = (args[3] or ''):lower() == 'on';
         apply_keys(hb.keys);

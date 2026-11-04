@@ -1,5 +1,30 @@
 # Changelog
 
+## 0.4.1
+
+- Your FFXI macros carry over. `/copymacros import` copies sets 1-5 of macro book 1 onto action bar pages 1-5 (the
+  Ctrl row onto the LT layer, the Alt row onto the RT layer); `/copymacros <set> <bar>` copies one set onto one
+  page; `/copymacros export` writes the bar pages back into FFXI's macro book 1, so you can take them with you if
+  you stop using xiv1ui. Nothing is emptied: an empty macro leaves the slot as it is, and the other way round.
+  Export backs up your macro files first (addons/xiv1ui/macro-backup/) and takes effect at once, no relog needed.
+- Action bar pages: 1 to 10 (5 by default, each one an FFXI macro set's worth), in Configuration » Controls;
+  Shift+1 ... Shift+0 switch to them.
+- Choosing who a spell or ability goes to (FFXI's sub-target cursor, `<st>`) now shows a pale blue ring over the
+  target being chosen, and a small one after a party member's name. Before, nothing marked it.
+- Temporary items (battlefield drinks and the like) are listed at the top of the Items list in pale blue, as FFXI
+  lists them. Without them the list was a few rows off during and after battlefields and seemed to jump about.
+- Enchanted items show their charges and reuse time in the item description, as FFXI's item box does:
+  `<1/1 9:43/[10:00, 0:08]>`.
+- Selling: items the shop won't buy are greyed out and say "This can't be sold." The shop's offer no longer runs
+  into a long item description.
+- Home Point: "Select from favorites" shows the names straight away.
+- **Partly done:** slim bars under the EXP bar for Capacity Points toward the next Job Point and Exemplar Points
+  toward the next Master Level (and, off by default, Limit Points toward the next merit), each switched on or off
+  in Configuration » HUD. They work, but their look will change in 0.4.2.
+- **Partly done:** during NPC events the black bars at the top and bottom of the screen now make room for FFXI's
+  own windows instead of covering them. Some event menus (exchanges that list items by name, like "Exchange for
+  what?") are still FFXI's own rather than xiv1ui's; 0.4.2 brings more of them into xiv1ui's style.
+
 ## 0.4.0
 
 - Customized icons for nearly every action a player can put on the action bar: about 1,300 spells, job

@@ -201,6 +201,9 @@ local function describe(r, item)
     local d = (r.Description and r.Description[1] or ''):gsub('\n', '  ');
     local aug = item and require('core.augments').text(item, r);
     if aug then d = (d ~= '' and (d .. '\n') or '') .. aug; end
+    -- an enchanted item's charges and reuse time ("<1/1 33:18/[2:00:00, 0:05]>")
+    local use = item and require('core.itemuse').text(item, r);
+    if use then d = (d ~= '' and (d .. '\n') or '') .. use; end
     if (r.Level or 0) > 0 or (r.Jobs or 0) ~= 0 then
         local jobs, n = {}, 0;
         for j = 1, 22 do
@@ -280,7 +283,7 @@ function panel.render()
         local cls = inv_slot and mem.u32(inv_slot);
         -- (this list keeps its item count at the class's +0x20; +0x1C is the last row on screen, scroll + 10)
         local rows = cls and mem.u16(cls + 0x20);
-        local n = #items_of(0, filter);
+        local n = #items_of(0, filter) + #items_of(3, filter);       -- (temporary items too: see below)
         if rows == nil or rows ~= n then
             if diag.on() then diag.change('items.count', 'handback', 'items (%s): game lists %s rows, xiv1ui %d',
                 tostring(fname), tostring(rows), n); end
@@ -301,7 +304,8 @@ function panel.render()
             for b, n in pairs(BAG_NAMES) do if n == cmdm.last_choice.mogcont then shown_bag = b; end end
         end
     end
-    if cid and not sell then
+    local on_temp = cid and not shopping and (inv:GetContainerItem(3, cidx or 0) or {}).Id == cid;
+    if cid and not sell and not on_temp then
         for _, b in ipairs(BAGS) do
             local it = inv:GetContainerItem(b, cidx or 0);
             if it and it.Id == cid then shown_bag = b; break; end
@@ -316,6 +320,17 @@ function panel.render()
         local own = inv_slot and mem.u32(inv_slot);           -- (the list window: inventor, or shop when selling)
         local row, top = own and mem.u16(own + 0x24), own and mem.u16(own + 0x1A);
         list = in_game_order(ls and mem.u32(ls), list, row and top and row >= 1 and row + top or nil, cid, cidx);
+    end
+    -- Temporary items (battlefield drinks and the like, bag 3) head the game's own Items list, in their bag's order,
+    -- ahead of the inventory; without them every row was two or three off and the list jumped about.
+    local inv_count = #list;
+    if shown_bag == 0 and not shopping then
+        local temp = items_of(3, filter);
+        if #temp > 0 then
+            for _, c in ipairs(temp) do c.temp = true; end
+            for _, c in ipairs(list) do temp[#temp + 1] = c; end
+            list = temp;
+        end
     end
     local at = nil;
     if buy then
@@ -388,7 +403,7 @@ function panel.render()
     desc_obj = desc_obj or text.new('small', { font_height = 16, font_color = 0xFFE8E4D8, box_width = W - 44 });
     if desc_obj.settings.text ~= d then text.set(desc_obj, d); end
     local extra = d ~= '' and math.max(0, select(2, text.size(desc_obj)) - 84) or 0;
-    local H = 50 + ROWS * ROW_H + 140 + extra + (shopping and 34 or 0);
+    local H = 50 + ROWS * ROW_H + 140 + extra + (shopping and 52 or 0);
     local x, y = layout.anchor('topleft', W, H, 24, 40, 'itempanel');
     -- opened from the action menu: in the menu's place, beside the character
     local ax, ay = require('ui.cmdmenu').action_spot();
@@ -431,7 +446,7 @@ function panel.render()
             text.draw(g, string.format('+%d gil', gain[1]), x + W - 20, y + 26 - 30 * k, 'baseline');
         end
     else
-        text.draw(cnt, string.format('%d / %d', #list, cap), x + W - 20, y + 26, 'baseline');
+        text.draw(cnt, string.format('%d / %d', inv_count, cap), x + W - 20, y + 26, 'baseline');
     end
 
     local sw, sh = layout.size('row_sel');
@@ -457,7 +472,10 @@ function panel.render()
         end
         draw.entry(draw.item_icon(c.id), x + 30, ry + 2, 28, 28);
         local o = ui.label('itp_r' .. r, 'small', { font_height = 18 });
-        local col = c.equipped and 0xFF9BE08C or (sel and 0xFFFFFFFF or 0xFFE8E4D8);
+        -- (selling: what the shop won't take, item flag 0x1000 "no sale", greyed as FFXI does)
+        local nosale = sell and bit.band(c.res.Flags or 0, 0x1000) ~= 0;
+        local col = c.equipped and 0xFF9BE08C or c.temp and (sel and 0xFFD8ECFF or 0xFFA8C8F0) or nosale and (sel and 0xFFB8B4A8 or 0xFF8C887C)
+                    or (sel and 0xFFFFFFFF or 0xFFE8E4D8);
         if o.settings.font_color ~= col then o:set_font_color(col); end
         text.draw(o, c.res.Name[1] or '?', x + 68, ry + 22, 'baseline');
         if buy then
@@ -502,19 +520,23 @@ function panel.render()
         -- what the shopkeeper offers, and (choosing how many) the amount and the total
         local price = offers[c.index];
         local who = shopkeeper or 'The shopkeeper';
-        local line = price and string.format('%s offers %d gil %s.', who, price, c.count > 1 and 'each' or 'for it')
+        local nosale = bit.band(c.res.Flags or 0, 0x1000) ~= 0;
+        local line = nosale and 'This can\'t be sold.'
+                     or price and string.format('%s offers %d gil %s.', who, price, c.count > 1 and 'each' or 'for it')
                      or 'Confirm to ask what it fetches.';
-        local o = ui.label('itp_offer', 'small', { font_height = 18, font_color = 0xFFF0D890 });
-        text.draw(o, line, x + 22, dy + extra + 96, 'baseline');
+        local col = nosale and 0xFFB06A60 or 0xFFF0D890;
+        local o = ui.label('itp_offer', 'small', { font_height = 18 });
+        if o.settings.font_color ~= col then o:set_font_color(col); end
+        text.draw(o, line, x + 22, dy + extra + 114, 'baseline');
         local qs = gamewin.slot('itemctrl');
         local qc = qs and gamewin.window('itemctrl') and mem.u32(qs);
         local n, max = qc and mem.u8(qc + 0x23), qc and mem.u8(qc + 0x22);
         if n and max and max >= 1 and n >= 1 and n <= max then
             local q = ui.label('itp_qty', 'name', { font_height = 22 });
-            text.draw(q, string.format('Sell %d of %d', n, max), x + 22, dy + extra + 132, 'baseline');
+            text.draw(q, string.format('Sell %d of %d', n, max), x + 22, dy + extra + 148, 'baseline');
             if price then
                 local t = ui.label('itp_total', 'name', { font_height = 22, font_color = 0xFFF0D890, font_alignment = text.align.Right });
-                text.draw(t, string.format('%d gil', price * n), x + W - 22, dy + extra + 132, 'baseline');
+                text.draw(t, string.format('%d gil', price * n), x + W - 22, dy + extra + 148, 'baseline');
             end
         end
     end
@@ -539,7 +561,7 @@ function panel.render()
     elseif not usable then
         local hint = ui.label('itp_hint', 'small', { font_height = 14, font_color = 0xFFB8C0D8 });
         local choosing = sell and gamewin.window('itemctrl') ~= nil;
-        text.draw(hint, buy and 'Confirm: buy' or choosing and 'Up / Down: how many    Left: all    Confirm: sell' or sell and 'Confirm: offer it to the shopkeeper' or '+ : Sort  (Auto / Manual / Recycle Bin)',
+        text.draw(hint, buy and 'Confirm: buy' or choosing and 'Up / Down: how many    Left: all    Confirm: sell' or sell and c and bit.band(c.res.Flags or 0, 0x1000) ~= 0 and '' or sell and 'Confirm: offer it to the shopkeeper' or '+ : Sort  (Auto / Manual / Recycle Bin)',
             x + 22, y + H - 10, 'baseline');
     end
 end

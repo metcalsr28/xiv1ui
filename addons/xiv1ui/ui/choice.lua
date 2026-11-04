@@ -77,7 +77,11 @@ function choice.read()
     if q == nil or mem.u32(q + 0x08) ~= obj then return nil; end
     local count = mem.u32(q + 0x24);
     if count == nil or count < 1 or count > MAX_ROWS then return nil; end
-    if cache == nil or cache.obj ~= obj or cache.q ~= q or cache.count ~= count then
+    -- (the rows are read again every 0.2 s too: the game reuses the same menu and records for the next question,
+    -- even with the same number of rows (a Home Point's "Teleport where?" and then its favorites), and fills some
+    -- rows in a moment after the menu opens (the favorites' names))
+    local now = require('core.now')();
+    if cache == nil or cache.obj ~= obj or cache.q ~= q or cache.count ~= count or now - cache.read_at > 0.2 then
         local rows, node = {}, mem.u32(q + 0x14);
         for i = 1, count do
             if node == nil or node == 0 then break; end
@@ -89,9 +93,15 @@ function choice.read()
             node = mem.u32(node);
         end
         if #rows ~= count then return nil; end
-        local qlen = mem.u16(q + 0x36);            -- the question's length in characters
-        cache = { obj = obj, q = q, count = count, question = glyph_text(q + 0x38, qlen and math.min(qlen, 160)),
-                  rows = rows };
+        local same = cache ~= nil and cache.obj == obj and cache.q == q and cache.count == count;
+        for i = 1, count do if same and cache.rows[i] ~= rows[i] then same = false; end end
+        if same then
+            cache.read_at = now;
+        else
+            local qlen = mem.u16(q + 0x36);            -- the question's length in characters
+            cache = { obj = obj, q = q, count = count, question = glyph_text(q + 0x38, qlen and math.min(qlen, 160)),
+                      rows = rows, read_at = now };
+        end
     end
     cache.cursor = math.max(0, math.min(count - 1, mem.u16(q + 0x30) or 0)) + 1;   -- u16: Q+0x32 is the game's scroll offset
     return cache;

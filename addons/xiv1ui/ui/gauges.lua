@@ -50,7 +50,7 @@ function gauges.render()
     local v = values();
     local tw, th = layout.size('gauge_track');
     local total = #BARS * tw + (#BARS - 1) * GAP;
-    local x0, y = layout.anchor('bottom', total, 0, 0, -64, 'gauges');
+    local x0, y = layout.anchor('bottom', total, 0, 0, -64 - require('ui.expbar').drawn_lift(), 'gauges');
     layout.bounds('gauges', x0 - 8, y - 30, total + 16, 54);
 
     for i, b in ipairs(BARS) do

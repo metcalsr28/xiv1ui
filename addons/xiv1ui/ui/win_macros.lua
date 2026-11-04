@@ -297,7 +297,7 @@ win.draw = function (w, x, y)
     local map = w.place or w.bars;
     if map then
         local hb = require('ui.hotbar');
-        local nrows = hb.PAGES * 2;
+        local nrows = hb.pages() * 2;
         local CW = 48;
         local gx, gy = x + 40, y + 120;
         local gw, gh = 130 + 10 * CW + 24, nrows * CW + 96;
@@ -394,7 +394,7 @@ win.key = function (w, vk)
             elseif vk == ui.VK.ESCAPE then b.pick = nil; end
             return true;
         end
-        local nrows = hb.PAGES * 2;
+        local nrows = hb.pages() * 2;
         if vk == ui.VK.LEFT then b.c = (b.c - 2) % 10 + 1;
         elseif vk == ui.VK.RIGHT then b.c = b.c % 10 + 1;
         elseif vk == ui.VK.UP then b.r = (b.r - 2) % nrows + 1;
@@ -405,7 +405,7 @@ win.key = function (w, vk)
         return true;
     end
     if w.place then
-        local nrows = require('ui.hotbar').PAGES * 2;
+        local nrows = require('ui.hotbar').pages() * 2;
         if vk == ui.VK.LEFT then w.place.c = (w.place.c - 2) % 10 + 1;
         elseif vk == ui.VK.RIGHT then w.place.c = w.place.c % 10 + 1;
         elseif vk == ui.VK.UP then w.place.r = (w.place.r - 2) % nrows + 1;
